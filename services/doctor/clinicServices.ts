@@ -7,8 +7,9 @@ import {
 
 export const getPublicSiteConfig = async (): Promise<IPublicSiteConfig | null> => {
   try {
-    const res = await serverFetch.get("/public/site-config", {
-      next: { revalidate: 60 },
+    const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000/api/v1";
+    const res = await fetch(`${serverUrl}/public/site-config`, {
+      cache: "no-store",
     });
     if (!res.ok) return null;
     const json = await res.json();
@@ -43,6 +44,7 @@ export const updateBranding = async (data: {
   primaryColor?: string;
   secondaryColor?: string;
   brandName?: string;
+  clinicName?: string;
   brandTagline?: string;
   logoUrl?: string;
   faviconUrl?: string;

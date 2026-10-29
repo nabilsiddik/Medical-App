@@ -4,37 +4,52 @@ import Link from "next/link";
 import Image from "next/image";
 import { Phone, Mail, MapPin, ChevronRight, ArrowUp } from "lucide-react";
 import { FaFacebookF, FaGooglePlusG, FaLinkedinIn, FaPinterestP } from "react-icons/fa";
+import { useBranding } from "@/components/branding/BrandingProvider";
 
 export default function MedicateFooter() {
+  const { branding, siteConfig } = useBranding();
+
+  const brandName = branding?.brandName || "Care Medical Chamber";
+  const tagline = branding?.brandTagline || "Trusted Clinical Care & Preventive Health";
+  const phone = siteConfig?.contact?.phone || siteConfig?.contactPhone || "+880 1700-112233";
+  const email = siteConfig?.contact?.email || siteConfig?.contactEmail || "doctor@chamber.com";
+  const address = siteConfig?.contact?.address || "Suite 402, Green Crescent Tower, Road 7/A, Dhanmondi, Dhaka";
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
-    <footer className="bg-[#0e2942] text-slate-300 relative">
+    <footer className="bg-[#0e2942] text-slate-300 relative text-base">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          {/* Column 1: Brand Info */}
+          {/* Column 1: Dynamic Brand Info */}
           <div className="space-y-5">
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-md bg-[#1673b8] flex items-center justify-center text-white">
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-              </div>
+            <Link href="/" className="flex items-center gap-3">
+              {branding?.logoUrl ? (
+                <div className="relative w-9 h-9 rounded-md overflow-hidden shrink-0">
+                  <Image src={branding.logoUrl} alt={brandName} fill className="object-contain" />
+                </div>
+              ) : (
+                <div className="w-9 h-9 rounded-md bg-primary flex items-center justify-center text-primary-foreground shrink-0">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                  </svg>
+                </div>
+              )}
               <span className="text-2xl font-black text-white tracking-tight">
-                Medicate
+                {brandName}
               </span>
             </Link>
 
-            <p className="text-xs text-slate-300 leading-relaxed">
-              It helps designers plan out where the content will sit, the content to be written and approved. Providing specialized clinical treatments and patient care.
+            <p className="text-base text-slate-300 leading-relaxed">
+              {tagline}. Dedicated to providing evidence-based outpatient consultations, verified digital prescriptions, and compassionate care.
             </p>
 
             {/* Social Icons */}
@@ -43,153 +58,122 @@ export default function MedicateFooter() {
                 href="https://facebook.com"
                 target="_blank"
                 rel="noreferrer"
-                className="w-8 h-8 rounded bg-[#13385a] hover:bg-[#1673b8] flex items-center justify-center text-slate-300 hover:text-white transition-colors"
+                className="w-9 h-9 rounded bg-[#13385a] hover:bg-primary flex items-center justify-center text-slate-300 hover:text-white transition-colors"
                 aria-label="Facebook"
               >
-                <FaFacebookF className="h-3 w-3" />
-              </a>
-              <a
-                href="https://plus.google.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded bg-[#13385a] hover:bg-[#1673b8] flex items-center justify-center text-slate-300 hover:text-white transition-colors"
-                aria-label="Google Plus"
-              >
-                <FaGooglePlusG className="h-3.5 w-3.5" />
+                <FaFacebookF className="h-4 w-4" />
               </a>
               <a
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noreferrer"
-                className="w-8 h-8 rounded bg-[#13385a] hover:bg-[#1673b8] flex items-center justify-center text-slate-300 hover:text-white transition-colors"
+                className="w-9 h-9 rounded bg-[#13385a] hover:bg-primary flex items-center justify-center text-slate-300 hover:text-white transition-colors"
                 aria-label="LinkedIn"
               >
-                <FaLinkedinIn className="h-3 w-3" />
+                <FaLinkedinIn className="h-4 w-4" />
               </a>
               <a
                 href="https://pinterest.com"
                 target="_blank"
                 rel="noreferrer"
-                className="w-8 h-8 rounded bg-[#13385a] hover:bg-[#1673b8] flex items-center justify-center text-slate-300 hover:text-white transition-colors"
+                className="w-9 h-9 rounded bg-[#13385a] hover:bg-primary flex items-center justify-center text-slate-300 hover:text-white transition-colors"
                 aria-label="Pinterest"
               >
-                <FaPinterestP className="h-3 w-3" />
+                <FaPinterestP className="h-4 w-4" />
               </a>
             </div>
           </div>
 
-          {/* Column 2: Our Services / Links */}
+          {/* Column 2: Quick Links */}
           <div>
-            <h4 className="text-base font-bold text-white mb-6 relative pb-2 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-10 after:h-0.5 after:bg-[#1673b8]">
+            <h4 className="text-lg font-bold text-white mb-6 relative pb-2 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-10 after:h-0.5 after:bg-primary">
               Our Services
             </h4>
-            <div className="grid grid-cols-2 gap-y-2.5 gap-x-4 text-xs text-slate-300">
-              <Link href="/services" className="hover:text-white flex items-center gap-1 transition-colors">
-                <ChevronRight className="h-3 w-3 text-[#1673b8]" /> About Us
+            <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-base text-slate-300">
+              <Link href="/services" className="hover:text-white flex items-center gap-1.5 transition-colors">
+                <ChevronRight className="h-4 w-4 text-primary" /> About Us
               </Link>
-              <Link href="/contact" className="hover:text-white flex items-center gap-1 transition-colors">
-                <ChevronRight className="h-3 w-3 text-[#1673b8]" /> Contact Us
+              <Link href="/contact" className="hover:text-white flex items-center gap-1.5 transition-colors">
+                <ChevronRight className="h-4 w-4 text-primary" /> Contact Us
               </Link>
-              <Link href="/services" className="hover:text-white flex items-center gap-1 transition-colors">
-                <ChevronRight className="h-3 w-3 text-[#1673b8]" /> Our Services
+              <Link href="/services" className="hover:text-white flex items-center gap-1.5 transition-colors">
+                <ChevronRight className="h-4 w-4 text-primary" /> Services
               </Link>
-              <Link href="/services" className="hover:text-white flex items-center gap-1 transition-colors">
-                <ChevronRight className="h-3 w-3 text-[#1673b8]" /> Our Process
+              <Link href="/book" className="hover:text-white flex items-center gap-1.5 transition-colors">
+                <ChevronRight className="h-4 w-4 text-primary" /> Bookings
               </Link>
-              <Link href="/#doctors" className="hover:text-white flex items-center gap-1 transition-colors">
-                <ChevronRight className="h-3 w-3 text-[#1673b8]" /> Specialist Doctor
+              <Link href="/blog" className="hover:text-white flex items-center gap-1.5 transition-colors">
+                <ChevronRight className="h-4 w-4 text-primary" /> Articles
               </Link>
-              <Link href="/#faq" className="hover:text-white flex items-center gap-1 transition-colors">
-                <ChevronRight className="h-3 w-3 text-[#1673b8]" /> FAQ
-              </Link>
-              <Link href="/book" className="hover:text-white flex items-center gap-1 transition-colors">
-                <ChevronRight className="h-3 w-3 text-[#1673b8]" /> Appointments
-              </Link>
-              <Link href="/services" className="hover:text-white flex items-center gap-1 transition-colors">
-                <ChevronRight className="h-3 w-3 text-[#1673b8]" /> Departments
+              <Link href="/contact" className="hover:text-white flex items-center gap-1.5 transition-colors">
+                <ChevronRight className="h-4 w-4 text-primary" /> Chamber
               </Link>
             </div>
           </div>
 
-          {/* Column 3: Recent Posts */}
+          {/* Column 3: Chambers & Operating Times */}
           <div>
-            <h4 className="text-base font-bold text-white mb-6 relative pb-2 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-10 after:h-0.5 after:bg-[#1673b8]">
-              Recent Posts
+            <h4 className="text-lg font-bold text-white mb-6 relative pb-2 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-10 after:h-0.5 after:bg-primary">
+              Visiting Hours
             </h4>
-            <div className="space-y-4">
-              <Link href="/blog" className="flex items-start gap-3 group">
-                <div className="w-16 h-14 rounded overflow-hidden relative shrink-0 bg-slate-800">
-                  <img
-                    src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=150&q=80"
-                    alt="Post thumbnail"
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-                  />
-                </div>
-                <div>
-                  <span className="text-[10px] text-slate-400 font-semibold uppercase block">
-                    DECEMBER 13, 2025
-                  </span>
-                  <p className="text-xs font-semibold text-white group-hover:text-[#1673b8] transition-colors line-clamp-2">
-                    Get The Exercise Limited Mobility
-                  </p>
-                </div>
-              </Link>
-
-              <Link href="/blog" className="flex items-start gap-3 group">
-                <div className="w-16 h-14 rounded overflow-hidden relative shrink-0 bg-slate-800">
-                  <img
-                    src="https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=150&q=80"
-                    alt="Post thumbnail"
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-                  />
-                </div>
-                <div>
-                  <span className="text-[10px] text-slate-400 font-semibold uppercase block">
-                    DECEMBER 13, 2025
-                  </span>
-                  <p className="text-xs font-semibold text-white group-hover:text-[#1673b8] transition-colors line-clamp-2">
-                    Transfusion Strategy And Heart Surgery
-                  </p>
-                </div>
-              </Link>
+            <div className="space-y-3 text-base text-slate-300">
+              <div className="flex justify-between border-b border-white/10 pb-2">
+                <span>Saturday – Thursday:</span>
+                <span className="font-semibold text-white">05:00 PM - 09:00 PM</span>
+              </div>
+              <div className="flex justify-between border-b border-white/10 pb-2">
+                <span>Friday:</span>
+                <span className="font-semibold text-amber-400">By Appointment</span>
+              </div>
+              <div className="flex justify-between border-b border-white/10 pb-2">
+                <span>Emergency Hotline:</span>
+                <span className="font-semibold text-emerald-400">24/7 Available</span>
+              </div>
             </div>
           </div>
 
-          {/* Column 4: Contact Us */}
+          {/* Column 4: Contact & Chamber Information */}
           <div className="space-y-4">
-            <h4 className="text-base font-bold text-white mb-6 relative pb-2 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-10 after:h-0.5 after:bg-[#1673b8]">
-              Contact Us
+            <h4 className="text-lg font-bold text-white mb-6 relative pb-2 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-10 after:h-0.5 after:bg-primary">
+              Chamber Info
             </h4>
-            <div className="space-y-3 text-xs text-slate-300">
-              <div className="flex items-center gap-3">
-                <Phone className="h-4 w-4 text-[#1673b8] shrink-0" />
-                <span>+1800-001-658</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Mail className="h-4 w-4 text-[#1673b8] shrink-0" />
-                <span>info@peacefulthemes.com</span>
-              </div>
+            <div className="space-y-3 text-base text-slate-300">
               <div className="flex items-start gap-3">
-                <MapPin className="h-4 w-4 text-[#1673b8] shrink-0 mt-0.5" />
-                <span>Themeforest, Envato HQ 24 Fifth st., Los Angeles, USA</span>
+                <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                <span>{address}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Phone className="h-5 w-5 text-primary shrink-0" />
+                <a href={`tel:${phone.replace(/[^0-9+]/g, "")}`} className="hover:text-white transition-colors">
+                  {phone}
+                </a>
+              </div>
+              <div className="flex items-center gap-3">
+                <Mail className="h-5 w-5 text-primary shrink-0" />
+                <a href={`mailto:${email}`} className="hover:text-white transition-colors">
+                  {email}
+                </a>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Copyright Bar */}
-      <div className="border-t border-white/10 bg-[#091e32] py-4 text-xs text-slate-400">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          <p className="text-center sm:text-left">
-            Copyright 2026 medicate All Rights Reserved
+        {/* Bottom Bar: Copyright & Back to Top */}
+        <div className="mt-14 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-base text-slate-400">
+          <p>
+            © {new Date().getFullYear()}{" "}
+            <span className="text-white font-semibold">{brandName}</span>. All Rights Reserved.
           </p>
+
           <button
+            type="button"
             onClick={scrollToTop}
-            className="w-8 h-8 rounded bg-[#1673b8] hover:bg-[#0f5991] flex items-center justify-center text-white transition-colors cursor-pointer"
-            aria-label="Scroll to top"
+            className="flex items-center gap-2 hover:text-white transition-colors cursor-pointer group"
           >
-            <ArrowUp className="h-4 w-4" />
+            <span>Back to top</span>
+            <div className="w-8 h-8 rounded-full bg-[#13385a] group-hover:bg-primary flex items-center justify-center text-white transition-colors">
+              <ArrowUp className="h-4 w-4" />
+            </div>
           </button>
         </div>
       </div>

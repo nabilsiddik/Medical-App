@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Search, Menu, X, Plus, User as UserIcon, LayoutDashboard, LogOut } from "lucide-react";
 import { Button } from "@/components/shared/buttons/Button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useBranding } from "@/components/branding/BrandingProvider";
 
 interface MedicateHeaderProps {
   user?: {
@@ -20,6 +22,9 @@ interface MedicateHeaderProps {
 export default function MedicateHeader({ user }: MedicateHeaderProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { branding } = useBranding();
+
+  const brandName = branding?.brandName || "Care Medical Chamber";
 
   const navLinks = [
     { label: "HOME", href: "/" },
@@ -39,21 +44,32 @@ export default function MedicateHeader({ user }: MedicateHeaderProps) {
   return (
     <header className="sticky top-0 z-50 w-full bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 shadow-xs transition-all">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-10 h-10 rounded-lg bg-[#1673b8] flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-105">
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-          </div>
-          <span className="text-2xl font-black tracking-tight text-[#0b1c2e] dark:text-white">
-            Medicate
+        {/* Dynamic Logo & Clinic Name */}
+        <Link href="/" className="flex items-center gap-3 group">
+          {branding?.logoUrl ? (
+            <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 shadow-sm transition-transform group-hover:scale-105">
+              <Image
+                src={branding.logoUrl}
+                alt={brandName}
+                fill
+                className="object-contain"
+              />
+            </div>
+          ) : (
+            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shadow-sm transition-transform group-hover:scale-105 shrink-0">
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+            </div>
+          )}
+          <span className="text-xl sm:text-2xl font-black tracking-tight text-foreground line-clamp-1">
+            {brandName}
           </span>
         </Link>
 
@@ -68,10 +84,10 @@ export default function MedicateHeader({ user }: MedicateHeaderProps) {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-[13px] font-bold tracking-wider transition-colors uppercase ${
+                className={`text-base font-bold tracking-wider transition-colors uppercase ${
                   isActive
-                    ? "text-[#1673b8]"
-                    : "text-slate-700 dark:text-slate-200 hover:text-[#1673b8] dark:hover:text-[#1673b8]"
+                    ? "text-primary"
+                    : "text-slate-700 dark:text-slate-200 hover:text-primary dark:hover:text-primary"
                 }`}
               >
                 {link.label}
@@ -86,25 +102,25 @@ export default function MedicateHeader({ user }: MedicateHeaderProps) {
           {user ? (
             <Link
               href={dashboardUrl}
-              className="hidden sm:inline-flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#1673b8] px-3 py-2 rounded-md bg-slate-100 dark:bg-slate-800 transition-colors"
+              className="hidden sm:inline-flex items-center gap-2 text-base font-bold text-slate-700 dark:text-slate-200 hover:text-primary px-3.5 py-2 rounded-md bg-slate-100 dark:bg-slate-800 transition-colors"
             >
-              <LayoutDashboard className="h-4 w-4 text-[#1673b8]" />
+              <LayoutDashboard className="h-5 w-5 text-primary" />
               <span>{isStaff ? "Doctor Portal" : "My Dashboard"}</span>
             </Link>
           ) : (
             <Link
               href="/login"
-              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-[#1673b8] transition-colors"
+              className="hidden sm:inline-flex items-center gap-1.5 text-base font-bold text-slate-700 hover:text-primary transition-colors"
             >
-              <UserIcon className="h-4 w-4" />
+              <UserIcon className="h-5 w-5" />
               <span>LOGIN</span>
             </Link>
           )}
 
-          {/* Appointment Button */}
+          {/* Dynamic Appointment Button */}
           <Link href="/book">
             <Button
-              className="bg-[#1673b8] hover:bg-[#0f5991] text-white font-bold text-[13px] tracking-wider uppercase h-11 px-5 rounded-[4px] shadow-sm transition-all"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base tracking-wider uppercase h-11 px-5 rounded-[4px] shadow-sm transition-all"
             >
               <span>APPOINTMENTS</span>
               <Plus className="h-4 w-4 stroke-[3]" />
@@ -124,11 +140,11 @@ export default function MedicateHeader({ user }: MedicateHeaderProps) {
             <SheetContent side="right" className="w-[300px] p-6 bg-white dark:bg-slate-900">
               <SheetHeader className="text-left pb-4 border-b border-slate-100 dark:border-slate-800">
                 <SheetTitle className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded bg-[#1673b8] flex items-center justify-center text-white">
+                  <div className="w-8 h-8 rounded bg-primary flex items-center justify-center text-primary-foreground">
                     <Plus className="h-5 w-5 stroke-[2.5]" />
                   </div>
-                  <span className="text-xl font-black text-[#0b1c2e] dark:text-white">
-                    Medicate
+                  <span className="text-xl font-black text-foreground">
+                    {brandName}
                   </span>
                 </SheetTitle>
               </SheetHeader>
@@ -139,7 +155,7 @@ export default function MedicateHeader({ user }: MedicateHeaderProps) {
                     key={link.href}
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
-                    className="text-sm font-bold tracking-wide text-slate-800 dark:text-slate-100 hover:text-[#1673b8] py-2 border-b border-slate-100 dark:border-slate-800"
+                    className="text-base font-bold tracking-wide text-slate-800 dark:text-slate-100 hover:text-primary py-2 border-b border-slate-100 dark:border-slate-800"
                   >
                     {link.label}
                   </Link>
@@ -150,18 +166,18 @@ export default function MedicateHeader({ user }: MedicateHeaderProps) {
                     <Link
                       href={dashboardUrl}
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center justify-center gap-2 w-full py-2.5 rounded-[4px] bg-slate-100 dark:bg-slate-800 text-sm font-semibold text-slate-800 dark:text-slate-100"
+                      className="flex items-center justify-center gap-2 w-full py-2.5 rounded-[4px] bg-slate-100 dark:bg-slate-800 text-base font-semibold text-slate-800 dark:text-slate-100"
                     >
-                      <LayoutDashboard className="h-4 w-4 text-[#1673b8]" />
+                      <LayoutDashboard className="h-5 w-5 text-primary" />
                       <span>{isStaff ? "Doctor Portal" : "My Dashboard"}</span>
                     </Link>
                   ) : (
                     <Link
                       href="/login"
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center justify-center gap-2 w-full py-2.5 rounded-[4px] bg-slate-100 dark:bg-slate-800 text-sm font-semibold text-slate-800 dark:text-slate-100"
+                      className="flex items-center justify-center gap-2 w-full py-2.5 rounded-[4px] bg-slate-100 dark:bg-slate-800 text-base font-semibold text-slate-800 dark:text-slate-100"
                     >
-                      <UserIcon className="h-4 w-4" />
+                      <UserIcon className="h-5 w-5" />
                       <span>Login to Account</span>
                     </Link>
                   )}
@@ -169,7 +185,7 @@ export default function MedicateHeader({ user }: MedicateHeaderProps) {
                   <Link
                     href="/book"
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center justify-center gap-2 w-full py-3 rounded-[4px] bg-[#1673b8] text-white text-sm font-bold uppercase tracking-wider shadow-sm"
+                    className="flex items-center justify-center gap-2 w-full py-3 rounded-[4px] bg-primary text-primary-foreground text-base font-bold uppercase tracking-wider shadow-sm hover:bg-primary/90 transition-colors"
                   >
                     <span>Book Appointment</span>
                     <Plus className="h-4 w-4" />

@@ -82,7 +82,7 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <span className="inline-block bg-[#dceaf8] text-[#1a73e8] text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-sm mb-3">
+          <span className="inline-block bg-primary/15 text-primary text-base font-bold tracking-widest uppercase px-4 py-1.5 rounded-sm mb-3">
             OUR CLIENTS
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0f2137] tracking-tight">
@@ -135,7 +135,7 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
                         <h4 className="font-black text-[#0f2137] text-lg sm:text-xl leading-tight">
                           {item.name}
                         </h4>
-                        <span className="text-[#1a73e8] font-bold text-xs tracking-wider uppercase mt-0.5 block">
+                        <span className="text-primary font-bold text-base tracking-wider uppercase mt-0.5 block">
                           {item.role}
                         </span>
                       </div>
@@ -144,7 +144,7 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
                     {/* Quotation Mark Graphic */}
                     <div
                       aria-hidden="true"
-                      className="text-6xl sm:text-7xl font-serif text-[#1a73e8]/20 select-none leading-none -mt-4"
+                      className="text-6xl sm:text-7xl font-serif text-primary/20 select-none leading-none -mt-4"
                     >
                       “
                     </div>
@@ -176,7 +176,7 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
         }
         .testimonial-slider-container .custom-bullet-active {
           width: 32px;
-          background: #1a73e8;
+          background: var(--primary) !important;
         }
       `}</style>
     </section>

@@ -125,6 +125,13 @@ export interface IPublicSiteConfig {
   branding: IBrandingConfig;
   doctor: IDoctorProfile;
   chambers: IChamberLocation[];
+  contact?: {
+    phone?: string;
+    emergencyPhone?: string;
+    email?: string;
+    whatsappNumber?: string;
+    address?: string;
+  };
   emergencyPhone?: string | null;
   contactEmail?: string | null;
   contactPhone?: string | null;
@@ -483,3 +490,23 @@ export interface ITestimonial {
   chamberName?: string | null;
   verified: boolean;
 }
+
+export interface IBlogCommentUser {
+  id: string;
+  fullName: string;
+  profilePhoto?: string | null;
+  role: string;
+}
+
+export interface IBlogComment {
+  id: string;
+  content: string;
+  blogPostId: string;
+  userId: string;
+  parentId?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user: IBlogCommentUser;
+  replies?: IBlogComment[];
+}
+

@@ -4,12 +4,16 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import PageBanner from "@/components/medicate/PageBanner";
 import NewsletterBanner from "@/components/medicate/NewsletterBanner";
-import { User, MessageSquare, Search, Tag, Folder, Plus, Calendar } from "lucide-react";
-import { toast } from "sonner";
+import BlogCommentsSection from "@/components/medicate/blog/BlogCommentsSection";
+import { User, MessageSquare, Search, Tag, Folder, Calendar } from "lucide-react";
 import { getBlogBySlug, getBlogs } from "@/services/doctor/cmsServices";
 import { IBlogPost } from "@/types/doctor.interface";
 
-export default function SingleBlogPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
+export default function SingleBlogPage({
+  params,
+}: {
+  params: Promise<{ id: string }> | { id: string };
+}) {
   // Unwrap Next.js 15/16 params
   const resolvedParams = params instanceof Promise ? React.use(params) : params;
   const slugOrId = resolvedParams?.id || "";
@@ -17,12 +21,7 @@ export default function SingleBlogPage({ params }: { params: Promise<{ id: strin
   const [post, setPost] = useState<IBlogPost | null>(null);
   const [recentBlogs, setRecentBlogs] = useState<IBlogPost[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const [commentName, setCommentName] = useState("");
-  const [commentEmail, setCommentEmail] = useState("");
-  const [commentWebsite, setCommentWebsite] = useState("");
-  const [commentText, setCommentText] = useState("");
-  const [submittedComment, setSubmittedComment] = useState(false);
+  const [commentsCount, setCommentsCount] = useState<number>(0);
 
   useEffect(() => {
     if (slugOrId) {
@@ -33,7 +32,9 @@ export default function SingleBlogPage({ params }: { params: Promise<{ id: strin
             setPost(blogData);
           } else {
             // Find by slug or id in all blogs
-            const found = allBlogs.find((b) => b.slug === slugOrId || b.id === slugOrId);
+            const found = allBlogs.find(
+              (b) => b.slug === slugOrId || b.id === slugOrId
+            );
             if (found) setPost(found);
           }
           setRecentBlogs(allBlogs.slice(0, 4));
@@ -41,20 +42,6 @@ export default function SingleBlogPage({ params }: { params: Promise<{ id: strin
         .finally(() => setLoading(false));
     }
   }, [slugOrId]);
-
-  const handleComment = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!commentName || !commentEmail || !commentText) {
-      toast.error("Please fill in your name, email, and comment.");
-      return;
-    }
-    setSubmittedComment(true);
-    toast.success("Thank you! Your comment has been submitted for moderation.");
-    setCommentName("");
-    setCommentEmail("");
-    setCommentWebsite("");
-    setCommentText("");
-  };
 
   const categories = [
     { name: "Clinical Cardiology", count: 4 },
@@ -64,17 +51,27 @@ export default function SingleBlogPage({ params }: { params: Promise<{ id: strin
     { name: "General Medicine", count: 6 },
   ];
 
-  const tags = ["Coronavirus", "Hospital", "Illness", "Doctors", "Health", "Medicine", "Cardiology"];
+  const tags = [
+    "Coronavirus",
+    "Hospital",
+    "Illness",
+    "Doctors",
+    "Health",
+    "Medicine",
+    "Cardiology",
+  ];
 
-  const postTitle = post?.title || "Hard Content We Decide Ourselves A Intently";
+  const postTitle = post?.title || "Medical Insights & Clinical Care Update";
   const postAuthor = post?.authorName || "Prof. Dr. Sarah Rahman";
   const postCategory = post?.category || "Clinical Care";
   const postDate = post?.publishedAt
-    ? new Date(post.publishedAt).toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      }).toUpperCase()
+    ? new Date(post.publishedAt)
+        .toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        })
+        .toUpperCase()
     : "OCTOBER 29, 2026";
   const postImage =
     post?.coverImage ||
@@ -104,140 +101,92 @@ export default function SingleBlogPage({ params }: { params: Promise<{ id: strin
                   alt={postTitle}
                   className="w-full h-[400px] sm:h-[460px] object-cover"
                 />
-                <div className="absolute bottom-4 left-4 bg-[#1673b8] text-white text-xs font-bold tracking-wider px-4 py-2 uppercase shadow-sm rounded-sm">
+                <div className="absolute bottom-4 left-4 bg-[#1673b8] text-white text-base font-bold tracking-wider px-4 py-2 uppercase shadow-sm rounded-sm">
                   {postDate}
                 </div>
               </div>
 
               {/* Meta */}
-              <div className="flex items-center gap-6 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100 pb-4">
-                <div className="flex items-center gap-1.5">
-                  <User className="h-3.5 w-3.5 text-[#1673b8]" />
+              <div className="flex flex-wrap items-center gap-6 text-base font-semibold text-slate-600 border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-2">
+                  <User className="h-5 w-5 text-[#1673b8]" />
                   <span>By {postAuthor}</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Folder className="h-3.5 w-3.5 text-[#1673b8]" />
+                <div className="flex items-center gap-2">
+                  <Folder className="h-5 w-5 text-[#1673b8]" />
                   <span>{postCategory}</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <MessageSquare className="h-3.5 w-3.5 text-[#1673b8]" />
-                  <span>0 Comments</span>
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-[#1673b8]" />
+                  <span>{commentsCount} Comments</span>
                 </div>
               </div>
 
               {/* Rich Body Paragraphs / HTML Content */}
               {post?.content ? (
                 <div
-                  className="prose prose-slate max-w-none text-slate-700 leading-relaxed space-y-5"
+                  className="blog-article-content blog-content prose max-w-none text-slate-800 text-base leading-relaxed space-y-4"
                   dangerouslySetInnerHTML={{ __html: post.content }}
                 />
               ) : (
-                <div className="prose max-w-none text-slate-700 leading-relaxed space-y-5">
+                <div className="prose max-w-none text-slate-700 text-base leading-relaxed space-y-5">
                   <p>
-                    It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English.
+                    Clinical research emphasizes the value of regular health screenings and preventive measures. Early identification of systemic inflammatory markers reduces long-term hospitalization risk by over forty percent. Our chamber integrates modern diagnostic panels alongside comprehensive patient lifestyle evaluations.
                   </p>
 
-                  <h3 className="text-xl sm:text-2xl font-black text-[#0b1c2e] pt-2">
-                    Results Are From The Clinical Trial
+                  <h3 className="text-2xl font-black text-[#0b1c2e] pt-2">
+                    Evidence-Based Clinical Protocols
                   </h3>
 
                   <p>
-                    Medical research proves that early identification of systemic inflammatory markers reduces long-term hospitalization risk by over forty percent. Our chamber integrates modern diagnostic panels alongside comprehensive patient lifestyle evaluations.
+                    Preventative screenings allow clinicians to detect asymptomatic cardiovascular stress before critical events emerge.
                   </p>
 
                   {/* Quote Callout Box */}
-                  <div className="border-l-4 border-[#1673b8] bg-[#f8fafd] p-6 rounded-r-xl italic text-slate-700 font-medium my-6">
+                  <div className="border-l-4 border-[#1673b8] bg-[#f8fafd] p-6 rounded-r-xl italic text-slate-700 font-medium my-6 text-base">
                     “Regular preventative screening allows clinicians to detect asymptomatic cardiovascular stress before critical events emerge.”
-                    <span className="block mt-2 text-xs font-bold text-[#1673b8] not-italic uppercase">
-                      — {postAuthor} (SENIOR PHYSICIAN)
+                    <span className="block mt-2 text-base font-bold text-[#1673b8] not-italic">
+                      — {postAuthor} (Senior Physician)
                     </span>
                   </div>
                 </div>
               )}
 
-              {/* Write A Reply Or Comment Form */}
-              <div className="pt-10 border-t border-slate-200">
-                <h3 className="text-2xl font-black text-[#0b1c2e] mb-2">
-                  Write A Reply Or Comment
-                </h3>
-                <p className="text-xs text-slate-500 mb-6">
-                  Your email address will not be published. Required fields are marked *
-                </p>
-
-                <form onSubmit={handleComment} className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      placeholder="Your Name *"
-                      required
-                      value={commentName}
-                      onChange={(e) => setCommentName(e.target.value)}
-                      className="w-full h-12 px-4 rounded border border-slate-200 text-sm focus:outline-none focus:border-[#1673b8]"
-                    />
-                    <input
-                      type="email"
-                      placeholder="Your Email *"
-                      required
-                      value={commentEmail}
-                      onChange={(e) => setCommentEmail(e.target.value)}
-                      className="w-full h-12 px-4 rounded border border-slate-200 text-sm focus:outline-none focus:border-[#1673b8]"
-                    />
-                  </div>
-
-                  <input
-                    type="url"
-                    placeholder="Your Website"
-                    value={commentWebsite}
-                    onChange={(e) => setCommentWebsite(e.target.value)}
-                    className="w-full h-12 px-4 rounded border border-slate-200 text-sm focus:outline-none focus:border-[#1673b8]"
-                  />
-
-                  <textarea
-                    rows={6}
-                    placeholder="Write your comment here... *"
-                    required
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    className="w-full p-4 rounded border border-slate-200 text-sm focus:outline-none focus:border-[#1673b8]"
-                  />
-
-                  <button
-                    type="submit"
-                    className="bg-[#1673b8] hover:bg-[#0f5991] text-white font-bold text-xs uppercase tracking-wider h-11 px-7 rounded shadow-xs"
-                  >
-                    POST COMMENT
-                  </button>
-                </form>
-              </div>
+              {/* Facebook-style Threaded Comments & Replies Section */}
+              <BlogCommentsSection
+                blogIdentifier={slugOrId}
+                authorName={postAuthor}
+                onCommentsCountChange={setCommentsCount}
+              />
             </div>
 
             {/* Right Column: Sidebar */}
             <div className="lg:col-span-4 space-y-10">
               {/* Widget: Search */}
               <div className="bg-[#f8fafd] border border-slate-200/80 p-6 rounded-2xl">
-                <h4 className="text-base font-bold text-[#0b1c2e] mb-4">Search</h4>
+                <h4 className="text-lg font-bold text-[#0b1c2e] mb-4">Search</h4>
                 <div className="relative">
                   <input
                     type="text"
                     placeholder="Search keywords..."
-                    className="w-full h-11 pl-4 pr-10 rounded border border-slate-200 text-sm focus:outline-none focus:border-[#1673b8] bg-white"
+                    className="w-full h-12 pl-4 pr-10 rounded-xl border border-slate-200 text-base focus:outline-none focus:border-[#1673b8] bg-white shadow-xs"
                   />
-                  <Search className="h-4 w-4 text-slate-400 absolute right-3.5 top-3.5" />
+                  <Search className="h-5 w-5 text-slate-400 absolute right-3.5 top-3.5" />
                 </div>
               </div>
 
               {/* Widget: Categories */}
               <div className="bg-[#f8fafd] border border-slate-200/80 p-6 rounded-2xl">
-                <h4 className="text-base font-bold text-[#0b1c2e] mb-4">Categories</h4>
-                <ul className="space-y-2.5">
+                <h4 className="text-lg font-bold text-[#0b1c2e] mb-4">Categories</h4>
+                <ul className="space-y-3">
                   {categories.map((cat) => (
                     <li key={cat.name}>
                       <Link
                         href="/blog"
-                        className="flex items-center justify-between text-slate-600 hover:text-[#1673b8] text-sm py-1 border-b border-slate-200/50"
+                        className="flex items-center justify-between text-slate-600 hover:text-[#1673b8] text-base py-1.5 border-b border-slate-200/50 transition-colors"
                       >
                         <span>{cat.name}</span>
-                        <span className="text-xs font-mono text-slate-400">({cat.count})</span>
+                        <span className="font-mono text-slate-400">({cat.count})</span>
                       </Link>
                     </li>
                   ))}
@@ -246,26 +195,26 @@ export default function SingleBlogPage({ params }: { params: Promise<{ id: strin
 
               {/* Widget: Recent Posts */}
               <div className="bg-[#f8fafd] border border-slate-200/80 p-6 rounded-2xl">
-                <h4 className="text-base font-bold text-[#0b1c2e] mb-4">Recent Posts</h4>
+                <h4 className="text-lg font-bold text-[#0b1c2e] mb-4">Recent Posts</h4>
                 <div className="space-y-4">
                   {recentBlogs.slice(0, 3).map((item) => (
-                    <div key={item.id} className="flex gap-3 items-center">
+                    <div key={item.id} className="flex gap-4 items-center">
                       <img
                         src={
                           item.coverImage ||
                           "https://images.pexels.com/photos/5452293/pexels-photo-5452293.jpeg?auto=compress&cs=tinysrgb&w=200"
                         }
                         alt={item.title}
-                        className="w-16 h-16 rounded-xl object-cover shrink-0"
+                        className="w-16 h-16 rounded-xl object-cover shrink-0 shadow-xs"
                       />
                       <div>
                         <Link
                           href={`/blog/${item.slug || item.id}`}
-                          className="font-bold text-sm text-[#0b1c2e] hover:text-[#1673b8] line-clamp-2 leading-snug"
+                          className="font-bold text-base text-[#0b1c2e] hover:text-[#1673b8] line-clamp-2 leading-snug transition-colors"
                         >
                           {item.title}
                         </Link>
-                        <span className="text-xs text-slate-400 font-mono mt-1 block">
+                        <span className="text-base text-slate-500 font-mono mt-1 block">
                           {item.publishedAt
                             ? new Date(item.publishedAt).toLocaleDateString("en-US", {
                                 month: "short",
@@ -282,12 +231,12 @@ export default function SingleBlogPage({ params }: { params: Promise<{ id: strin
 
               {/* Widget: Tags */}
               <div className="bg-[#f8fafd] border border-slate-200/80 p-6 rounded-2xl">
-                <h4 className="text-base font-bold text-[#0b1c2e] mb-4">Popular Tags</h4>
-                <div className="flex flex-wrap gap-2">
+                <h4 className="text-lg font-bold text-[#0b1c2e] mb-4">Popular Tags</h4>
+                <div className="flex flex-wrap gap-2.5">
                   {tags.map((tag) => (
                     <span
                       key={tag}
-                      className="text-xs font-medium bg-white text-slate-600 border border-slate-200 px-3 py-1.5 rounded hover:border-[#1673b8] hover:text-[#1673b8] cursor-pointer"
+                      className="text-base font-medium bg-white text-slate-700 border border-slate-200 px-3.5 py-1.5 rounded-lg hover:border-[#1673b8] hover:text-[#1673b8] cursor-pointer shadow-xs transition-colors"
                     >
                       {tag}
                     </span>

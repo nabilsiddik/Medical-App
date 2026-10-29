@@ -1,34 +1,48 @@
+"use client";
+
 import Link from "next/link";
 import { Phone, Mail } from "lucide-react";
 import { FaFacebookF, FaGooglePlusG, FaLinkedinIn, FaPinterestP, FaTwitter } from "react-icons/fa";
+import { useBranding } from "@/components/branding/BrandingProvider";
 
 interface MedicateTopBarProps {
   phone?: string;
   email?: string;
 }
 
-export default function MedicateTopBar({
-  phone = "+1800-001-658",
-  email = "info@peacefulthemes.com",
-}: MedicateTopBarProps) {
+export default function MedicateTopBar({ phone, email }: MedicateTopBarProps) {
+  const { siteConfig } = useBranding();
+
+  const displayPhone =
+    phone ||
+    siteConfig?.contact?.phone ||
+    siteConfig?.contactPhone ||
+    "+880 1700-112233";
+
+  const displayEmail =
+    email ||
+    siteConfig?.contact?.email ||
+    siteConfig?.contactEmail ||
+    "doctor@chamber.com";
+
   return (
-    <div className="bg-[#0b1c2e] text-slate-300 text-xs py-2.5 border-b border-white/10 hidden sm:block">
+    <div className="bg-[#0b1c2e] text-slate-300 text-base py-2.5 border-b border-white/10 hidden sm:block">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        {/* Left: Contact Info */}
+        {/* Left: Dynamic Contact Info */}
         <div className="flex items-center gap-6">
           <a
-            href={`tel:${phone.replace(/[^0-9+]/g, "")}`}
+            href={`tel:${displayPhone.replace(/[^0-9+]/g, "")}`}
             className="flex items-center gap-2 hover:text-white transition-colors"
           >
-            <Phone className="h-3.5 w-3.5 text-[#1673b8]" />
-            <span>{phone}</span>
+            <Phone className="h-4 w-4 text-primary" />
+            <span>{displayPhone}</span>
           </a>
           <a
-            href={`mailto:${email}`}
+            href={`mailto:${displayEmail}`}
             className="flex items-center gap-2 hover:text-white transition-colors"
           >
-            <Mail className="h-3.5 w-3.5 text-[#1673b8]" />
-            <span>{email}</span>
+            <Mail className="h-4 w-4 text-primary" />
+            <span>{displayEmail}</span>
           </a>
         </div>
 
@@ -41,34 +55,7 @@ export default function MedicateTopBar({
             className="hover:text-white transition-colors"
             aria-label="Facebook"
           >
-            <FaFacebookF className="h-3 w-3" />
-          </a>
-          <a
-            href="https://plus.google.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-white transition-colors"
-            aria-label="Google Plus"
-          >
-            <FaGooglePlusG className="h-3.5 w-3.5" />
-          </a>
-          <a
-            href="https://linkedin.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-white transition-colors"
-            aria-label="LinkedIn"
-          >
-            <FaLinkedinIn className="h-3 w-3" />
-          </a>
-          <a
-            href="https://pinterest.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-white transition-colors"
-            aria-label="Pinterest"
-          >
-            <FaPinterestP className="h-3 w-3" />
+            <FaFacebookF className="h-4 w-4" />
           </a>
           <a
             href="https://twitter.com"
@@ -77,7 +64,25 @@ export default function MedicateTopBar({
             className="hover:text-white transition-colors"
             aria-label="Twitter"
           >
-            <FaTwitter className="h-3 w-3" />
+            <FaTwitter className="h-4 w-4" />
+          </a>
+          <a
+            href="https://linkedin.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-white transition-colors"
+            aria-label="LinkedIn"
+          >
+            <FaLinkedinIn className="h-4 w-4" />
+          </a>
+          <a
+            href="https://pinterest.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-white transition-colors"
+            aria-label="Pinterest"
+          >
+            <FaPinterestP className="h-4 w-4" />
           </a>
         </div>
       </div>

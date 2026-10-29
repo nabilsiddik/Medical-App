@@ -43,7 +43,7 @@ export default function WideRangeServicesSection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <span className="inline-block text-[#1673b8] font-bold text-xs tracking-widest uppercase mb-2">
+          <span className="inline-block text-primary font-bold text-base tracking-widest uppercase mb-2">
             SERVICES
           </span>
           <h2 className="text-3xl sm:text-4xl font-black text-[#0b1c2e]">
@@ -60,16 +60,16 @@ export default function WideRangeServicesSection() {
               return (
                 <div
                   key={idx}
-                  className="bg-white p-6 rounded-sm border border-slate-200/70 shadow-xs hover:border-[#1673b8]/50 hover:shadow-md transition-all flex items-start gap-4 text-left group"
+                  className="bg-white p-6 rounded-sm border border-slate-200/70 shadow-xs hover:border-primary/50 hover:shadow-md transition-all flex items-start gap-4 text-left group"
                 >
-                  <div className="w-12 h-12 rounded bg-[#f1f6fb] group-hover:bg-[#1673b8] text-[#1673b8] group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
+                  <div className="w-12 h-12 rounded bg-primary/10 group-hover:bg-primary text-primary group-hover:text-primary-foreground flex items-center justify-center shrink-0 transition-colors">
                     <Icon className="h-6 w-6 stroke-[1.8]" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-[#0b1c2e] mb-1">
+                    <h3 className="text-base font-bold text-[#0b1c2e] mb-1">
                       {srv.title}
                     </h3>
-                    <p className="text-xs text-slate-500 leading-relaxed">
+                    <p className="text-base text-slate-600 leading-relaxed">
                       {srv.desc}
                     </p>
                   </div>
@@ -96,16 +96,16 @@ export default function WideRangeServicesSection() {
               return (
                 <div
                   key={idx}
-                  className="bg-white p-6 rounded-sm border border-slate-200/70 shadow-xs hover:border-[#1673b8]/50 hover:shadow-md transition-all flex items-start gap-4 text-left group"
+                  className="bg-white p-6 rounded-sm border border-slate-200/70 shadow-xs hover:border-primary/50 hover:shadow-md transition-all flex items-start gap-4 text-left group"
                 >
-                  <div className="w-12 h-12 rounded bg-[#f1f6fb] group-hover:bg-[#1673b8] text-[#1673b8] group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
+                  <div className="w-12 h-12 rounded bg-primary/10 group-hover:bg-primary text-primary group-hover:text-primary-foreground flex items-center justify-center shrink-0 transition-colors">
                     <Icon className="h-6 w-6 stroke-[1.8]" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-[#0b1c2e] mb-1">
+                    <h3 className="text-base font-bold text-[#0b1c2e] mb-1">
                       {srv.title}
                     </h3>
-                    <p className="text-xs text-slate-500 leading-relaxed">
+                    <p className="text-base text-slate-600 leading-relaxed">
                       {srv.desc}
                     </p>
                   </div>

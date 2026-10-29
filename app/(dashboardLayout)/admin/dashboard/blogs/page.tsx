@@ -7,6 +7,7 @@ import {
   createBlogPost,
   updateBlogPost,
   deleteBlogPost,
+  uploadMediaFile,
 } from "@/services/doctor/cmsServices";
 import { IBlogPost } from "@/types/doctor.interface";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -21,7 +22,6 @@ import {
   Plus,
   Trash2,
   Edit,
-  Eye,
   Image as ImageIcon,
   Bold,
   Italic,
@@ -38,8 +38,6 @@ import {
   Minimize2,
   Save,
   CheckCircle2,
-  Calendar,
-  User,
   Folder,
   Tag,
   Search,
@@ -47,6 +45,9 @@ import {
   ExternalLink,
   RefreshCw,
   Minus,
+  UploadCloud,
+  X,
+  ChevronDown,
 } from "lucide-react";
 import {
   Dialog,
@@ -69,27 +70,14 @@ const PRESET_CATEGORIES = [
   "Surgery & Recovery",
 ];
 
-const SAMPLE_MEDIA_IMAGES = [
-  {
-    title: "Doctor Reviewing Report",
-    url: "https://images.pexels.com/photos/5452293/pexels-photo-5452293.jpeg?auto=compress&cs=tinysrgb&w=800",
-  },
-  {
-    title: "Clinical Consultation",
-    url: "https://images.pexels.com/photos/7088530/pexels-photo-7088530.jpeg?auto=compress&cs=tinysrgb&w=800",
-  },
-  {
-    title: "Heart Surgery & Equipment",
-    url: "https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg?auto=compress&cs=tinysrgb&w=800",
-  },
-  {
-    title: "Senior Care & Wellness",
-    url: "https://images.pexels.com/photos/4021775/pexels-photo-4021775.jpeg?auto=compress&cs=tinysrgb&w=800",
-  },
-  {
-    title: "Stethoscope & Diagnostics",
-    url: "https://images.pexels.com/photos/4173239/pexels-photo-4173239.jpeg?auto=compress&cs=tinysrgb&w=800",
-  },
+const FORMAT_OPTIONS = [
+  { label: "Paragraph", tag: "p", className: "text-base font-normal" },
+  { label: "Heading 1", tag: "h1", className: "text-xl font-bold" },
+  { label: "Heading 2", tag: "h2", className: "text-lg font-bold" },
+  { label: "Heading 3", tag: "h3", className: "text-base font-bold" },
+  { label: "Heading 4", tag: "h4", className: "text-base font-semibold" },
+  { label: "Blockquote", tag: "blockquote", className: "italic text-muted-foreground border-l-2 border-primary pl-2" },
+  { label: "Preformatted", tag: "pre", className: "font-mono text-base bg-muted/60 px-1 rounded" },
 ];
 
 export default function AdminBlogsPage() {
@@ -115,17 +103,75 @@ export default function AdminBlogsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // Cloudinary Upload States
+  const [uploadingFeatured, setUploadingFeatured] = useState(false);
+  const [uploadingMedia, setUploadingMedia] = useState(false);
+  const [uploadedMediaUrl, setUploadedMediaUrl] = useState("");
+
   // Word count & cursor element path
   const [wordCount, setWordCount] = useState(0);
   const [currentPath, setCurrentPath] = useState("p");
 
+  // Custom Format Dropdown State
+  const [isFormatMenuOpen, setIsFormatMenuOpen] = useState(false);
+  const [activeFormat, setActiveFormat] = useState("Paragraph");
+
   // Add Media Modal State
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
-  const [mediaImageUrl, setMediaImageUrl] = useState("");
+  const [mediaLocalPreview, setMediaLocalPreview] = useState("");
   const [mediaAlt, setMediaAlt] = useState("");
   const [mediaCaption, setMediaCaption] = useState("");
 
-  const visualEditorRef = useRef<HTMLDivElement>(null);
+  const visualEditorRef = useRef<HTMLDivElement | null>(null);
+  const featuredFileInputRef = useRef<HTMLInputElement | null>(null);
+  const mediaFileInputRef = useRef<HTMLInputElement | null>(null);
+  const savedRangeRef = useRef<Range | null>(null);
+  const formatDropdownRef = useRef<HTMLDivElement | null>(null);
+
+  // Close format dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (formatDropdownRef.current && !formatDropdownRef.current.contains(e.target as Node)) {
+        setIsFormatMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Selection preservation helpers for HTML5 contentEditable
+  const saveSelection = () => {
+    if (editorTab !== "visual" || !visualEditorRef.current) return;
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) {
+      const range = sel.getRangeAt(0);
+      if (visualEditorRef.current.contains(range.commonAncestorContainer)) {
+        savedRangeRef.current = range.cloneRange();
+      }
+    }
+  };
+
+  const restoreSelection = () => {
+    if (editorTab !== "visual" || !visualEditorRef.current) return;
+    visualEditorRef.current.focus();
+    const sel = window.getSelection();
+    if (!sel) return;
+
+    if (
+      savedRangeRef.current &&
+      visualEditorRef.current.contains(savedRangeRef.current.commonAncestorContainer)
+    ) {
+      sel.removeAllRanges();
+      sel.addRange(savedRangeRef.current);
+    } else {
+      const range = document.createRange();
+      range.selectNodeContents(visualEditorRef.current);
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      savedRangeRef.current = range.cloneRange();
+    }
+  };
 
   // Fetch blogs from API
   const fetchBlogs = async () => {
@@ -156,14 +202,14 @@ export default function AdminBlogsPage() {
     }
   }, [htmlContent]);
 
-  // Sync state into visual editor innerHTML when switching to visual
+  // Synchronize HTML into visual editor whenever switching to visual mode or opening a post
   useEffect(() => {
-    if (editorTab === "visual" && visualEditorRef.current) {
+    if (viewMode === "editor" && editorTab === "visual" && visualEditorRef.current) {
       if (visualEditorRef.current.innerHTML !== htmlContent) {
         visualEditorRef.current.innerHTML = htmlContent;
       }
     }
-  }, [editorTab]);
+  }, [viewMode, editorTab, editingPostId]);
 
   // Title & auto slug generation
   const handleTitleChange = (val: string) => {
@@ -183,26 +229,31 @@ export default function AdminBlogsPage() {
     setEditingPostId(null);
     setTitle("");
     setSlug("");
-    setHtmlContent(
-      "<p>Start writing your clinical article or healthcare advisory here...</p>"
-    );
+    const initialText = "<p>Start typing your clinical article or healthcare advisory here...</p>";
+    setHtmlContent(initialText);
     setSummary("");
-    setCoverImage(
-      "https://images.pexels.com/photos/7088530/pexels-photo-7088530.jpeg?auto=compress&cs=tinysrgb&w=800"
-    );
+    setCoverImage("");
     setCategory("Health Tips");
     setTagsInput("Healthcare, Medicine, Wellness");
     setIsPublished(true);
     setViewMode("editor");
     setEditorTab("visual");
+
+    // Ensure editor element gets content
+    setTimeout(() => {
+      if (visualEditorRef.current) {
+        visualEditorRef.current.innerHTML = initialText;
+      }
+    }, 50);
   };
 
-  // Open Editor for Existing Post
+  // Open Editor for Existing Post (Fix: Guarantee description loads into visual editor)
   const handleOpenEditPost = (post: IBlogPost) => {
     setEditingPostId(post.id);
     setTitle(post.title);
     setSlug(post.slug);
-    setHtmlContent(post.content || "");
+    const content = post.content || "<p></p>";
+    setHtmlContent(content);
     setSummary(post.summary || "");
     setCoverImage(post.coverImage || "");
     setCategory(post.category || "Health Tips");
@@ -211,16 +262,53 @@ export default function AdminBlogsPage() {
     setAuthorName(post.authorName || "Prof. Dr. Sarah Rahman");
     setViewMode("editor");
     setEditorTab("visual");
+
+    // Populate visual editor immediately across render ticks
+    if (visualEditorRef.current) {
+      visualEditorRef.current.innerHTML = content;
+    }
+    setTimeout(() => {
+      if (visualEditorRef.current) {
+        visualEditorRef.current.innerHTML = content;
+      }
+    }, 20);
+    setTimeout(() => {
+      if (visualEditorRef.current) {
+        visualEditorRef.current.innerHTML = content;
+      }
+    }, 100);
   };
 
-  // Execute formatting command in visual editor
+  // Execute formatting command in visual editor with selection preservation
   const executeCmd = (command: string, value: string | undefined = undefined) => {
-    if (editorTab !== "visual") return;
-    visualEditorRef.current?.focus();
+    if (editorTab !== "visual" || !visualEditorRef.current) return;
+    visualEditorRef.current.focus();
+    restoreSelection();
     document.execCommand(command, false, value);
+    saveSelection();
     if (visualEditorRef.current) {
       setHtmlContent(visualEditorRef.current.innerHTML);
     }
+  };
+
+  // Apply Heading / Paragraph block format
+  const handleApplyFormat = (tag: string, label: string) => {
+    if (editorTab !== "visual" || !visualEditorRef.current) return;
+    visualEditorRef.current.focus();
+    restoreSelection();
+    try {
+      document.execCommand("formatBlock", false, `<${tag.toUpperCase()}>`);
+    } catch {
+      try {
+        document.execCommand("formatBlock", false, tag);
+      } catch {}
+    }
+    saveSelection();
+    if (visualEditorRef.current) {
+      setHtmlContent(visualEditorRef.current.innerHTML);
+    }
+    setActiveFormat(label);
+    setIsFormatMenuOpen(false);
   };
 
   // Handle input in Visual editor
@@ -228,54 +316,196 @@ export default function AdminBlogsPage() {
     if (visualEditorRef.current) {
       const html = visualEditorRef.current.innerHTML;
       setHtmlContent(html);
+      saveSelection();
 
       // Detect current tag node for "Path: p / h2 / blockquote"
       const sel = window.getSelection();
       if (sel && sel.anchorNode) {
         const parent = sel.anchorNode.parentElement;
         if (parent) {
-          setCurrentPath(parent.tagName.toLowerCase());
+          const tagName = parent.tagName.toLowerCase();
+          setCurrentPath(tagName);
+          const match = FORMAT_OPTIONS.find((f) => f.tag === tagName);
+          if (match) {
+            setActiveFormat(match.label);
+          } else if (tagName === "div") {
+            setActiveFormat("Paragraph");
+          }
         }
       }
     }
   };
 
-  // Add Link Prompt
+  // Add Link Prompt with selection preservation
   const handleAddLink = () => {
+    if (editorTab !== "visual" || !visualEditorRef.current) return;
+    saveSelection();
     const url = prompt("Enter link destination URL:", "https://");
     if (url) {
-      executeCmd("createLink", url);
-    }
-  };
-
-  // Add Media dialog submission
-  const handleInsertMedia = () => {
-    if (!mediaImageUrl.trim()) {
-      toast.error("Please enter an image URL");
-      return;
-    }
-
-    const imgTag = `<img src="${mediaImageUrl.trim()}" alt="${
-      mediaAlt || title
-    }" class="rounded-xl my-4 max-w-full shadow-md" />${
-      mediaCaption ? `<p class="text-xs text-muted-foreground italic text-center mt-1 mb-4">${mediaCaption}</p>` : ""
-    }`;
-
-    if (editorTab === "visual") {
-      visualEditorRef.current?.focus();
-      document.execCommand("insertHTML", false, imgTag);
+      restoreSelection();
+      document.execCommand("createLink", false, url);
+      saveSelection();
       if (visualEditorRef.current) {
         setHtmlContent(visualEditorRef.current.innerHTML);
       }
+    }
+  };
+
+  // -------------------------------------------------------------
+  // CLOUDINARY UPLOAD: Featured Image (With Instant Preview)
+  // -------------------------------------------------------------
+  const handleFeaturedImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file (PNG, JPG, WEBP)");
+      return;
+    }
+
+    // Instant local preview
+    const localUrl = URL.createObjectURL(file);
+    setCoverImage(localUrl);
+    setUploadingFeatured(true);
+
+    try {
+      const res = await uploadMediaFile(file);
+      if (res?.url) {
+        setCoverImage(res.url);
+        toast.success("Featured image uploaded to Cloudinary successfully!");
+      } else {
+        toast.error("Cloudinary upload did not return an image URL");
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err?.message || "Failed to upload featured image to Cloudinary");
+    } finally {
+      setUploadingFeatured(false);
+      if (featuredFileInputRef.current) {
+        featuredFileInputRef.current.value = "";
+      }
+    }
+  };
+
+  // -------------------------------------------------------------
+  // CLOUDINARY UPLOAD: In-Editor Media Image (With Instant Preview)
+  // -------------------------------------------------------------
+  const handleMediaFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file");
+      return;
+    }
+
+    // Instant local preview in modal
+    const previewUrl = URL.createObjectURL(file);
+    setMediaLocalPreview(previewUrl);
+    setUploadingMedia(true);
+
+    try {
+      const res = await uploadMediaFile(file);
+      if (res?.url) {
+        setUploadedMediaUrl(res.url);
+        toast.success("Image uploaded to Cloudinary!");
+      } else {
+        toast.error("Cloudinary upload did not return an image URL");
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err?.message || "Failed to upload image to Cloudinary");
+    } finally {
+      setUploadingMedia(false);
+      if (mediaFileInputRef.current) {
+        mediaFileInputRef.current.value = "";
+      }
+    }
+  };
+
+  // Insert uploaded media image into post content at exact cursor position
+  const handleInsertMedia = () => {
+    if (uploadingMedia) {
+      toast.error("Please wait for image upload to Cloudinary to complete.");
+      return;
+    }
+    const finalUrl = uploadedMediaUrl.trim();
+    if (!finalUrl) {
+      toast.error("Please upload an image to Cloudinary first.");
+      return;
+    }
+
+    if (editorTab === "visual" && visualEditorRef.current) {
+      visualEditorRef.current.focus();
+
+      const sel = window.getSelection();
+      let range = savedRangeRef.current;
+
+      // Ensure valid range inside editor
+      if (!range || !visualEditorRef.current.contains(range.commonAncestorContainer)) {
+        range = document.createRange();
+        range.selectNodeContents(visualEditorRef.current);
+        range.collapse(false);
+      }
+
+      if (sel) {
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+
+      // Create figure container
+      const figure = document.createElement("figure");
+      figure.className = "my-5 block text-center";
+
+      const img = document.createElement("img");
+      img.src = finalUrl;
+      img.alt = mediaAlt.trim() || title || "Medical article image";
+      img.className = "rounded-xl max-w-full h-auto mx-auto shadow-md";
+      figure.appendChild(img);
+
+      if (mediaCaption.trim()) {
+        const figcaption = document.createElement("figcaption");
+        figcaption.className = "text-muted-foreground italic text-center mt-2 text-base";
+        figcaption.innerText = mediaCaption.trim();
+        figure.appendChild(figcaption);
+      }
+
+      // Add a clean paragraph after the image so user can keep typing
+      const afterP = document.createElement("p");
+      afterP.innerHTML = "<br>";
+
+      range.deleteContents();
+      range.insertNode(afterP);
+      range.insertNode(figure);
+
+      // Move cursor to the paragraph below
+      range.setStart(afterP, 0);
+      range.collapse(true);
+      if (sel) {
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      savedRangeRef.current = range.cloneRange();
+
+      // Synchronize editor innerHTML to htmlContent state
+      setHtmlContent(visualEditorRef.current.innerHTML);
     } else {
+      const imgTag = `<figure class="my-5 block text-center"><img src="${finalUrl}" alt="${
+        mediaAlt.trim() || title || "Medical article image"
+      }" class="rounded-xl max-w-full h-auto mx-auto shadow-md" />${
+        mediaCaption.trim()
+          ? `<figcaption class="text-muted-foreground italic text-center mt-2 text-base">${mediaCaption.trim()}</figcaption>`
+          : ""
+      }</figure><p><br></p>`;
       setHtmlContent((prev) => prev + "\n" + imgTag);
     }
 
     setIsMediaModalOpen(false);
-    setMediaImageUrl("");
+    setUploadedMediaUrl("");
+    setMediaLocalPreview("");
     setMediaAlt("");
     setMediaCaption("");
-    toast.success("Image embedded into article!");
+    toast.success("Image embedded into article content!");
   };
 
   // Save Post (Publish or Draft)
@@ -392,18 +622,18 @@ export default function AdminBlogsPage() {
   return (
     <div className="space-y-6 pb-12">
       {/* ============================================================== */}
-      {/* 1. LIST VIEW: Posts Table & Header */}
+      {/* 1. LIST VIEW: Posts Table & Header (Normal Comfortable Fonts) */}
       {/* ============================================================== */}
       {viewMode === "list" && (
         <div className="space-y-6">
           {/* Top Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-                <FileText className="h-6 w-6 text-primary" />
+              <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
+                <FileText className="h-7 w-7 text-primary" />
                 Medical Blog & Clinical Articles
               </h1>
-              <p className="text-muted-foreground mt-1">
+              <p className="text-muted-foreground mt-1 text-base">
                 Write, publish, and manage health guidelines, clinical case studies, and patient
                 recovery tips.
               </p>
@@ -411,34 +641,34 @@ export default function AdminBlogsPage() {
 
             <Button
               onClick={handleOpenNewPost}
-              className="rounded-xl font-bold gap-2 bg-primary text-primary-foreground shadow-xs"
+              className="rounded-xl font-bold gap-2 bg-primary text-primary-foreground shadow-xs h-11 px-5 text-base"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-5 w-5" />
               Add New Post
             </Button>
           </div>
 
           {/* Search & Filter Bar */}
           <Card className="rounded-2xl border-border/80 shadow-xs">
-            <CardContent className="p-4 sm:p-5 flex flex-col md:flex-row gap-4 justify-between items-center">
+            <CardContent className="p-5 flex flex-col md:flex-row gap-4 justify-between items-center">
               <div className="relative w-full md:w-96">
-                <Search className="h-4 w-4 absolute left-3.5 top-3 text-muted-foreground" />
+                <Search className="h-5 w-5 absolute left-3.5 top-3 text-muted-foreground" />
                 <Input
                   placeholder="Search articles by title, slug, or topic..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 rounded-xl"
+                  className="pl-11 rounded-xl h-11 text-base"
                 />
               </div>
 
-              <div className="flex items-center gap-2 w-full md:w-auto">
-                <Label className="font-semibold text-muted-foreground whitespace-nowrap">
+              <div className="flex items-center gap-3 w-full md:w-auto">
+                <Label className="font-semibold text-muted-foreground whitespace-nowrap text-base">
                   Filter Topic:
                 </Label>
                 <select
                   value={selectedCategoryFilter}
                   onChange={(e) => setSelectedCategoryFilter(e.target.value)}
-                  className="rounded-xl border border-input bg-background h-10 px-3 text-foreground font-semibold"
+                  className="rounded-xl border border-input bg-background h-11 px-3 text-foreground font-semibold text-base"
                 >
                   <option value="ALL">All Categories ({blogs.length})</option>
                   {PRESET_CATEGORIES.map((c) => (
@@ -456,7 +686,7 @@ export default function AdminBlogsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-muted/50 border-b border-border/80 text-muted-foreground font-bold text-sm">
+                  <tr className="bg-muted/50 border-b border-border/80 text-muted-foreground font-bold text-base">
                     <th className="p-4 pl-6">Title</th>
                     <th className="p-4">Author</th>
                     <th className="p-4">Category</th>
@@ -465,22 +695,22 @@ export default function AdminBlogsPage() {
                     <th className="p-4 pr-6 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/60">
+                <tbody className="divide-y divide-border/60 text-base">
                   {loading ? (
                     <tr>
                       <td colSpan={6} className="p-8 text-center text-muted-foreground">
-                        <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-2 text-primary" />
+                        <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-primary" />
                         Loading published articles...
                       </td>
                     </tr>
                   ) : filteredBlogs.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="p-10 text-center text-muted-foreground">
-                        <FileText className="h-10 w-10 mx-auto mb-2 text-muted-foreground/40" />
+                        <FileText className="h-12 w-12 mx-auto mb-2 text-muted-foreground/40" />
                         No articles found. Click{" "}
                         <button
                           onClick={handleOpenNewPost}
-                          className="text-primary font-bold underline"
+                          className="text-primary font-bold underline cursor-pointer"
                         >
                           Add New Post
                         </button>{" "}
@@ -494,33 +724,33 @@ export default function AdminBlogsPage() {
                         className="hover:bg-muted/30 transition-colors group"
                       >
                         <td className="p-4 pl-6">
-                          <div className="font-bold text-foreground text-base group-hover:text-primary transition-colors">
+                          <div className="font-bold text-foreground text-lg group-hover:text-primary transition-colors">
                             {post.title}
                           </div>
-                          <div className="text-xs text-muted-foreground font-mono mt-0.5">
+                          <div className="text-muted-foreground font-mono mt-0.5 text-base">
                             /blog/{post.slug}
                           </div>
                         </td>
-                        <td className="p-4 font-medium text-muted-foreground text-sm">
+                        <td className="p-4 font-medium text-muted-foreground">
                           {post.authorName || "Doctor"}
                         </td>
                         <td className="p-4">
-                          <Badge variant="outline" className="font-semibold text-xs text-primary border-primary/30">
+                          <Badge variant="outline" className="font-semibold text-primary border-primary/30 py-1 px-2.5 text-base">
                             {post.category || "General"}
                           </Badge>
                         </td>
                         <td className="p-4">
                           {post.isPublished ? (
-                            <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400 border-emerald-300">
+                            <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400 border-emerald-300 py-1 px-2.5 text-base">
                               Published
                             </Badge>
                           ) : (
-                            <Badge variant="secondary" className="text-amber-600 bg-amber-50">
+                            <Badge variant="secondary" className="text-amber-600 bg-amber-50 py-1 px-2.5 text-base">
                               Draft
                             </Badge>
                           )}
                         </td>
-                        <td className="p-4 text-xs font-mono text-muted-foreground">
+                        <td className="p-4 font-mono text-muted-foreground">
                           {post.publishedAt
                             ? new Date(post.publishedAt).toLocaleDateString("en-US", {
                                 month: "short",
@@ -530,35 +760,35 @@ export default function AdminBlogsPage() {
                             : "Draft"}
                         </td>
                         <td className="p-4 pr-6 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
+                          <div className="flex items-center justify-end gap-2">
                             <Button
                               size="sm"
                               variant="ghost"
                               onClick={() => handleOpenEditPost(post)}
-                              className="rounded-lg h-8 px-2.5 text-primary hover:bg-primary/10 gap-1"
+                              className="rounded-lg h-9 px-3 text-primary hover:bg-primary/10 gap-1.5 font-semibold text-base"
                               title="Edit in WordPress-style editor"
                             >
-                              <Edit className="h-3.5 w-3.5" />
+                              <Edit className="h-4 w-4" />
                               Edit
                             </Button>
 
                             <Link
                               href={`/blog/${post.slug || post.id}`}
                               target="_blank"
-                              className="inline-flex items-center justify-center rounded-lg h-8 px-2.5 text-muted-foreground hover:text-foreground hover:bg-muted gap-1 text-sm font-semibold"
+                              className="inline-flex items-center justify-center rounded-lg h-9 px-3 text-muted-foreground hover:text-foreground hover:bg-muted gap-1 font-semibold text-base"
                               title="View Live Post"
                             >
-                              <ExternalLink className="h-3.5 w-3.5" />
+                              <ExternalLink className="h-4 w-4" />
                             </Link>
 
                             <Button
                               size="sm"
                               variant="ghost"
                               onClick={() => handleDeletePost(post.id, post.title)}
-                              className="rounded-lg h-8 px-2 text-destructive hover:bg-destructive/10"
+                              className="rounded-lg h-9 px-2.5 text-destructive hover:bg-destructive/10"
                               title="Delete Post"
                             >
-                              <Trash2 className="h-3.5 w-3.5" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         </td>
@@ -573,22 +803,27 @@ export default function AdminBlogsPage() {
       )}
 
       {/* ============================================================== */}
-      {/* 2. WORDPRESS-STYLE POST EDITOR (Matching User Screenshot) */}
+      {/* 2. WORDPRESS-STYLE POST EDITOR (Normal Font Size & Cloudinary Upload) */}
       {/* ============================================================== */}
       {viewMode === "editor" && (
-        <div className={`space-y-6 ${isFullscreen ? "fixed inset-0 z-50 bg-background p-6 overflow-y-auto" : ""}`}>
+        <div
+          key={`${editingPostId || "new"}-editor`}
+          className={`space-y-6 ${
+            isFullscreen ? "fixed inset-0 z-50 bg-background p-6 overflow-y-auto" : ""
+          }`}
+        >
           {/* Header Action Bar */}
           <div className="flex items-center justify-between gap-4 pb-2 border-b border-border/80">
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
                 onClick={() => setViewMode("list")}
-                className="rounded-xl gap-2 font-semibold"
+                className="rounded-xl gap-2 font-semibold text-base h-10"
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-5 w-5" />
                 Back to All Posts
               </Button>
-              <h2 className="text-xl font-bold text-foreground">
+              <h2 className="text-2xl font-bold text-foreground">
                 {editingPostId ? "Edit Medical Post" : "Add New Post"}
               </h2>
             </div>
@@ -598,10 +833,10 @@ export default function AdminBlogsPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsFullscreen(!isFullscreen)}
-                className="rounded-xl gap-1 text-muted-foreground"
+                className="rounded-xl gap-1.5 text-muted-foreground font-semibold text-base"
                 title="Toggle Fullscreen Editor"
               >
-                {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
                 <span className="hidden sm:inline">{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}</span>
               </Button>
             </div>
@@ -623,7 +858,7 @@ export default function AdminBlogsPage() {
                 />
 
                 {/* Permalink display */}
-                <div className="flex items-center gap-2 text-xs text-muted-foreground px-1 pt-1 font-mono">
+                <div className="flex items-center gap-2 text-base text-muted-foreground px-1 pt-1 font-mono">
                   <span>Permalink:</span>
                   <span className="text-primary underline">
                     http://yourclinic.com/blog/
@@ -632,7 +867,7 @@ export default function AdminBlogsPage() {
                         type="text"
                         value={slug}
                         onChange={(e) => setSlug(e.target.value)}
-                        className="bg-background border border-input rounded px-1.5 py-0.5 font-mono text-xs text-foreground"
+                        className="bg-background border border-input rounded px-2 py-0.5 font-mono text-base text-foreground"
                       />
                     ) : (
                       <span>{slug || "post-slug"}</span>
@@ -641,7 +876,7 @@ export default function AdminBlogsPage() {
                   <button
                     type="button"
                     onClick={() => setIsEditingSlug(!isEditingSlug)}
-                    className="ml-1 text-xs text-muted-foreground hover:text-foreground font-sans underline"
+                    className="ml-1 text-muted-foreground hover:text-foreground font-sans underline cursor-pointer"
                   >
                     {isEditingSlug ? "Done" : "Edit"}
                   </button>
@@ -651,88 +886,167 @@ export default function AdminBlogsPage() {
               {/* WordPress TinyMCE Editor Box */}
               <div className="border border-border rounded-xl bg-card overflow-hidden shadow-xs">
                 {/* Top Action Bar: Add Media on left, Visual/Text on right */}
-                <div className="bg-muted/60 p-2.5 border-b border-border flex items-center justify-between gap-2">
-                  {/* "Add Media" Button */}
-                  <Dialog open={isMediaModalOpen} onOpenChange={setIsMediaModalOpen}>
+                <div className="bg-muted/60 p-3 border-b border-border flex items-center justify-between gap-3">
+                  {/* "Add Media" Button with Cloudinary Upload Modal */}
+                  <Dialog
+                    open={isMediaModalOpen}
+                    onOpenChange={(open) => {
+                      setIsMediaModalOpen(open);
+                      if (!open) {
+                        setUploadedMediaUrl("");
+                        setMediaLocalPreview("");
+                        setMediaAlt("");
+                        setMediaCaption("");
+                      }
+                    }}
+                  >
                     <DialogTrigger asChild>
                       <Button
                         type="button"
-                        size="sm"
                         variant="outline"
-                        className="rounded-lg h-8 gap-1.5 text-xs font-semibold bg-background shadow-xs hover:bg-muted"
+                        onMouseDown={() => saveSelection()}
+                        onClick={() => {
+                          saveSelection();
+                          setIsMediaModalOpen(true);
+                        }}
+                        className="rounded-lg h-9 gap-2 font-bold text-base bg-background shadow-xs hover:bg-muted"
                       >
-                        <ImageIcon className="h-3.5 w-3.5 text-primary" />
+                        <ImageIcon className="h-4 w-4 text-primary" />
                         Add Media
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[500px]">
+                    <DialogContent className="sm:max-w-[540px]">
                       <DialogHeader>
-                        <DialogTitle className="text-lg font-bold flex items-center gap-2">
-                          <ImageIcon className="h-5 w-5 text-primary" />
-                          Insert Media Image
+                        <DialogTitle className="text-xl font-bold flex items-center gap-2">
+                          <UploadCloud className="h-6 w-6 text-primary" />
+                          Upload Media to Cloudinary
                         </DialogTitle>
-                        <DialogDescription>
-                          Insert clinical photography or diagnostic images into your article content.
+                        <DialogDescription className="text-base text-muted-foreground">
+                          Upload image directly from your computer to Cloudinary and insert it at your cursor location.
                         </DialogDescription>
                       </DialogHeader>
 
                       <div className="space-y-4 py-3">
-                        <div className="space-y-1.5">
-                          <Label className="font-semibold text-xs">Image URL *</Label>
-                          <Input
-                            placeholder="https://images.pexels.com/..."
-                            value={mediaImageUrl}
-                            onChange={(e) => setMediaImageUrl(e.target.value)}
-                            className="rounded-xl"
-                          />
-                        </div>
+                        {/* Hidden Cloudinary File Upload Box */}
+                        <input
+                          ref={mediaFileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleMediaFileUpload}
+                          className="hidden"
+                        />
 
-                        {/* Quick Presets */}
-                        <div className="space-y-1">
-                          <span className="text-[11px] font-semibold text-muted-foreground uppercase">
-                            Or select from medical presets:
-                          </span>
-                          <div className="grid grid-cols-2 gap-2 max-h-36 overflow-y-auto pt-1">
-                            {SAMPLE_MEDIA_IMAGES.map((img) => (
+                        {mediaLocalPreview || uploadedMediaUrl ? (
+                          <div className="p-4 rounded-xl border border-border bg-muted/30 space-y-3">
+                            <div className="relative rounded-lg overflow-hidden border border-border h-52 bg-slate-900 flex items-center justify-center">
+                              <img
+                                src={mediaLocalPreview || uploadedMediaUrl}
+                                alt="Uploaded preview"
+                                className="w-full h-full object-contain"
+                              />
+                              {uploadingMedia && (
+                                <div className="absolute inset-0 bg-black/60 backdrop-blur-xs flex flex-col items-center justify-center text-white gap-2">
+                                  <RefreshCw className="h-7 w-7 animate-spin text-primary" />
+                                  <span className="font-semibold text-base">Uploading to Cloudinary...</span>
+                                </div>
+                              )}
                               <button
-                                key={img.url}
                                 type="button"
-                                onClick={() => setMediaImageUrl(img.url)}
-                                className="flex items-center gap-2 p-1.5 rounded-lg border border-border hover:border-primary text-left text-xs bg-muted/40"
+                                onClick={() => {
+                                  setUploadedMediaUrl("");
+                                  setMediaLocalPreview("");
+                                }}
+                                className="absolute top-2 right-2 p-1.5 rounded-full bg-destructive text-white hover:opacity-90 shadow-md cursor-pointer transition-transform hover:scale-105"
+                                title="Remove image"
                               >
-                                <img src={img.url} alt="" className="w-8 h-8 rounded object-cover" />
-                                <span className="line-clamp-1 font-medium">{img.title}</span>
+                                <X className="h-4 w-4" />
                               </button>
-                            ))}
+                            </div>
+
+                            <div className="flex items-center justify-between text-base">
+                              {uploadedMediaUrl ? (
+                                <span className="text-emerald-600 font-semibold flex items-center gap-1.5">
+                                  <CheckCircle2 className="h-4 w-4" />
+                                  Uploaded to Cloudinary (Ready to insert)
+                                </span>
+                              ) : uploadingMedia ? (
+                                <span className="text-primary font-semibold flex items-center gap-1.5">
+                                  <RefreshCw className="h-4 w-4 animate-spin" />
+                                  Optimizing & storing in Cloudinary...
+                                </span>
+                              ) : (
+                                <span className="text-muted-foreground text-base">Image selected</span>
+                              )}
+
+                              <button
+                                type="button"
+                                onClick={() => mediaFileInputRef.current?.click()}
+                                className="text-primary text-base font-semibold hover:underline cursor-pointer"
+                              >
+                                Change Image
+                              </button>
+                            </div>
                           </div>
-                        </div>
+                        ) : (
+                          <div
+                            onClick={() => mediaFileInputRef.current?.click()}
+                            className="border-2 border-dashed border-primary/40 hover:border-primary rounded-xl p-8 text-center cursor-pointer transition-colors bg-muted/20 hover:bg-muted/40 space-y-3 group"
+                          >
+                            <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto group-hover:scale-105 transition-transform">
+                              {uploadingMedia ? (
+                                <RefreshCw className="h-7 w-7 animate-spin" />
+                              ) : (
+                                <UploadCloud className="h-7 w-7" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-bold text-foreground text-lg">
+                                {uploadingMedia
+                                  ? "Uploading image to Cloudinary..."
+                                  : "Click to browse image from computer"}
+                              </p>
+                              <p className="text-muted-foreground text-base mt-1">
+                                Supports JPG, PNG, WEBP up to 10MB
+                              </p>
+                            </div>
+                          </div>
+                        )}
 
                         <div className="space-y-1.5">
-                          <Label className="font-semibold text-xs">Alt Text (Accessibility & SEO)</Label>
+                          <Label className="font-semibold text-base">Alt Text (Accessibility & SEO)</Label>
                           <Input
                             placeholder="e.g. Doctor explaining clinical scan results"
                             value={mediaAlt}
                             onChange={(e) => setMediaAlt(e.target.value)}
-                            className="rounded-xl"
+                            className="rounded-xl h-11 text-base"
                           />
                         </div>
 
                         <div className="space-y-1.5">
-                          <Label className="font-semibold text-xs">Image Caption (Optional)</Label>
+                          <Label className="font-semibold text-base">Image Caption (Optional)</Label>
                           <Input
                             placeholder="e.g. Figure 1: Early diagnosis protocol"
                             value={mediaCaption}
                             onChange={(e) => setMediaCaption(e.target.value)}
-                            className="rounded-xl"
+                            className="rounded-xl h-11 text-base"
                           />
                         </div>
                       </div>
 
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsMediaModalOpen(false)}>
+                      <DialogFooter className="gap-2 sm:gap-0">
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsMediaModalOpen(false)}
+                          className="rounded-xl text-base"
+                        >
                           Cancel
                         </Button>
-                        <Button onClick={handleInsertMedia} className="font-semibold">
+                        <Button
+                          onClick={handleInsertMedia}
+                          disabled={!uploadedMediaUrl || uploadingMedia}
+                          className="font-bold rounded-xl text-base bg-primary text-primary-foreground shadow-xs gap-2"
+                        >
+                          {uploadingMedia && <RefreshCw className="h-4 w-4 animate-spin" />}
                           Insert into post
                         </Button>
                       </DialogFooter>
@@ -744,7 +1058,7 @@ export default function AdminBlogsPage() {
                     <button
                       type="button"
                       onClick={() => setEditorTab("visual")}
-                      className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${
+                      className={`px-4 py-1.5 text-base font-bold rounded-md transition-all cursor-pointer ${
                         editorTab === "visual"
                           ? "bg-primary text-primary-foreground shadow-xs"
                           : "text-muted-foreground hover:text-foreground"
@@ -760,7 +1074,7 @@ export default function AdminBlogsPage() {
                         }
                         setEditorTab("text");
                       }}
-                      className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${
+                      className={`px-4 py-1.5 text-base font-bold rounded-md transition-all cursor-pointer ${
                         editorTab === "text"
                           ? "bg-primary text-primary-foreground shadow-xs"
                           : "text-muted-foreground hover:text-foreground"
@@ -773,166 +1087,251 @@ export default function AdminBlogsPage() {
 
                 {/* Classic WordPress Toolbar Row (Active in Visual mode) */}
                 {editorTab === "visual" && (
-                  <div className="bg-muted/40 p-2 border-b border-border/80 flex flex-wrap items-center gap-1">
-                    {/* Headings / Block format dropdown */}
-                    <select
-                      onChange={(e) => executeCmd("formatBlock", e.target.value)}
-                      defaultValue="p"
-                      className="h-8 rounded-lg border border-input bg-background px-2 text-xs font-semibold text-foreground mr-1"
-                    >
-                      <option value="p">Paragraph</option>
-                      <option value="h1">Heading 1</option>
-                      <option value="h2">Heading 2</option>
-                      <option value="h3">Heading 3</option>
-                      <option value="h4">Heading 4</option>
-                      <option value="blockquote">Blockquote</option>
-                      <option value="pre">Preformatted</option>
-                    </select>
+                  <div className="bg-muted/40 p-2.5 border-b border-border/80 flex flex-wrap items-center gap-1.5">
+                    {/* Headings / Block format Custom Dropdown */}
+                    <div className="relative" ref={formatDropdownRef}>
+                      <button
+                        type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          saveSelection();
+                        }}
+                        onClick={() => setIsFormatMenuOpen((prev) => !prev)}
+                        className="h-9 px-3 rounded-lg border border-input bg-background hover:bg-muted/80 text-foreground text-base font-semibold flex items-center gap-2 cursor-pointer shadow-xs min-w-[130px] justify-between"
+                        title="Paragraph / Headings Format"
+                      >
+                        <span>{activeFormat}</span>
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      </button>
 
-                    <div className="h-4 w-px bg-border mx-0.5" />
+                      {isFormatMenuOpen && (
+                        <div className="absolute left-0 top-full mt-1.5 w-48 rounded-xl border border-border bg-popover shadow-xl z-50 py-1.5 overflow-hidden animate-in fade-in-50 zoom-in-95">
+                          {FORMAT_OPTIONS.map((opt) => (
+                            <button
+                              key={opt.tag}
+                              type="button"
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                saveSelection();
+                              }}
+                              onClick={() => handleApplyFormat(opt.tag, opt.label)}
+                              className={`w-full text-left px-3.5 py-2 text-base transition-colors flex items-center justify-between cursor-pointer ${
+                                activeFormat === opt.label
+                                  ? "bg-primary/10 text-primary font-bold"
+                                  : "text-foreground hover:bg-muted"
+                              }`}
+                            >
+                              <span className={opt.className}>{opt.label}</span>
+                              {activeFormat === opt.label && <CheckCircle2 className="h-4 w-4 text-primary" />}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="h-5 w-px bg-border mx-1" />
 
                     {/* Bold */}
                     <button
                       type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        saveSelection();
+                      }}
                       onClick={() => executeCmd("bold")}
-                      className="p-1.5 rounded hover:bg-muted text-foreground font-bold text-xs h-8 w-8 flex items-center justify-center border border-transparent hover:border-border"
+                      className="p-1.5 rounded-lg hover:bg-muted text-foreground font-bold h-9 w-9 flex items-center justify-center border border-transparent hover:border-border cursor-pointer transition-colors"
                       title="Bold (Ctrl+B)"
                     >
-                      <Bold className="h-3.5 w-3.5" />
+                      <Bold className="h-4 w-4" />
                     </button>
 
                     {/* Italic */}
                     <button
                       type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        saveSelection();
+                      }}
                       onClick={() => executeCmd("italic")}
-                      className="p-1.5 rounded hover:bg-muted text-foreground text-xs h-8 w-8 flex items-center justify-center border border-transparent hover:border-border"
+                      className="p-1.5 rounded-lg hover:bg-muted text-foreground h-9 w-9 flex items-center justify-center border border-transparent hover:border-border cursor-pointer transition-colors"
                       title="Italic (Ctrl+I)"
                     >
-                      <Italic className="h-3.5 w-3.5" />
+                      <Italic className="h-4 w-4" />
                     </button>
 
                     {/* Strikethrough */}
                     <button
                       type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        saveSelection();
+                      }}
                       onClick={() => executeCmd("strikeThrough")}
-                      className="p-1.5 rounded hover:bg-muted text-foreground text-xs h-8 w-8 flex items-center justify-center border border-transparent hover:border-border"
+                      className="p-1.5 rounded-lg hover:bg-muted text-foreground h-9 w-9 flex items-center justify-center border border-transparent hover:border-border cursor-pointer transition-colors"
                       title="Strikethrough"
                     >
-                      <Strikethrough className="h-3.5 w-3.5" />
+                      <Strikethrough className="h-4 w-4" />
                     </button>
 
-                    <div className="h-4 w-px bg-border mx-0.5" />
+                    <div className="h-5 w-px bg-border mx-1" />
 
                     {/* Bullet List */}
                     <button
                       type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        saveSelection();
+                      }}
                       onClick={() => executeCmd("insertUnorderedList")}
-                      className="p-1.5 rounded hover:bg-muted text-foreground text-xs h-8 w-8 flex items-center justify-center border border-transparent hover:border-border"
+                      className="p-1.5 rounded-lg hover:bg-muted text-foreground h-9 w-9 flex items-center justify-center border border-transparent hover:border-border cursor-pointer transition-colors"
                       title="Bulleted list"
                     >
-                      <List className="h-3.5 w-3.5" />
+                      <List className="h-4 w-4" />
                     </button>
 
                     {/* Numbered List */}
                     <button
                       type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        saveSelection();
+                      }}
                       onClick={() => executeCmd("insertOrderedList")}
-                      className="p-1.5 rounded hover:bg-muted text-foreground text-xs h-8 w-8 flex items-center justify-center border border-transparent hover:border-border"
+                      className="p-1.5 rounded-lg hover:bg-muted text-foreground h-9 w-9 flex items-center justify-center border border-transparent hover:border-border cursor-pointer transition-colors"
                       title="Numbered list"
                     >
-                      <ListOrdered className="h-3.5 w-3.5" />
+                      <ListOrdered className="h-4 w-4" />
                     </button>
 
                     {/* Blockquote */}
                     <button
                       type="button"
-                      onClick={() => executeCmd("formatBlock", "blockquote")}
-                      className="p-1.5 rounded hover:bg-muted text-foreground text-xs h-8 w-8 flex items-center justify-center border border-transparent hover:border-border"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        saveSelection();
+                      }}
+                      onClick={() => handleApplyFormat("blockquote", "Blockquote")}
+                      className="p-1.5 rounded-lg hover:bg-muted text-foreground h-9 w-9 flex items-center justify-center border border-transparent hover:border-border cursor-pointer transition-colors"
                       title="Quote"
                     >
-                      <Quote className="h-3.5 w-3.5" />
+                      <Quote className="h-4 w-4" />
                     </button>
 
                     {/* Horizontal Line */}
                     <button
                       type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        saveSelection();
+                      }}
                       onClick={() => executeCmd("insertHorizontalRule")}
-                      className="p-1.5 rounded hover:bg-muted text-foreground text-xs h-8 w-8 flex items-center justify-center border border-transparent hover:border-border"
+                      className="p-1.5 rounded-lg hover:bg-muted text-foreground h-9 w-9 flex items-center justify-center border border-transparent hover:border-border cursor-pointer transition-colors"
                       title="Horizontal line"
                     >
-                      <Minus className="h-3.5 w-3.5" />
+                      <Minus className="h-4 w-4" />
                     </button>
 
-                    <div className="h-4 w-px bg-border mx-0.5" />
+                    <div className="h-5 w-px bg-border mx-1" />
 
                     {/* Alignments */}
                     <button
                       type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        saveSelection();
+                      }}
                       onClick={() => executeCmd("justifyLeft")}
-                      className="p-1.5 rounded hover:bg-muted text-foreground text-xs h-8 w-8 flex items-center justify-center border border-transparent hover:border-border"
+                      className="p-1.5 rounded-lg hover:bg-muted text-foreground h-9 w-9 flex items-center justify-center border border-transparent hover:border-border cursor-pointer transition-colors"
                       title="Align left"
                     >
-                      <AlignLeft className="h-3.5 w-3.5" />
+                      <AlignLeft className="h-4 w-4" />
                     </button>
                     <button
                       type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        saveSelection();
+                      }}
                       onClick={() => executeCmd("justifyCenter")}
-                      className="p-1.5 rounded hover:bg-muted text-foreground text-xs h-8 w-8 flex items-center justify-center border border-transparent hover:border-border"
+                      className="p-1.5 rounded-lg hover:bg-muted text-foreground h-9 w-9 flex items-center justify-center border border-transparent hover:border-border cursor-pointer transition-colors"
                       title="Align center"
                     >
-                      <AlignCenter className="h-3.5 w-3.5" />
+                      <AlignCenter className="h-4 w-4" />
                     </button>
                     <button
                       type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        saveSelection();
+                      }}
                       onClick={() => executeCmd("justifyRight")}
-                      className="p-1.5 rounded hover:bg-muted text-foreground text-xs h-8 w-8 flex items-center justify-center border border-transparent hover:border-border"
+                      className="p-1.5 rounded-lg hover:bg-muted text-foreground h-9 w-9 flex items-center justify-center border border-transparent hover:border-border cursor-pointer transition-colors"
                       title="Align right"
                     >
-                      <AlignRight className="h-3.5 w-3.5" />
+                      <AlignRight className="h-4 w-4" />
                     </button>
 
-                    <div className="h-4 w-px bg-border mx-0.5" />
+                    <div className="h-5 w-px bg-border mx-1" />
 
                     {/* Link / Unlink */}
                     <button
                       type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        saveSelection();
+                      }}
                       onClick={handleAddLink}
-                      className="p-1.5 rounded hover:bg-muted text-foreground text-xs h-8 w-8 flex items-center justify-center border border-transparent hover:border-border"
+                      className="p-1.5 rounded-lg hover:bg-muted text-foreground h-9 w-9 flex items-center justify-center border border-transparent hover:border-border cursor-pointer transition-colors"
                       title="Insert/edit link"
                     >
-                      <LinkIcon className="h-3.5 w-3.5" />
+                      <LinkIcon className="h-4 w-4" />
                     </button>
                     <button
                       type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        saveSelection();
+                      }}
                       onClick={() => executeCmd("unlink")}
-                      className="p-1.5 rounded hover:bg-muted text-foreground text-xs h-8 w-8 flex items-center justify-center border border-transparent hover:border-border"
+                      className="p-1.5 rounded-lg hover:bg-muted text-foreground h-9 w-9 flex items-center justify-center border border-transparent hover:border-border cursor-pointer transition-colors"
                       title="Remove link"
                     >
-                      <Unlink className="h-3.5 w-3.5" />
+                      <Unlink className="h-4 w-4" />
                     </button>
                   </div>
                 )}
 
-                {/* Editor Content Area */}
+                {/* Editor Content Area (Guaranteed Content Rendering) */}
                 {editorTab === "visual" ? (
                   <div
-                    ref={visualEditorRef}
+                    ref={(el) => {
+                      visualEditorRef.current = el;
+                      if (el && !el.innerHTML && htmlContent) {
+                        el.innerHTML = htmlContent;
+                      }
+                    }}
                     contentEditable
+                    data-rich-editor="true"
                     onInput={handleVisualInput}
-                    className="min-h-[380px] p-6 focus:outline-none prose prose-slate max-w-none text-foreground font-normal leading-relaxed text-base"
-                    style={{ minHeight: "420px" }}
+                    onKeyUp={saveSelection}
+                    onMouseUp={saveSelection}
+                    onSelect={saveSelection}
+                    onFocus={saveSelection}
+                    onBlur={saveSelection}
+                    className="visual-editor-content blog-content min-h-[440px] p-6 focus:outline-none text-foreground font-normal leading-relaxed text-base bg-card"
+                    style={{ minHeight: "440px" }}
                   />
                 ) : (
                   <textarea
                     value={htmlContent}
                     onChange={(e) => setHtmlContent(e.target.value)}
-                    className="w-full min-h-[420px] p-4 font-mono text-xs bg-background text-foreground focus:outline-none resize-y"
+                    className="w-full min-h-[440px] p-5 font-mono text-base bg-background text-foreground focus:outline-none resize-y"
                     placeholder="<p>Raw HTML article content here...</p>"
                   />
                 )}
 
                 {/* WordPress Bottom Bar: Path & Word count */}
-                <div className="bg-muted/40 px-4 py-2 border-t border-border flex items-center justify-between text-xs text-muted-foreground font-mono">
+                <div className="bg-muted/40 px-5 py-2.5 border-t border-border flex items-center justify-between text-base text-muted-foreground font-mono">
                   <span>Path: {currentPath}</span>
                   <span>Word count: {wordCount}</span>
                 </div>
@@ -940,21 +1339,21 @@ export default function AdminBlogsPage() {
 
               {/* Excerpt Summary Box */}
               <Card className="rounded-xl border-border/80 shadow-xs">
-                <CardHeader className="py-3 px-4">
-                  <CardTitle className="text-sm font-bold flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-primary" />
+                <CardHeader className="py-4 px-5">
+                  <CardTitle className="text-base font-bold flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-primary" />
                     Post Excerpt / Meta Description
                   </CardTitle>
-                  <CardDescription className="text-xs">
+                  <CardDescription className="text-base">
                     Short summary displayed on public blog cards and search engine snippets.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="px-4 pb-4 pt-0">
+                <CardContent className="px-5 pb-5 pt-0">
                   <Textarea
                     placeholder="Write an excerpt (optional, auto-generated from post content if left empty)..."
                     value={summary}
                     onChange={(e) => setSummary(e.target.value)}
-                    className="rounded-xl text-xs h-20"
+                    className="rounded-xl text-base h-24"
                   />
                 </CardContent>
               </Card>
@@ -966,54 +1365,52 @@ export default function AdminBlogsPage() {
             <div className="lg:col-span-4 space-y-5">
               {/* Box 1: Publish Settings */}
               <Card className="rounded-xl border-border shadow-xs">
-                <CardHeader className="py-3 px-4 border-b border-border/60">
-                  <CardTitle className="text-base font-bold flex items-center gap-2">
-                    <Save className="h-4 w-4 text-primary" />
+                <CardHeader className="py-4 px-5 border-b border-border/60">
+                  <CardTitle className="text-lg font-bold flex items-center gap-2">
+                    <Save className="h-5 w-5 text-primary" />
                     Publish
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-4 space-y-4">
-                  <div className="flex items-center justify-between text-xs">
+                <CardContent className="p-5 space-y-4 text-base">
+                  <div className="flex items-center justify-between">
                     <span className="text-muted-foreground font-semibold">Status:</span>
-                    <Badge variant={isPublished ? "default" : "secondary"} className="font-bold">
+                    <Badge variant={isPublished ? "default" : "secondary"} className="font-bold text-base px-2.5 py-0.5">
                       {isPublished ? "Published" : "Draft"}
                     </Badge>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center justify-between">
                     <span className="text-muted-foreground font-semibold">Visibility:</span>
                     <span className="font-bold text-foreground">Public</span>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center justify-between">
                     <span className="text-muted-foreground font-semibold">Author:</span>
                     <input
                       type="text"
                       value={authorName}
                       onChange={(e) => setAuthorName(e.target.value)}
-                      className="font-semibold text-foreground text-right bg-transparent border-b border-border/80 focus:outline-none text-xs"
+                      className="font-semibold text-foreground text-right bg-transparent border-b border-border/80 focus:outline-none text-base"
                     />
                   </div>
 
                   {/* Actions */}
-                  <div className="pt-3 border-t border-border/60 flex items-center justify-between gap-2">
+                  <div className="pt-4 border-t border-border/60 flex items-center justify-between gap-3">
                     <Button
                       type="button"
                       variant="outline"
-                      size="sm"
                       disabled={submitting}
                       onClick={() => handleSavePost(false)}
-                      className="rounded-xl text-xs font-semibold"
+                      className="rounded-xl font-semibold text-base h-10 px-4"
                     >
                       Save Draft
                     </Button>
 
                     <Button
                       type="button"
-                      size="sm"
                       disabled={submitting}
                       onClick={() => handleSavePost(true)}
-                      className="rounded-xl text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 px-4 shadow-xs"
+                      className="rounded-xl font-bold bg-primary text-primary-foreground hover:bg-primary/90 px-5 text-base h-10 shadow-xs"
                     >
                       {submitting ? "Saving..." : editingPostId ? "Update Post" : "Publish"}
                     </Button>
@@ -1021,82 +1418,131 @@ export default function AdminBlogsPage() {
                 </CardContent>
               </Card>
 
-              {/* Box 2: Featured Image */}
+              {/* Box 2: Featured Image (Cloudinary Upload System) */}
               <Card className="rounded-xl border-border shadow-xs">
-                <CardHeader className="py-3 px-4 border-b border-border/60">
-                  <CardTitle className="text-base font-bold flex items-center gap-2">
-                    <ImageIcon className="h-4 w-4 text-primary" />
+                <CardHeader className="py-4 px-5 border-b border-border/60">
+                  <CardTitle className="text-lg font-bold flex items-center gap-2">
+                    <ImageIcon className="h-5 w-5 text-primary" />
                     Featured Image
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-4 space-y-3">
+                <CardContent className="p-5 space-y-3">
+                  <input
+                    ref={featuredFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFeaturedImageUpload}
+                    className="hidden"
+                  />
+
                   {coverImage ? (
-                    <div className="space-y-2">
-                      <img
-                        src={coverImage}
-                        alt="Featured Preview"
-                        className="w-full h-36 object-cover rounded-xl border border-border"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setCoverImage("")}
-                        className="text-xs text-destructive hover:underline font-semibold block"
-                      >
-                        Remove featured image
-                      </button>
+                    <div className="space-y-3">
+                      <div className="relative rounded-xl overflow-hidden border border-border group">
+                        <img
+                          src={coverImage}
+                          alt="Featured Preview"
+                          className="w-full h-44 object-cover"
+                        />
+                        {uploadingFeatured ? (
+                          <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white gap-2">
+                            <RefreshCw className="h-6 w-6 animate-spin text-primary" />
+                            <span className="font-semibold text-base">Uploading to Cloudinary...</span>
+                          </div>
+                        ) : (
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => featuredFileInputRef.current?.click()}
+                              className="rounded-lg font-semibold text-base"
+                            >
+                              Change Image
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-emerald-600 font-semibold flex items-center gap-1.5 text-base">
+                          {uploadingFeatured ? (
+                            <>
+                              <RefreshCw className="h-4 w-4 animate-spin text-primary" />
+                              <span className="text-primary">Uploading...</span>
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle2 className="h-4 w-4" />
+                              Cloudinary Synced
+                            </>
+                          )}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setCoverImage("")}
+                          className="text-base text-destructive hover:underline font-semibold cursor-pointer"
+                        >
+                          Remove image
+                        </button>
+                      </div>
                     </div>
                   ) : (
-                    <div className="p-6 rounded-xl border-2 border-dashed border-border/80 text-center text-xs text-muted-foreground">
-                      No featured image chosen.
+                    <div
+                      onClick={() => featuredFileInputRef.current?.click()}
+                      className="border-2 border-dashed border-primary/40 hover:border-primary rounded-xl p-6 text-center cursor-pointer transition-colors bg-muted/20 hover:bg-muted/40 space-y-2"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
+                        {uploadingFeatured ? (
+                          <RefreshCw className="h-6 w-6 animate-spin" />
+                        ) : (
+                          <UploadCloud className="h-6 w-6" />
+                        )}
+                      </div>
+                      <p className="font-bold text-foreground text-base">
+                        {uploadingFeatured ? "Uploading to Cloudinary..." : "Upload Featured Image"}
+                      </p>
+                      <p className="text-muted-foreground text-base">
+                        Click to select image file from your device
+                      </p>
                     </div>
                   )}
-
-                  <div className="space-y-1">
-                    <Label className="text-xs font-semibold">Cover Image URL</Label>
-                    <Input
-                      placeholder="https://images.pexels.com/..."
-                      value={coverImage}
-                      onChange={(e) => setCoverImage(e.target.value)}
-                      className="rounded-xl text-xs"
-                    />
-                  </div>
                 </CardContent>
               </Card>
 
               {/* Box 3: Categories */}
               <Card className="rounded-xl border-border shadow-xs">
-                <CardHeader className="py-3 px-4 border-b border-border/60">
-                  <CardTitle className="text-base font-bold flex items-center gap-2">
-                    <Folder className="h-4 w-4 text-primary" />
+                <CardHeader className="py-4 px-5 border-b border-border/60">
+                  <CardTitle className="text-lg font-bold flex items-center gap-2">
+                    <Folder className="h-5 w-5 text-primary" />
                     Category
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-4 space-y-2">
-                  <div className="space-y-1 max-h-40 overflow-y-auto pr-1">
+                <CardContent className="p-5 space-y-3">
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                     {PRESET_CATEGORIES.map((cat) => (
                       <label
                         key={cat}
-                        className="flex items-center gap-2 text-xs font-semibold text-foreground cursor-pointer hover:text-primary py-0.5"
+                        className="flex items-center gap-2.5 font-semibold text-foreground cursor-pointer hover:text-primary py-0.5 text-base"
                       >
                         <input
                           type="radio"
                           name="blogCategory"
                           checked={category === cat}
                           onChange={() => setCategory(cat)}
-                          className="text-primary focus:ring-primary rounded"
+                          className="text-primary focus:ring-primary rounded h-4 w-4 cursor-pointer"
                         />
                         <span>{cat}</span>
                       </label>
                     ))}
                   </div>
 
-                  <div className="pt-2 border-t border-border/60">
-                    <Label className="text-xs font-semibold">Or custom category:</Label>
+                  <div className="pt-3 border-t border-border/60 space-y-1">
+                    <Label className="font-semibold text-base">Or custom category:</Label>
                     <Input
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
                       placeholder="e.g. Pediatric Cardiology"
-                      className="rounded-xl text-xs mt-1"
+                      className="rounded-xl h-10 text-base"
                     />
                   </div>
                 </CardContent>
@@ -1104,20 +1550,20 @@ export default function AdminBlogsPage() {
 
               {/* Box 4: Tags */}
               <Card className="rounded-xl border-border shadow-xs">
-                <CardHeader className="py-3 px-4 border-b border-border/60">
-                  <CardTitle className="text-base font-bold flex items-center gap-2">
-                    <Tag className="h-4 w-4 text-primary" />
+                <CardHeader className="py-4 px-5 border-b border-border/60">
+                  <CardTitle className="text-lg font-bold flex items-center gap-2">
+                    <Tag className="h-5 w-5 text-primary" />
                     Tags
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-4 space-y-2">
+                <CardContent className="p-5 space-y-2">
                   <Input
                     placeholder="Separate tags with commas..."
                     value={tagsInput}
                     onChange={(e) => setTagsInput(e.target.value)}
-                    className="rounded-xl text-xs"
+                    className="rounded-xl h-11 text-base"
                   />
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="text-muted-foreground text-base">
                     e.g. HeartHealth, PreventiveMedicine, Diagnostics
                   </p>
                 </CardContent>

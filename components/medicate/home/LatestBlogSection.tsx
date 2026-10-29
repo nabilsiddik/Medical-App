@@ -1,127 +1,100 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
-import { User, MessageSquare, Plus, ArrowRight } from "lucide-react";
+import { User, MessageSquare } from "lucide-react";
 import { IBlogPost } from "@/types/doctor.interface";
 
-// Swiper styles
+// Import Swiper styles
 import "swiper/css";
 import "swiper/css/pagination";
-
-const DUMMY_BLOGS = [
-  {
-    id: "blog-1",
-    title: "Get The Exercise Limited Mobility",
-    slug: "get-the-exercise-limited-mobility",
-    summary:
-      "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.",
-    coverImage:
-      "https://images.pexels.com/photos/7088530/pexels-photo-7088530.jpeg?auto=compress&cs=tinysrgb&w=800",
-    authorName: "Dr. Sarah Jenkins",
-    publishedAt: "2026-10-17T09:00:00Z",
-    formattedDate: "DECEMBER 17, 2026",
-    category: "Rehabilitation",
-  },
-  {
-    id: "blog-2",
-    title: "Transfusion Strategy And Heart Surgery",
-    slug: "transfusion-strategy-and-heart-surgery",
-    summary:
-      "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.",
-    coverImage:
-      "https://images.pexels.com/photos/5452293/pexels-photo-5452293.jpeg?auto=compress&cs=tinysrgb&w=800",
-    authorName: "Dr. John Martin",
-    publishedAt: "2026-10-05T10:00:00Z",
-    formattedDate: "DECEMBER 5, 2026",
-    category: "Cardiology",
-  },
-  {
-    id: "blog-3",
-    title: "Latest Equipment For The Heart Treatment",
-    slug: "latest-equipment-for-the-heart-treatment",
-    summary:
-      "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.",
-    coverImage:
-      "https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg?auto=compress&cs=tinysrgb&w=800",
-    authorName: "Dr. Sarah Jenkins",
-    publishedAt: "2026-10-05T10:30:00Z",
-    formattedDate: "DECEMBER 5, 2026",
-    category: "Cardiology",
-  },
-  {
-    id: "blog-4",
-    title: "Preventive Cardiac Care & Nutrition Guidelines",
-    slug: "preventive-cardiac-care-nutrition-guidelines",
-    summary:
-      "Essential lifestyle modifications and dietary adjustments that protect arterial health and stabilize blood pressure in senior adults.",
-    coverImage:
-      "https://images.pexels.com/photos/4021775/pexels-photo-4021775.jpeg?auto=compress&cs=tinysrgb&w=800",
-    authorName: "Dr. Sarah Jenkins",
-    publishedAt: "2026-09-28T14:00:00Z",
-    formattedDate: "SEPTEMBER 28, 2026",
-    category: "Wellness",
-  },
-  {
-    id: "blog-5",
-    title: "Understanding Hypertension: Symptoms & Diagnostics",
-    slug: "understanding-hypertension-symptoms-diagnostics",
-    summary:
-      "Why early screening matters and how routine clinical blood pressure monitoring prevents chronic cardiovascular complications.",
-    coverImage:
-      "https://images.pexels.com/photos/4173239/pexels-photo-4173239.jpeg?auto=compress&cs=tinysrgb&w=800",
-    authorName: "Dr. Sarah Jenkins",
-    publishedAt: "2026-09-15T11:00:00Z",
-    formattedDate: "SEPTEMBER 15, 2026",
-    category: "Hypertension",
-  },
-];
 
 interface LatestBlogSectionProps {
   blogs?: IBlogPost[];
 }
 
-export default function LatestBlogSection({ blogs }: LatestBlogSectionProps) {
-  // Format date nicely e.g. "DECEMBER 17, 2026"
-  const formatDate = (dateStr?: string | Date) => {
-    if (!dateStr) return "RECENT POST";
-    try {
-      const d = new Date(dateStr);
-      return d.toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      }).toUpperCase();
-    } catch {
-      return "RECENT POST";
+export default function LatestBlogSection({ blogs = [] }: LatestBlogSectionProps) {
+  // Use dynamic blogs from database or fallback to 3 clinical high-res posts
+  const displayBlogs = useMemo(() => {
+    if (blogs && blogs.length > 0) {
+      return blogs.slice(0, 10).map((b) => ({
+        id: b.id,
+        title: b.title,
+        slug: b.slug,
+        summary:
+          b.summary ||
+          b.content?.replace(/<[^>]*>/g, " ").substring(0, 150) + "..." ||
+          "Evidence-based clinical guidelines and outpatient care recommendations.",
+        authorName: b.authorName || "Doctor",
+        coverImage:
+          b.coverImage ||
+          "https://images.pexels.com/photos/7088530/pexels-photo-7088530.jpeg?auto=compress&cs=tinysrgb&w=800",
+        formattedDate: b.publishedAt
+          ? new Date(b.publishedAt).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })
+          : "Recently Published",
+      }));
     }
-  };
 
-  // Combine live blogs (up to 10) with realistic fallbacks if needed
-  const displayBlogs =
-    blogs && blogs.length > 0
-      ? blogs.slice(0, 10).map((b, idx) => ({
-          id: b.id || `live-${idx}`,
-          title: b.title,
-          slug: b.slug,
-          summary: b.summary || "Explore recent medical breakthroughs, patient recovery guidance, and wellness tips.",
-          coverImage:
-            b.coverImage ||
-            DUMMY_BLOGS[idx % DUMMY_BLOGS.length].coverImage,
-          authorName: b.authorName || "Dr. Sarah Jenkins",
-          formattedDate: formatDate(b.publishedAt || b.createdAt),
-          category: b.category || "Health Care",
-        }))
-      : DUMMY_BLOGS;
+    return [
+      {
+        id: "dummy-1",
+        title: "Get The Exercise Limited Mobility",
+        slug: "get-the-exercise-limited-mobility",
+        summary:
+          "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.",
+        authorName: "Clinical Staff",
+        coverImage:
+          "https://images.pexels.com/photos/7088530/pexels-photo-7088530.jpeg?auto=compress&cs=tinysrgb&w=800",
+        formattedDate: "December 17, 2021",
+      },
+      {
+        id: "dummy-2",
+        title: "Transfusion Strategy And Heart Surgery",
+        slug: "transfusion-strategy-and-heart-surgery",
+        summary:
+          "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.",
+        authorName: "Cardiology Unit",
+        coverImage:
+          "https://images.pexels.com/photos/5452293/pexels-photo-5452293.jpeg?auto=compress&cs=tinysrgb&w=800",
+        formattedDate: "December 5, 2021",
+      },
+      {
+        id: "dummy-3",
+        title: "Latest Equipment For The Heart Treatment",
+        slug: "latest-equipment-for-heart-treatment",
+        summary:
+          "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.",
+        authorName: "Diagnostic Team",
+        coverImage:
+          "https://images.pexels.com/photos/5214958/pexels-photo-5214958.jpeg?auto=compress&cs=tinysrgb&w=800",
+        formattedDate: "December 5, 2021",
+      },
+      {
+        id: "dummy-4",
+        title: "Preventive Cardiac Care Protocols",
+        slug: "preventive-cardiac-care-protocols",
+        summary:
+          "Early diagnostic screening and lifestyle management for long-term cardiovascular resilience and vitality.",
+        authorName: "Specialist Team",
+        coverImage:
+          "https://images.pexels.com/photos/7089017/pexels-photo-7089017.jpeg?auto=compress&cs=tinysrgb&w=800",
+        formattedDate: "November 28, 2021",
+      },
+    ];
+  }, [blogs]);
 
   return (
     <section className="py-20 md:py-28 bg-[#f8fafc] overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <span className="inline-block bg-[#dceaf8] text-[#1a73e8] text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-sm mb-3">
+          <span className="inline-block bg-primary/15 text-primary text-base font-bold tracking-widest uppercase px-4 py-1.5 rounded-sm mb-3">
             OUR BLOG
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0f2137] tracking-tight">
@@ -172,7 +145,7 @@ export default function LatestBlogSection({ blogs }: LatestBlogSectionProps) {
                       alt={post.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                     />
-                    <div className="absolute bottom-0 left-0 bg-[#1a73e8] text-white text-xs font-bold px-4 py-2 tracking-wider uppercase">
+                    <div className="absolute bottom-0 left-0 bg-primary text-primary-foreground text-base font-bold px-4 py-2 tracking-wider uppercase">
                       {post.formattedDate}
                     </div>
                   </div>
@@ -181,15 +154,15 @@ export default function LatestBlogSection({ blogs }: LatestBlogSectionProps) {
                   <div className="p-6 sm:p-7 flex-1 flex flex-col justify-between space-y-4">
                     <div className="space-y-3">
                       {/* Meta: Author & Comments */}
-                      <div className="flex items-center gap-4 text-xs font-bold text-slate-500">
-                        <span className="flex items-center gap-1.5 text-[#1a73e8]">
-                          <User className="h-3.5 w-3.5 text-[#1a73e8]" />
+                      <div className="flex items-center gap-4 text-base font-bold text-slate-500">
+                        <span className="flex items-center gap-1.5 text-primary">
+                          <User className="h-4 w-4 text-primary" />
                           <span className="text-slate-600 uppercase font-semibold">
                             {post.authorName}
                           </span>
                         </span>
-                        <span className="flex items-center gap-1.5 text-[#1a73e8]">
-                          <MessageSquare className="h-3.5 w-3.5 text-[#1a73e8]" />
+                        <span className="flex items-center gap-1.5 text-primary">
+                          <MessageSquare className="h-4 w-4 text-primary" />
                           <span className="text-slate-600 uppercase font-semibold">
                             0 COMMENTS
                           </span>
@@ -197,7 +170,7 @@ export default function LatestBlogSection({ blogs }: LatestBlogSectionProps) {
                       </div>
 
                       {/* Title */}
-                      <h3 className="font-bold text-xl sm:text-2xl text-[#0f2137] group-hover:text-[#1a73e8] transition-colors leading-snug line-clamp-2">
+                      <h3 className="font-bold text-xl sm:text-2xl text-[#0f2137] group-hover:text-primary transition-colors leading-snug line-clamp-2">
                         <Link href={`/blog/${post.slug || post.id}`}>
                           {post.title}
                         </Link>
@@ -213,7 +186,7 @@ export default function LatestBlogSection({ blogs }: LatestBlogSectionProps) {
                     <div className="pt-2">
                       <Link
                         href={`/blog/${post.slug || post.id}`}
-                        className="inline-flex items-center gap-1.5 text-[#1a73e8] hover:text-[#0f5991] font-bold text-sm tracking-wider uppercase transition-colors"
+                        className="inline-flex items-center gap-1.5 text-primary hover:text-primary/80 font-bold text-base tracking-wider uppercase transition-colors"
                       >
                         <span>READ MORE +</span>
                       </Link>
@@ -226,30 +199,30 @@ export default function LatestBlogSection({ blogs }: LatestBlogSectionProps) {
         </div>
       </div>
 
-      {/* Custom Swiper Pagination Styling */}
+      {/* Styled Swiper Pagination Dots */}
       <style jsx global>{`
         .blog-slider-container .swiper-pagination {
           bottom: 0px !important;
           display: flex;
-          justify-content: center;
           align-items: center;
+          justify-content: center;
           gap: 8px;
         }
         .blog-slider-container .custom-bullet {
-          display: inline-block;
-          width: 16px;
-          height: 6px;
+          width: 28px;
+          height: 4px;
+          border-radius: 2px;
           background: #cbd5e1;
-          border-radius: 9999px;
-          cursor: pointer;
+          display: inline-block;
+          opacity: 1;
           transition: all 0.3s ease;
+          cursor: pointer;
         }
         .blog-slider-container .custom-bullet-active {
-          width: 32px;
-          background: #1a73e8;
+          width: 38px;
+          background: var(--primary) !important;
         }
       `}</style>
     </section>
   );
 }
-

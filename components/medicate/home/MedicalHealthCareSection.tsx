@@ -5,10 +5,10 @@ export default function MedicalHealthCareSection() {
   return (
     <section className="bg-white">
       <div className="grid grid-cols-1 lg:grid-cols-2">
-        {/* Left Side: Solid Blue Info Block */}
-        <div className="bg-[#1673b8] text-white p-10 sm:p-14 lg:p-20 flex flex-col justify-center">
+        {/* Left Side: Dynamic Primary Info Block */}
+        <div className="bg-primary text-primary-foreground p-10 sm:p-14 lg:p-20 flex flex-col justify-center">
           <div className="max-w-xl lg:ml-auto">
-            <span className="inline-block text-blue-200 font-bold text-xs tracking-widest uppercase mb-3">
+            <span className="inline-block text-primary-foreground/80 font-bold text-base tracking-widest uppercase mb-3">
               SPECIAL SERVICES
             </span>
 
@@ -16,7 +16,7 @@ export default function MedicalHealthCareSection() {
               A Great Piece Of Medical Health Care
             </h2>
 
-            <p className="text-blue-100 text-sm leading-relaxed mb-10">
+            <p className="text-primary-foreground/90 text-base sm:text-lg leading-relaxed mb-10">
               Our clinical practice delivers continuous care across diagnostic medicine, targeted therapies, and preventive regimens. Every treatment protocol is formulated to maximize patient recovery with safety and precision.
             </p>
 
@@ -26,7 +26,7 @@ export default function MedicalHealthCareSection() {
                 <span className="block text-4xl sm:text-5xl font-black tracking-tight text-white">
                   85+
                 </span>
-                <span className="text-xs font-semibold text-blue-200 tracking-wider uppercase mt-1 block">
+                <span className="text-base font-semibold text-primary-foreground/85 tracking-wider uppercase mt-1 block">
                   Medical Specialists
                 </span>
               </div>
@@ -35,7 +35,7 @@ export default function MedicalHealthCareSection() {
                 <span className="block text-4xl sm:text-5xl font-black tracking-tight text-white">
                   1205+
                 </span>
-                <span className="text-xs font-semibold text-blue-200 tracking-wider uppercase mt-1 block">
+                <span className="text-base font-semibold text-primary-foreground/85 tracking-wider uppercase mt-1 block">
                   Happy Patients
                 </span>
               </div>
@@ -48,7 +48,7 @@ export default function MedicalHealthCareSection() {
           <img
             src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=1200&q=80"
             alt="Doctor examining clinical charts"
-            className="w-full h-full object-cover object-center"
+            className="w-full h-full object-cover"
           />
         </div>
       </div>

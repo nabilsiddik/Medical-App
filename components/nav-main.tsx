@@ -194,22 +194,22 @@ export function NavMain({ userInfo }: { userInfo?: IUserInfo | null }) {
                     asChild
                     isActive={isActive}
                     className={cn(
-                      "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-xl transition-all duration-150 cursor-pointer",
+                      "flex items-center gap-3 px-3.5 py-2.5 text-base font-medium rounded-xl transition-all duration-150 cursor-pointer",
                       isActive
-                        ? "bg-primary text-primary-foreground shadow-xs font-semibold hover:bg-primary/95 hover:text-primary-foreground"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                        ? "!bg-primary !text-white shadow-xs font-semibold hover:!bg-primary/95 hover:!text-white"
+                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
                     )}
                   >
                     <Link href={item.url}>
                       <Icon
                         className={cn(
-                          "h-4 w-4 shrink-0",
-                          isActive ? "text-primary-foreground" : "text-muted-foreground"
+                          "h-5 w-5 shrink-0",
+                          isActive ? "!text-white" : "text-slate-500"
                         )}
                       />
                       <span>{item.title}</span>
                       {item.badge && (
-                        <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
+                        <span className="ml-auto text-base px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
                           {item.badge}
                         </span>
                       )}

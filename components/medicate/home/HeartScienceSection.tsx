@@ -46,7 +46,7 @@ export default function HeartScienceSection() {
 
           {/* Right Text Content */}
           <ScrollReveal delay={0.15} className="lg:col-span-6 space-y-6">
-            <span className="inline-block text-[#1673b8] font-bold text-sm tracking-widest uppercase">
+            <span className="inline-block text-primary font-bold text-base tracking-widest uppercase">
               MEDICAL SERVICES
             </span>
 
@@ -62,7 +62,7 @@ export default function HeartScienceSection() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               {points.map((pt, i) => (
                 <div key={i} className="flex items-center gap-2.5 text-base font-semibold text-[#0b1c2e]">
-                  <div className="w-5 h-5 rounded-full bg-[#1673b8]/15 text-[#1673b8] flex items-center justify-center shrink-0">
+                  <div className="w-5 h-5 rounded-full bg-primary/15 text-primary flex items-center justify-center shrink-0">
                     <Check className="h-3.5 w-3.5 stroke-[3]" />
                   </div>
                   <span>{pt}</span>
@@ -72,7 +72,7 @@ export default function HeartScienceSection() {
 
             <div className="pt-4">
               <Link href="/services">
-                <Button className="bg-[#1673b8] hover:bg-[#0f5991] text-white font-bold text-sm tracking-wider uppercase h-12 px-8 rounded-[4px] shadow-sm">
+                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base tracking-wider uppercase h-12 px-8 rounded-[4px] shadow-sm">
                   <span>DISCOVER SERVICES</span>
                   <Plus className="h-4 w-4 stroke-[3]" />
                 </Button>

@@ -143,3 +143,168 @@
     line-height: 1.35rem !important;
   }
 }
+
+
+/* ============================================================== */
+/* RICH TEXT & BLOG CONTENT TYPOGRAPHY (Lists, Headings, Quotes, Images) */
+/* ============================================================== */
+.blog-article-content,
+.blog-content,
+.visual-editor-content,
+[data-rich-editor="true"] {
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  color: inherit;
+}
+
+.blog-article-content h1,
+.blog-content h1,
+.visual-editor-content h1,
+[data-rich-editor="true"] h1 {
+  font-size: 2.125rem !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+  margin-top: 1.75rem !important;
+  margin-bottom: 0.875rem !important;
+  color: #0b1c2e;
+}
+
+.blog-article-content h2,
+.blog-content h2,
+.visual-editor-content h2,
+[data-rich-editor="true"] h2 {
+  font-size: 1.625rem !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.75rem !important;
+  color: #0b1c2e;
+}
+
+.blog-article-content h3,
+.blog-content h3,
+.visual-editor-content h3,
+[data-rich-editor="true"] h3 {
+  font-size: 1.375rem !important;
+  font-weight: 700 !important;
+  line-height: 1.4 !important;
+  margin-top: 1.25rem !important;
+  margin-bottom: 0.5rem !important;
+  color: #0b1c2e;
+}
+
+.blog-article-content h4,
+.blog-content h4,
+.visual-editor-content h4,
+[data-rich-editor="true"] h4 {
+  font-size: 1.1875rem !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  margin-top: 1rem !important;
+  margin-bottom: 0.5rem !important;
+  color: #0b1c2e;
+}
+
+.blog-article-content p,
+.blog-content p,
+.visual-editor-content p,
+[data-rich-editor="true"] p {
+  margin-top: 0.75rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.blog-article-content ul,
+.blog-content ul,
+.visual-editor-content ul,
+[data-rich-editor="true"] ul {
+  list-style-type: disc !important;
+  padding-left: 2rem !important;
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.blog-article-content ol,
+.blog-content ol,
+.visual-editor-content ol,
+[data-rich-editor="true"] ol {
+  list-style-type: decimal !important;
+  padding-left: 2rem !important;
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.blog-article-content li,
+.blog-content li,
+.visual-editor-content li,
+[data-rich-editor="true"] li {
+  display: list-item !important;
+  margin-top: 0.35rem !important;
+  margin-bottom: 0.35rem !important;
+  padding-left: 0.25rem !important;
+}
+
+.blog-article-content blockquote,
+.blog-content blockquote,
+.visual-editor-content blockquote,
+[data-rich-editor="true"] blockquote {
+  border-left: 4px solid #1673b8 !important;
+  background-color: #f8fafd !important;
+  padding: 0.875rem 1.25rem !important;
+  margin: 1.5rem 0 !important;
+  border-radius: 0 0.5rem 0.5rem 0 !important;
+  font-style: italic !important;
+  color: #334155 !important;
+}
+
+.blog-article-content a,
+.blog-content a,
+.visual-editor-content a,
+[data-rich-editor="true"] a {
+  color: #1673b8 !important;
+  text-decoration: underline !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+}
+
+.blog-article-content img,
+.blog-content img,
+.visual-editor-content img,
+[data-rich-editor="true"] img {
+  max-width: 100% !important;
+  height: auto !important;
+  border-radius: 0.75rem !important;
+  display: block !important;
+  margin: 1.5rem auto !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.blog-article-content figure,
+.blog-content figure,
+.visual-editor-content figure,
+[data-rich-editor="true"] figure {
+  margin: 1.5rem 0 !important;
+  text-align: center !important;
+  display: block !important;
+}
+
+.blog-article-content figcaption,
+.blog-content figcaption,
+.visual-editor-content figcaption,
+[data-rich-editor="true"] figcaption {
+  font-size: 0.9375rem !important;
+  color: #64748b !important;
+  font-style: italic !important;
+  text-align: center !important;
+  margin-top: 0.5rem !important;
+}
+
+.blog-article-content hr,
+.blog-content hr,
+.visual-editor-content hr,
+[data-rich-editor="true"] hr {
+  margin: 2rem 0 !important;
+  border-color: #e2e8f0 !important;
+}
+
+
+

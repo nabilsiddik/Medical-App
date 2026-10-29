@@ -36,35 +36,67 @@ export function BrandingProvider({
   initialConfig,
   children,
 }: BrandingProviderProps) {
-  const [branding, setBranding] = useState<IBrandingConfig>(
-    initialConfig?.branding || defaultBranding
-  );
+  const [branding, setBranding] = useState<IBrandingConfig>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const local = localStorage.getItem("clinic_branding");
+        if (local) {
+          const parsed = JSON.parse(local);
+          if (parsed?.primaryColor) return { ...defaultBranding, ...parsed };
+        }
+      } catch {}
+    }
+    return initialConfig?.branding || defaultBranding;
+  });
+
   const [siteConfig, setSiteConfig] = useState<IPublicSiteConfig | null>(
     initialConfig || null
   );
 
+  // Sync with server and local storage
   useEffect(() => {
-    if (!initialConfig) {
-      // Client-side fallback fetch
-      fetch("/api/v1/public/site-config")
-        .then((res) => res.json())
-        .then((res) => {
-          if (res.data?.branding) {
-            setBranding(res.data.branding);
-            setSiteConfig(res.data);
-          }
-        })
-        .catch(() => {
-          // Gracefully keep defaultBranding
-        });
-    }
-  }, [initialConfig]);
+    const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000/api/v1";
+
+    fetch(`${serverUrl}/public/site-config`, { cache: "no-store" })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.data?.branding) {
+          setBranding((prev) => ({
+            ...prev,
+            ...res.data.branding,
+          }));
+          setSiteConfig(res.data);
+          try {
+            localStorage.setItem("clinic_branding", JSON.stringify(res.data.branding));
+          } catch {}
+        }
+      })
+      .catch(() => {});
+
+    // Listen to cross-tab storage changes
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "clinic_branding" && e.newValue) {
+        try {
+          const updated = JSON.parse(e.newValue);
+          setBranding((prev) => ({ ...prev, ...updated }));
+        } catch {}
+      }
+    };
+
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
 
   const updateBrandingState = (newBranding: Partial<IBrandingConfig>) => {
-    setBranding((prev) => ({
-      ...prev,
-      ...newBranding,
-    }));
+    setBranding((prev) => {
+      const merged = { ...prev, ...newBranding };
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("clinic_branding", JSON.stringify(merged));
+        } catch {}
+      }
+      return merged;
+    });
   };
 
   const dynamicStyles = generateCssVariables(

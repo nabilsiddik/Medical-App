@@ -149,7 +149,7 @@ export default function HeroSection({
                           },
                         }}
                       >
-                        <span className="inline-block bg-[#1673b8]/15 border border-[#1673b8]/20 text-[#1673b8] font-bold text-xs sm:text-sm tracking-wider uppercase px-4 py-2 rounded-[3px]">
+                        <span className="inline-block bg-primary/15 border border-primary/25 text-primary font-bold text-base tracking-wider uppercase px-4 py-2 rounded-[3px]">
                           {slide.subtitle}
                         </span>
                       </motion.div>
@@ -208,7 +208,7 @@ export default function HeroSection({
                         <Link href={slide.buttonLink}>
                           <button
                             type="button"
-                            className="inline-flex items-center gap-2.5 bg-[#1673b8] hover:bg-[#0f5991] text-white font-bold text-sm sm:text-base uppercase tracking-wider h-13 sm:h-14 px-9 rounded-[4px] shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer active:scale-98 group"
+                            className="inline-flex items-center gap-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base uppercase tracking-wider h-13 sm:h-14 px-9 rounded-[4px] shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer active:scale-98 group"
                           >
                             <span>{slide.buttonText}</span>
                             <Plus className="h-4 w-4 stroke-[3] group-hover:rotate-90 transition-transform duration-200" />
@@ -229,7 +229,7 @@ export default function HeroSection({
         type="button"
         onClick={() => swiperRef.current?.slidePrev()}
         aria-label="Previous Slide"
-        className="absolute left-3 sm:left-6 md:left-8 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-13 sm:h-13 bg-white/70 hover:bg-white text-slate-800 hover:text-[#1673b8] backdrop-blur-md flex items-center justify-center rounded-[3px] border border-slate-200/60 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer active:scale-95 group"
+        className="absolute left-3 sm:left-6 md:left-8 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-13 sm:h-13 bg-white/70 hover:bg-white text-slate-800 hover:text-primary backdrop-blur-md flex items-center justify-center rounded-[3px] border border-slate-200/60 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer active:scale-95 group"
       >
         <ChevronLeft className="h-6 w-6 stroke-[2.2] group-hover:-translate-x-0.5 transition-transform" />
       </button>
@@ -239,7 +239,7 @@ export default function HeroSection({
         type="button"
         onClick={() => swiperRef.current?.slideNext()}
         aria-label="Next Slide"
-        className="absolute right-3 sm:right-6 md:right-8 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-13 sm:h-13 bg-white/70 hover:bg-white text-slate-800 hover:text-[#1673b8] backdrop-blur-md flex items-center justify-center rounded-[3px] border border-slate-200/60 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer active:scale-95 group"
+        className="absolute right-3 sm:right-6 md:right-8 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-13 sm:h-13 bg-white/70 hover:bg-white text-slate-800 hover:text-primary backdrop-blur-md flex items-center justify-center rounded-[3px] border border-slate-200/60 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer active:scale-95 group"
       >
         <ChevronRight className="h-6 w-6 stroke-[2.2] group-hover:translate-x-0.5 transition-transform" />
       </button>
@@ -254,7 +254,7 @@ export default function HeroSection({
             aria-label={`Go to slide ${idx + 1}`}
             className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
               activeIndex === idx
-                ? "w-8 bg-[#1673b8]"
+                ? "w-8 bg-primary"
                 : "w-2.5 bg-slate-400/50 hover:bg-slate-400"
             }`}
           />

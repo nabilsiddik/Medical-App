@@ -1,5 +1,5 @@
 import { serverFetch } from "@/lib/serverFetch";
-import { IBlogPost, IFaq, ITestimonial } from "@/types/doctor.interface";
+import { IBlogPost, IFaq, ITestimonial, IBlogComment } from "@/types/doctor.interface";
 
 export const getBlogs = async (): Promise<IBlogPost[]> => {
   try {
@@ -95,3 +95,58 @@ export const deleteBlogPost = async (id: string) => {
   const res = await serverFetch.delete(`/cms/blogs/${id}`);
   return res.json();
 };
+
+export const uploadMediaFile = async (file: File): Promise<{ url: string; publicId?: string } | null> => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch("/api/upload", {
+    method: "POST",
+    body: formData,
+  });
+
+  const json = await res.json();
+  if (!res.ok || !json?.success) {
+    throw new Error(json?.message || "Failed to upload image to Cloudinary");
+  }
+
+  return json.data || null;
+};
+
+// ---------------------------------------------------------------------------
+// Blog Comments (Facebook-style threaded discussion)
+// ---------------------------------------------------------------------------
+
+export const getBlogComments = async (
+  blogIdentifier: string
+): Promise<IBlogComment[]> => {
+  try {
+    const res = await serverFetch.get(`/cms/blogs/${blogIdentifier}/comments`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.data || [];
+  } catch (error) {
+    console.error("Failed to load blog comments:", error);
+    return [];
+  }
+};
+
+export const createBlogComment = async (
+  blogIdentifier: string,
+  content: string,
+  parentId?: string | null
+) => {
+  const res = await serverFetch.post(`/cms/blogs/${blogIdentifier}/comments`, {
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content, parentId }),
+  });
+  return res.json();
+};
+
+export const deleteBlogComment = async (commentId: string) => {
+  const res = await serverFetch.delete(`/cms/comments/${commentId}`);
+  return res.json();
+};
+

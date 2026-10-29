@@ -145,12 +145,26 @@ export function generateCssVariables(
   const pFg = getWcagContrastForeground(primaryHex);
   const sFg = getWcagContrastForeground(secondaryHex);
 
+  const pRgb = hexToRgb(primaryHex);
+  const sRgb = hexToRgb(secondaryHex);
+
   return `
     :root {
       --primary: ${primaryHex};
       --primary-foreground: ${pFg};
+      --color-primary: ${primaryHex};
+      --color-primary-foreground: ${pFg};
+      --brand-primary: ${primaryHex};
+      --brand-primary-fg: ${pFg};
+      --primary-rgb: ${pRgb.r}, ${pRgb.g}, ${pRgb.b};
+
       --secondary: ${secondaryHex};
       --secondary-foreground: ${sFg};
+      --color-secondary: ${secondaryHex};
+      --color-secondary-foreground: ${sFg};
+      --brand-secondary: ${secondaryHex};
+      --secondary-rgb: ${sRgb.r}, ${sRgb.g}, ${sRgb.b};
+
       --sidebar-primary: ${primaryHex};
       --sidebar-primary-foreground: ${pFg};
 

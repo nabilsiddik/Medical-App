@@ -24,7 +24,7 @@ export default function CaregivingServicesSection() {
   return (
     <section className="py-20 bg-[#f8fafd]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <span className="inline-block text-[#1673b8] font-bold text-sm tracking-widest uppercase mb-2">
+        <span className="inline-block text-primary font-bold text-base tracking-widest uppercase mb-2">
           SERVICES
         </span>
 
@@ -39,9 +39,9 @@ export default function CaregivingServicesSection() {
               <ScrollReveal
                 key={idx}
                 delay={idx * 0.15}
-                className="bg-white p-8 sm:p-10 rounded-sm border border-slate-200/70 shadow-xs hover:shadow-md hover:border-[#1673b8]/40 transition-all text-center flex flex-col items-center justify-between group h-full"
+                className="bg-white p-8 sm:p-10 rounded-sm border border-slate-200/70 shadow-xs hover:shadow-md hover:border-primary/40 transition-all text-center flex flex-col items-center justify-between group h-full"
               >
-                <div className="w-16 h-16 rounded-full bg-[#f1f6fb] group-hover:bg-[#1673b8] text-[#1673b8] group-hover:text-white flex items-center justify-center mb-6 transition-colors duration-300">
+                <div className="w-16 h-16 rounded-full bg-primary/10 group-hover:bg-primary text-primary group-hover:text-primary-foreground flex items-center justify-center mb-6 transition-colors duration-300">
                   <Icon className="h-8 w-8 stroke-[1.8]" />
                 </div>
 
@@ -55,7 +55,7 @@ export default function CaregivingServicesSection() {
 
                 <Link
                   href="/services"
-                  className="inline-flex items-center gap-1.5 text-sm font-bold text-[#1673b8] hover:text-[#0f5991] tracking-wider uppercase transition-colors"
+                  className="inline-flex items-center gap-1.5 text-base font-bold text-primary hover:text-primary/80 tracking-wider uppercase transition-colors"
                 >
                   <span>MORE</span>
                   <Plus className="h-4 w-4 stroke-[3]" />

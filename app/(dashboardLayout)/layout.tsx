@@ -20,7 +20,7 @@ export default async function CommonDashboardLayout({
       <AppSidebar userInfo={userInfo} />
       <SidebarInset className="min-w-0 bg-muted/20">
         <DashboardNavbar />
-        <main className="p-4 sm:p-6 w-full space-y-6">
+        <main className="px-6 py-6 sm:px-8 md:px-10 lg:px-12 xl:px-14 w-full space-y-6 min-h-[calc(100vh-4rem)]">
           {children}
         </main>
         {isPatient && <LiveChatWidget />}

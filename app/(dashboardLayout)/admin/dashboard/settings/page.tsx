@@ -60,15 +60,56 @@ export default function ClinicSettingsPage() {
       ]);
       if (sRes) {
         setSettings(sRes);
-        setClinicName((sRes as any).brandName || sRes.clinicName || "Care Medical Chamber");
-        setDoctorName(sRes.doctorName || "");
-        setDoctorTitle(sRes.doctorTitle || "");
-        setBmdcRegNumber(sRes.bmdcRegNumber || "");
-        setContactPhone(sRes.contactPhone || (sRes as any).phone || "");
-        setEmergencyPhone(sRes.emergencyPhone || "");
-        setPrimaryColor(sRes.primaryColor || "#0284c7");
-        setSecondaryColor(sRes.secondaryColor || "#0f766e");
-        setBrandTagline((sRes as any).brandTagline || sRes.tagline || "");
+        const fetchedClinicName =
+          sRes.clinicName ||
+          (sRes as any).brandName ||
+          (sRes as any).branding?.brandName ||
+          "Care Medical Chamber";
+        const fetchedDoctorName =
+          sRes.doctorName ||
+          (sRes as any).doctor?.name ||
+          "";
+        const fetchedDoctorTitle =
+          sRes.doctorTitle ||
+          (sRes as any).doctor?.title ||
+          "";
+        const fetchedBmdc =
+          sRes.bmdcRegNumber ||
+          (sRes as any).bmdcNumber ||
+          (sRes as any).doctor?.bmdcNumber ||
+          "";
+        const fetchedPhone =
+          sRes.contactPhone ||
+          (sRes as any).phone ||
+          (sRes as any).contact?.phone ||
+          "";
+        const fetchedEmergency =
+          sRes.emergencyPhone ||
+          (sRes as any).contact?.emergencyPhone ||
+          "";
+        const fetchedPrimary =
+          sRes.primaryColor ||
+          (sRes as any).branding?.primaryColor ||
+          "#0284c7";
+        const fetchedSecondary =
+          sRes.secondaryColor ||
+          (sRes as any).branding?.secondaryColor ||
+          "#0f766e";
+        const fetchedTagline =
+          (sRes as any).brandTagline ||
+          (sRes as any).branding?.brandTagline ||
+          sRes.tagline ||
+          "";
+
+        setClinicName(fetchedClinicName);
+        setDoctorName(fetchedDoctorName);
+        setDoctorTitle(fetchedDoctorTitle);
+        setBmdcRegNumber(fetchedBmdc);
+        setContactPhone(fetchedPhone);
+        setEmergencyPhone(fetchedEmergency);
+        setPrimaryColor(fetchedPrimary);
+        setSecondaryColor(fetchedSecondary);
+        setBrandTagline(fetchedTagline);
       }
       setChambers(cRes);
     } catch (err) {
@@ -99,21 +140,26 @@ export default function ClinicSettingsPage() {
     try {
       const res = await updateClinicSettings({
         clinicName,
+        brandName: clinicName,
         doctorName,
         doctorTitle,
         bmdcRegNumber,
+        bmdcNumber: bmdcRegNumber,
         contactPhone,
+        phone: contactPhone,
         emergencyPhone,
       });
 
-      if (res.success) {
-        toast.success("Clinic profile updated successfully!");
+      if (res?.success || res?.id || res?.data) {
+        toast.success("Clinic profile & credentials updated successfully!");
         updateBrandingState({ brandName: clinicName });
+        await fetchSettings();
       } else {
-        toast.error("Failed to update clinic profile");
+        toast.error(res?.message || "Failed to update clinic profile");
       }
-    } catch (err) {
-      toast.error("Error saving profile");
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err?.message || "Error saving profile");
     } finally {
       setSavingProfile(false);
     }
@@ -127,21 +173,24 @@ export default function ClinicSettingsPage() {
         primaryColor,
         secondaryColor,
         brandName: clinicName.trim() || undefined,
+        clinicName: clinicName.trim() || undefined,
         brandTagline: brandTagline.trim() || undefined,
       });
 
-      if (res.success) {
-        toast.success("Branding & color palette updated! CSS variables synchronized.");
+      if (res?.success || res?.id || res?.data) {
+        toast.success("Branding & color palette updated! CSS variables synchronized across the whole website.");
         updateBrandingState({
           primaryColor,
           secondaryColor,
           brandName: clinicName,
           brandTagline,
         });
+        await fetchSettings();
       } else {
-        toast.error(res.message || "Failed to update branding");
+        toast.error(res?.message || "Failed to update branding");
       }
     } catch (err: any) {
+      console.error(err);
       toast.error(err?.message || "Error saving branding");
     } finally {
       setSavingBranding(false);
@@ -155,14 +204,14 @@ export default function ClinicSettingsPage() {
     <div className="space-y-6">
       {/* Top Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
           Clinic Settings & Dynamic Branding
-          <Badge variant="outline" className="text-xs text-primary">
+          <Badge variant="outline" className="text-base text-primary border-primary/40 py-0.5 px-3">
             White-Label Ready
           </Badge>
         </h1>
-        <p className="text-xs sm:text-sm text-muted-foreground">
-          Single-source branding system: change primary/secondary hex colors to instantly retheme the entire web app, emails, and PDFs.
+        <p className="text-base text-muted-foreground mt-1">
+          Single-source branding system: change primary/secondary hex colors to instantly retheme the entire web app, public home page, header, booking engine, emails, and PDFs.
         </p>
       </div>
 
@@ -173,74 +222,78 @@ export default function ClinicSettingsPage() {
           
           {/* Clinic Profile Card */}
           <Card className="rounded-2xl border-border/80 shadow-xs">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-bold flex items-center gap-2">
-                <Building className="h-4 w-4 text-primary" />
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl font-bold flex items-center gap-2">
+                <Building className="h-5 w-5 text-primary" />
                 Clinic & Doctor Credentials
               </CardTitle>
-              <CardDescription className="text-xs">
+              <CardDescription className="text-base">
                 Printed on computerized prescriptions and booking confirmations
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSaveProfile} className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold">Practice / Clinic Name *</Label>
+                <div className="space-y-2">
+                  <Label className="text-base font-bold">Practice / Clinic Name *</Label>
                   <Input
                     required
                     value={clinicName}
                     onChange={(e) => setClinicName(e.target.value)}
-                    className="rounded-xl h-10 text-xs font-semibold"
+                    className="rounded-xl h-12 text-base font-semibold"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">Doctor Full Name *</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-base font-bold">Doctor Full Name *</Label>
                     <Input
                       required
                       value={doctorName}
                       onChange={(e) => setDoctorName(e.target.value)}
-                      className="rounded-xl h-10 text-xs"
+                      className="rounded-xl h-12 text-base"
                     />
                   </div>
 
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">BMDC Registration # *</Label>
+                  <div className="space-y-2">
+                    <Label className="text-base font-bold">BMDC Registration # *</Label>
                     <Input
                       required
                       value={bmdcRegNumber}
                       onChange={(e) => setBmdcRegNumber(e.target.value)}
-                      className="rounded-xl h-10 text-xs font-mono"
+                      className="rounded-xl h-12 text-base font-mono"
+                      placeholder="e.g. A-54321"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold">Doctor Medical Titles / Degrees</Label>
+                <div className="space-y-2">
+                  <Label className="text-base font-bold">Doctor Medical Titles / Degrees</Label>
                   <Input
                     value={doctorTitle}
                     onChange={(e) => setDoctorTitle(e.target.value)}
-                    className="rounded-xl h-10 text-xs"
+                    className="rounded-xl h-12 text-base"
+                    placeholder="e.g. MBBS, FCPS, MD"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">Chamber Inquiry Phone</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-base font-bold">Chamber Inquiry Phone</Label>
                     <Input
                       value={contactPhone}
                       onChange={(e) => setContactPhone(e.target.value)}
-                      className="rounded-xl h-10 text-xs"
+                      className="rounded-xl h-12 text-base"
+                      placeholder="+880 1700-112233"
                     />
                   </div>
 
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">Emergency Hotline</Label>
+                  <div className="space-y-2">
+                    <Label className="text-base font-bold">Emergency Hotline</Label>
                     <Input
                       value={emergencyPhone}
                       onChange={(e) => setEmergencyPhone(e.target.value)}
-                      className="rounded-xl h-10 text-xs font-mono"
+                      className="rounded-xl h-12 text-base font-mono"
+                      placeholder="12345 or +880 1700-000000"
                     />
                   </div>
                 </div>
@@ -248,9 +301,9 @@ export default function ClinicSettingsPage() {
                 <Button
                   type="submit"
                   disabled={savingProfile}
-                  className="rounded-xl font-semibold mt-2"
+                  className="rounded-xl font-bold h-12 px-6 text-base mt-2"
                 >
-                  <Save className="h-4 w-4 mr-1.5" />
+                  <Save className="h-5 w-5 mr-2" />
                   {savingProfile ? "Saving..." : "Save Clinic Profile"}
                 </Button>
               </form>
@@ -265,7 +318,7 @@ export default function ClinicSettingsPage() {
                   <MapPin className="h-4 w-4 text-primary" />
                   Active Chamber Locations ({chambers.length})
                 </CardTitle>
-                <CardDescription className="text-xs">
+                <CardDescription className="text-base">
                   Manage chamber branches, consultation hours, and multiple break times
                 </CardDescription>
               </div>
@@ -311,12 +364,12 @@ export default function ClinicSettingsPage() {
         {/* RIGHT COLUMN: Single-Source Branding Customizer */}
         <div className="lg:col-span-5 space-y-6">
           <Card className="rounded-2xl border-border/80 shadow-xs">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-bold flex items-center gap-2">
-                <Palette className="h-4 w-4 text-primary" />
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl font-bold flex items-center gap-2">
+                <Palette className="h-5 w-5 text-primary" />
                 Live Branding Customizer
               </CardTitle>
-              <CardDescription className="text-xs">
+              <CardDescription className="text-base">
                 Real-time color scale math & contrast foreground engine
               </CardDescription>
             </CardHeader>
@@ -324,10 +377,10 @@ export default function ClinicSettingsPage() {
             <CardContent>
               <form onSubmit={handleSaveBranding} className="space-y-4">
                 {/* Primary Color Picker */}
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label className="text-xs font-semibold">Primary Brand Color</Label>
-                    <span className="font-mono text-xs font-bold text-foreground">
+                    <Label className="text-base font-bold">Primary Brand Color</Label>
+                    <span className="font-mono text-base font-bold text-foreground">
                       {primaryColor}
                     </span>
                   </div>
@@ -336,22 +389,22 @@ export default function ClinicSettingsPage() {
                       type="color"
                       value={primaryColor}
                       onChange={(e) => handlePrimaryChange(e.target.value)}
-                      className="h-10 w-14 rounded-lg cursor-pointer border border-border bg-transparent p-0.5"
+                      className="h-12 w-16 rounded-xl cursor-pointer border border-border bg-transparent p-1"
                     />
                     <Input
                       value={primaryColor}
                       onChange={(e) => handlePrimaryChange(e.target.value)}
-                      className="rounded-xl h-10 font-mono text-xs uppercase"
+                      className="rounded-xl h-12 font-mono text-base uppercase"
                     />
                   </div>
                 </div>
 
                 {/* Primary Scale Swatches */}
-                <div className="space-y-1 pt-1">
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+                <div className="space-y-1.5 pt-1">
+                  <span className="text-base uppercase tracking-wider text-muted-foreground font-semibold">
                     Generated 50-950 Primary Shade Scale
                   </span>
-                  <div className="flex rounded-lg overflow-hidden h-7 border border-border">
+                  <div className="flex rounded-xl overflow-hidden h-9 border border-border">
                     {Object.entries(primaryScale).map(([shade, hex]) => (
                       <div
                         key={shade}
@@ -364,10 +417,10 @@ export default function ClinicSettingsPage() {
                 </div>
 
                 {/* Secondary Color Picker */}
-                <div className="space-y-1.5 pt-2">
+                <div className="space-y-2 pt-2">
                   <div className="flex items-center justify-between">
-                    <Label className="text-xs font-semibold">Secondary Accent Color</Label>
-                    <span className="font-mono text-xs font-bold text-foreground">
+                    <Label className="text-base font-bold">Secondary Accent Color</Label>
+                    <span className="font-mono text-base font-bold text-foreground">
                       {secondaryColor}
                     </span>
                   </div>
@@ -376,22 +429,22 @@ export default function ClinicSettingsPage() {
                       type="color"
                       value={secondaryColor}
                       onChange={(e) => handleSecondaryChange(e.target.value)}
-                      className="h-10 w-14 rounded-lg cursor-pointer border border-border bg-transparent p-0.5"
+                      className="h-12 w-16 rounded-xl cursor-pointer border border-border bg-transparent p-1"
                     />
                     <Input
                       value={secondaryColor}
                       onChange={(e) => handleSecondaryChange(e.target.value)}
-                      className="rounded-xl h-10 font-mono text-xs uppercase"
+                      className="rounded-xl h-12 font-mono text-base uppercase"
                     />
                   </div>
                 </div>
 
                 {/* Secondary Scale Swatches */}
-                <div className="space-y-1 pt-1">
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+                <div className="space-y-1.5 pt-1">
+                  <span className="text-base uppercase tracking-wider text-muted-foreground font-semibold">
                     Generated 50-950 Secondary Shade Scale
                   </span>
-                  <div className="flex rounded-lg overflow-hidden h-7 border border-border">
+                  <div className="flex rounded-xl overflow-hidden h-9 border border-border">
                     {Object.entries(secondaryScale).map(([shade, hex]) => (
                       <div
                         key={shade}
@@ -404,28 +457,29 @@ export default function ClinicSettingsPage() {
                 </div>
 
                 {/* Brand Tagline */}
-                <div className="space-y-1.5 pt-2">
-                  <Label className="text-xs font-semibold">Brand Tagline</Label>
+                <div className="space-y-2 pt-2">
+                  <Label className="text-base font-bold">Brand Tagline</Label>
                   <Input
                     value={brandTagline}
                     onChange={(e) => setBrandTagline(e.target.value)}
-                    className="rounded-xl h-10 text-xs"
+                    className="rounded-xl h-12 text-base"
+                    placeholder="e.g. Trusted Clinical Care & Preventive Health"
                   />
                 </div>
 
                 {/* Live Button & Badge Preview Box */}
                 <div className="p-4 rounded-xl bg-muted/40 border border-border/80 space-y-3">
-                  <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block">
+                  <span className="text-base font-bold text-muted-foreground uppercase tracking-wider block">
                     Live UI Component Preview
                   </span>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Button size="sm" variant="default" className="rounded-xl text-xs font-semibold">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Button size="sm" variant="default" className="rounded-xl text-base font-bold h-10 px-4">
                       Primary Button
                     </Button>
-                    <Button size="sm" variant="outline" className="rounded-xl text-xs font-semibold">
+                    <Button size="sm" variant="outline" className="rounded-xl text-base font-bold h-10 px-4">
                       Outline Button
                     </Button>
-                    <Badge variant="default" className="text-[10px]">
+                    <Badge variant="default" className="text-base py-1 px-3">
                       Active Badge
                     </Badge>
                   </div>
@@ -434,9 +488,9 @@ export default function ClinicSettingsPage() {
                 <Button
                   type="submit"
                   disabled={savingBranding}
-                  className="w-full rounded-xl font-bold shadow-md shadow-primary/25"
+                  className="w-full rounded-xl font-bold h-12 text-base shadow-md shadow-primary/25"
                 >
-                  <Save className="h-4 w-4 mr-1.5" />
+                  <Save className="h-5 w-5 mr-2" />
                   {savingBranding ? "Saving Palette..." : "Apply & Persist Branding"}
                 </Button>
               </form>

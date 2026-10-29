@@ -11,7 +11,7 @@ export default function ProtectLifeSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Left: Text & Progress Bars */}
           <div className="lg:col-span-6 space-y-6">
-            <span className="inline-block text-[#1673b8] font-bold text-xs tracking-widest uppercase">
+            <span className="inline-block text-primary font-bold text-base tracking-widest uppercase">
               FEATURE
             </span>
 
@@ -19,21 +19,21 @@ export default function ProtectLifeSection() {
               We Protect You In Any Sphere Of Life
             </h2>
 
-            <p className="text-sm text-slate-600 leading-relaxed">
+            <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
               Our clinical protocol is built on preventive medicine and personalized therapeutic pathways. We combine evidence-based clinical assessments with patient-centered communication to optimize outcomes across all ages.
             </p>
 
             {/* Progress / Skill Bars */}
             <div className="space-y-5 pt-3">
               {skills.map((s, idx) => (
-                <div key={idx} className="space-y-1.5">
-                  <div className="flex justify-between text-xs font-bold text-[#0b1c2e]">
+                <div key={idx} className="space-y-2">
+                  <div className="flex justify-between text-base font-bold text-[#0b1c2e]">
                     <span>{s.label}</span>
-                    <span className="text-[#1673b8]">{s.percent}%</span>
+                    <span className="text-primary">{s.percent}%</span>
                   </div>
-                  <div className="h-2 w-full bg-[#eaedf2] rounded-full overflow-hidden">
+                  <div className="h-2.5 w-full bg-[#eaedf2] rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-[#1673b8] rounded-full transition-all duration-1000"
+                      className="h-full bg-primary rounded-full transition-all duration-1000"
                       style={{ width: `${s.percent}%` }}
                     />
                   </div>
