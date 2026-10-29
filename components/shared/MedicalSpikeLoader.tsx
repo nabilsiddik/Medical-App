@@ -90,24 +90,6 @@ export default function MedicalSpikeLoader({
         </h3>
         {subText && <p className="text-base text-muted-foreground">{subText}</p>}
       </div>
-
-      {/* Keyframe animation injected inline */}
-      <style jsx>{`
-        @keyframes ecgTrace {
-          0% {
-            stroke-dasharray: 60 280;
-            stroke-dashoffset: 340;
-          }
-          100% {
-            stroke-dasharray: 60 280;
-            stroke-dashoffset: -340;
-          }
-        }
-        .animate-ecg-trace {
-          stroke-dasharray: 80 260;
-          animation: ecgTrace 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }
-      `}</style>
     </div>
   );
 

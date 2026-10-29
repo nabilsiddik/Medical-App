@@ -1,18 +1,62 @@
 import { serverFetch } from "@/lib/serverFetch";
 import { IAppointment, IQueueItem, AppointmentStatus } from "@/types/doctor.interface";
 
+export interface ISlotItem {
+  time: string;
+  startTime: string;
+  endTime?: string;
+  isAvailable: boolean;
+  isBooked: boolean;
+  isBreak: boolean;
+  breakTitle?: string | null;
+  isPast?: boolean;
+}
+
+export interface IAvailabilityResponse {
+  isAvailable: boolean;
+  isClosed?: boolean;
+  reason?: string;
+  bookingMode: "SLOT_BASED" | "SERIAL_TOKEN" | string;
+  chamber?: {
+    id: string;
+    name: string;
+    address: string;
+    city: string;
+  };
+  date: string;
+  totalSlots: number;
+  availableSlotsCount: number;
+  bookedSlotsCount?: number;
+  breakSlotsCount?: number;
+  slots: ISlotItem[];
+}
+
+export const getAvailabilityDetails = async (
+  chamberId: string,
+  date: string,
+  serviceId?: string
+): Promise<IAvailabilityResponse | null> => {
+  try {
+    const params = new URLSearchParams({ chamberId, date });
+    if (serviceId) params.append("serviceId", serviceId);
+    const res = await serverFetch.get(`/appointment/availability?${params.toString()}`);
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data || null;
+  } catch (error) {
+    console.error("Failed to load availability details:", error);
+    return null;
+  }
+};
+
 export const getAvailableSlots = async (
   chamberId: string,
   date: string,
   serviceId?: string
 ) => {
   try {
-    const params = new URLSearchParams({ chamberId, date });
-    if (serviceId) params.append("serviceId", serviceId);
-    const res = await serverFetch.get(`/appointment/availability?${params.toString()}`);
-    if (!res.ok) return [];
-    const json = await res.json();
-    return json.data?.slots || json.data || [];
+    const data = await getAvailabilityDetails(chamberId, date, serviceId);
+    return data?.slots || [];
   } catch (error) {
     console.error("Failed to load slots:", error);
     return [];

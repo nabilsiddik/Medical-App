@@ -3,7 +3,12 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { getChamberLocations, getServices } from "@/services/doctor/clinicServices";
-import { getAvailableSlots, bookAppointment } from "@/services/doctor/appointmentServices";
+import {
+  getAvailabilityDetails,
+  bookAppointment,
+  ISlotItem,
+  IAvailabilityResponse,
+} from "@/services/doctor/appointmentServices";
 import { IChamberLocation, IService } from "@/types/doctor.interface";
 import { Button } from "@/components/shared/buttons/Button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -24,8 +29,13 @@ import {
   FileText,
   AlertCircle,
   Building,
+  Coffee,
+  XCircle,
+  CalendarX2,
+  Printer,
   Sparkles,
 } from "lucide-react";
+import MedicalSpikeLoader from "@/components/shared/MedicalSpikeLoader";
 
 export default function BookingWizardPage() {
   const searchParams = useSearchParams();
@@ -47,13 +57,27 @@ export default function BookingWizardPage() {
   const [patientGender, setPatientGender] = useState<"MALE" | "FEMALE" | "OTHER">("MALE");
   const [chiefComplaint, setChiefComplaint] = useState<string>("");
 
-  // Slots State
-  const [slots, setSlots] = useState<{ startTime: string; endTime: string; isBooked: boolean; isAvailable?: boolean }[]>([]);
+  // Slots & Availability State
+  const [slots, setSlots] = useState<ISlotItem[]>([]);
+  const [availabilityInfo, setAvailabilityInfo] = useState<IAvailabilityResponse | null>(null);
   const [loadingSlots, setLoadingSlots] = useState(false);
 
   // Booking Result State
   const [submitting, setSubmitting] = useState(false);
   const [bookingResult, setBookingResult] = useState<any>(null);
+
+  // Helper to convert 24h format (e.g. "17:00") into friendly 12h format ("05:00 PM")
+  const formatSlotDisplay = (time24?: string) => {
+    if (!time24) return "";
+    const [hoursStr, minutesStr] = time24.split(":");
+    let hours = parseInt(hoursStr, 10);
+    if (isNaN(hours)) return time24;
+    const minutes = minutesStr || "00";
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    return `${hours.toString().padStart(2, "0")}:${minutes} ${ampm}`;
+  };
 
   // Load chambers and services on mount
   useEffect(() => {
@@ -77,16 +101,24 @@ export default function BookingWizardPage() {
     setSelectedDate(tomorrow.toISOString().split("T")[0]);
   }, []);
 
-  // Fetch slots whenever chamber or date changes
+  // Fetch slots and chamber availability whenever chamber, date or service changes
   useEffect(() => {
     if (selectedChamberId && selectedDate) {
       setLoadingSlots(true);
-      getAvailableSlots(selectedChamberId, selectedDate, selectedServiceId)
+      getAvailabilityDetails(selectedChamberId, selectedDate, selectedServiceId)
         .then((data) => {
-          setSlots(data);
-          if (data.length > 0) {
-            const firstOpen = data.find((s: any) => !s.isBooked && (s.isAvailable ?? true));
-            if (firstOpen) setSelectedSlot(firstOpen.startTime);
+          setAvailabilityInfo(data);
+          const slotList = data?.slots || [];
+          setSlots(slotList);
+
+          // Select first available (not booked and not in break) slot
+          const firstOpen = slotList.find(
+            (s) => s.isAvailable && !s.isBooked && !s.isBreak
+          );
+          if (firstOpen) {
+            setSelectedSlot(firstOpen.startTime || firstOpen.time);
+          } else {
+            setSelectedSlot("");
           }
         })
         .finally(() => setLoadingSlots(false));
@@ -96,7 +128,7 @@ export default function BookingWizardPage() {
   const handleBook = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!patientName.trim()) {
-      toast.error("Please enter patient name");
+      toast.error("Please enter patient full name");
       return;
     }
     if (!patientPhone.trim() || patientPhone.length < 10) {
@@ -104,7 +136,7 @@ export default function BookingWizardPage() {
       return;
     }
     if (!selectedSlot) {
-      toast.error("Please select an available time slot");
+      toast.error("Please select an available consultation time slot");
       return;
     }
 
@@ -128,7 +160,7 @@ export default function BookingWizardPage() {
         setStep(4);
         toast.success("Appointment booked successfully!");
       } else {
-        toast.error(res.message || "Failed to book appointment. Please try another slot.");
+        toast.error(res.message || "Failed to book appointment. That slot may have just been taken.");
       }
     } catch {
       toast.error("An error occurred during booking. Please try again.");
@@ -140,11 +172,15 @@ export default function BookingWizardPage() {
   const currentChamber = chambers.find((c) => c.id === selectedChamberId);
   const currentService = services.find((s) => s.id === selectedServiceId);
 
+  const availableSlotsCount = slots.filter((s) => s.isAvailable && !s.isBooked && !s.isBreak).length;
+  const bookedSlotsCount = slots.filter((s) => s.isBooked).length;
+  const breakSlotsCount = slots.filter((s) => s.isBreak).length;
+
   return (
     <div className="min-h-screen py-10 md:py-16 bg-muted/20">
-      <div className="container mx-auto px-4 sm:px-6 max-w-3xl">
+      <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
         {/* Step Indicator */}
-        <div className="mb-8">
+        <div className="mb-10">
           <div className="flex items-center justify-between">
             {[
               { num: 1, label: "Chamber & Service" },
@@ -154,7 +190,7 @@ export default function BookingWizardPage() {
             ].map((s) => (
               <div key={s.num} className="flex flex-col items-center">
                 <div
-                  className={`h-9 w-9 rounded-full flex items-center justify-center font-bold text-xs transition-colors ${
+                  className={`h-11 w-11 rounded-full flex items-center justify-center font-bold text-base transition-colors ${
                     step >= s.num
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "bg-muted text-muted-foreground border border-border"
@@ -162,16 +198,16 @@ export default function BookingWizardPage() {
                 >
                   {s.num}
                 </div>
-                <span className="text-[11px] font-medium text-muted-foreground mt-1.5 hidden sm:block">
+                <span className="text-base font-semibold text-muted-foreground mt-2 hidden sm:block">
                   {s.label}
                 </span>
               </div>
             ))}
           </div>
-          <div className="relative mt-2">
-            <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-border -translate-y-1/2 -z-10" />
+          <div className="relative mt-3">
+            <div className="absolute top-1/2 left-0 right-0 h-1 bg-border -translate-y-1/2 -z-10 rounded-full" />
             <div
-              className="h-0.5 bg-primary transition-all duration-300"
+              className="h-1 bg-primary transition-all duration-300 rounded-full"
               style={{ width: `${((step - 1) / 3) * 100}%` }}
             />
           </div>
@@ -180,16 +216,18 @@ export default function BookingWizardPage() {
         {/* STEP 1: Chamber & Service */}
         {step === 1 && (
           <Card className="rounded-2xl border-border/80 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-xl">Select Chamber Location & Appointment Type</CardTitle>
-              <CardDescription>
+            <CardHeader className="p-6 pb-2">
+              <CardTitle className="text-2xl font-bold text-foreground">
+                Select Chamber Location & Appointment Type
+              </CardTitle>
+              <CardDescription className="text-base text-muted-foreground mt-1">
                 Choose the clinical chamber location and the type of consultation you require.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="p-6 space-y-6">
               {/* Chamber selection */}
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+              <div className="space-y-3">
+                <Label className="text-base uppercase tracking-wider text-muted-foreground font-bold">
                   Chamber Location
                 </Label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -199,18 +237,18 @@ export default function BookingWizardPage() {
                       <div
                         key={chamber.id}
                         onClick={() => setSelectedChamberId(chamber.id)}
-                        className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                        className={`p-5 rounded-2xl border-2 cursor-pointer transition-all ${
                           isSelected
                             ? "border-primary bg-primary/5 shadow-xs"
                             : "border-border hover:border-primary/40 bg-card"
                         }`}
                       >
                         <div className="flex items-start justify-between">
-                          <div className="font-bold text-foreground">{chamber.name}</div>
-                          {isSelected && <CheckCircle2 className="h-4 w-4 text-primary" />}
+                          <div className="font-bold text-lg text-foreground">{chamber.name}</div>
+                          {isSelected && <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />}
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                          <MapPin className="h-3 w-3 text-primary shrink-0" />
+                        <p className="text-base text-muted-foreground mt-1.5 flex items-center gap-1.5">
+                          <MapPin className="h-4 w-4 text-primary shrink-0" />
                           {chamber.address}, {chamber.city}
                         </p>
                       </div>
@@ -221,10 +259,10 @@ export default function BookingWizardPage() {
 
               {/* Service Selection */}
               <div className="space-y-3 pt-2">
-                <Label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-                  Appointment Type & Pricing
+                <Label className="text-base uppercase tracking-wider text-muted-foreground font-bold">
+                  Consultation Service & Pricing
                 </Label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {services.length > 0 ? (
                     services.map((s) => {
                       const isSelected = selectedServiceId === s.id;
@@ -233,26 +271,26 @@ export default function BookingWizardPage() {
                         <div
                           key={s.id}
                           onClick={() => setSelectedServiceId(s.id)}
-                          className={`p-3.5 rounded-xl border text-xs cursor-pointer flex items-center justify-between transition-colors ${
+                          className={`p-4 rounded-2xl border-2 cursor-pointer flex items-center justify-between transition-colors ${
                             isSelected
                               ? "border-primary bg-primary/5 font-semibold text-primary"
                               : "border-border bg-card hover:bg-muted/50"
                           }`}
                         >
                           <div>
-                            <div className="font-medium text-foreground">{s.name}</div>
-                            <div className="text-[10px] text-muted-foreground">
-                              {s.durationMinutes} minutes
+                            <div className="font-bold text-base text-foreground">{s.name}</div>
+                            <div className="text-base text-muted-foreground">
+                              {s.durationMinutes} minutes duration
                             </div>
                           </div>
-                          <div className="font-bold text-primary font-mono text-sm">
+                          <div className="font-bold text-primary font-mono text-lg">
                             {price === 0 ? "FREE (৳0)" : `৳ ${price.toLocaleString()}`}
                           </div>
                         </div>
                       );
                     })
                   ) : (
-                    <div className="col-span-2 text-xs text-muted-foreground py-2">
+                    <div className="col-span-2 text-base text-muted-foreground py-2">
                       Loading clinic services...
                     </div>
                   )}
@@ -263,9 +301,9 @@ export default function BookingWizardPage() {
                 <Button
                   onClick={() => setStep(2)}
                   disabled={!selectedChamberId}
-                  className="rounded-xl px-6"
+                  className="rounded-xl px-8 h-12 text-base font-bold bg-primary text-primary-foreground hover:bg-primary/90"
                 >
-                  Continue to Schedule <ArrowRight className="h-4 w-4 ml-1.5" />
+                  Continue to Schedule <ArrowRight className="h-5 w-5 ml-2" />
                 </Button>
               </div>
             </CardContent>
@@ -275,16 +313,19 @@ export default function BookingWizardPage() {
         {/* STEP 2: Date & Available Time Slot */}
         {step === 2 && (
           <Card className="rounded-2xl border-border/80 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-xl">Pick Date & Time Slot</CardTitle>
-              <CardDescription>
-                {currentChamber?.name} • Select a date and consultation slot. Doctor breaks and booked slots are automatically excluded.
+            <CardHeader className="p-6 pb-2">
+              <CardTitle className="text-2xl font-bold text-foreground">
+                Pick Date & Time Slot
+              </CardTitle>
+              <CardDescription className="text-base text-muted-foreground mt-1">
+                <span className="font-semibold text-foreground">{currentChamber?.name}</span> • Select your preferred consultation date and available time slot.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="p-6 space-y-6">
               {/* Date Input */}
               <div className="space-y-2">
-                <Label htmlFor="appDate" className="text-xs font-semibold">
+                <Label htmlFor="appDate" className="text-base font-bold text-foreground flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-primary" />
                   Consultation Date
                 </Label>
                 <Input
@@ -293,69 +334,152 @@ export default function BookingWizardPage() {
                   value={selectedDate}
                   min={new Date().toISOString().split("T")[0]}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="rounded-xl h-11"
+                  className="rounded-xl h-12 text-base font-semibold max-w-sm"
                 />
               </div>
 
-              {/* Time Slots Grid */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-xs font-semibold">Available Chamber Slots</Label>
-                  <span className="text-xs text-muted-foreground">
-                    {slots.filter((s) => !s.isBooked && (s.isAvailable ?? true)).length} slots open
-                  </span>
+              {/* Time Slots Area */}
+              <div className="space-y-4 pt-2">
+                {/* Status Legend */}
+                <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-muted/40 border border-border/70">
+                  <div className="flex items-center gap-2 font-bold text-base text-foreground">
+                    <Clock className="h-5 w-5 text-primary" />
+                    <span>Chamber Schedule Slots</span>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-4 text-base font-medium">
+                    <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
+                      <span className="h-3 w-3 rounded-full bg-emerald-500" />
+                      Available ({availableSlotsCount})
+                    </span>
+                    <span className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400">
+                      <span className="h-3 w-3 rounded-full bg-rose-500" />
+                      Booked ({bookedSlotsCount})
+                    </span>
+                    {breakSlotsCount > 0 && (
+                      <span className="flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
+                        <span className="h-3 w-3 rounded-full bg-amber-500" />
+                        Break ({breakSlotsCount})
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {loadingSlots ? (
-                  <div className="py-8 text-center text-xs text-muted-foreground animate-pulse">
-                    Loading live chamber slots...
+                  <div className="py-12 flex justify-center">
+                    <MedicalSpikeLoader
+                      text="Checking Chamber Slots..."
+                      subText="Evaluating doctor hours, breaks, and active bookings"
+                    />
                   </div>
-                ) : slots.length > 0 ? (
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 max-h-60 overflow-y-auto p-1">
+                ) : availabilityInfo?.isClosed || slots.length === 0 ? (
+                  <div className="p-8 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-200 dark:border-amber-800 text-center space-y-3">
+                    <div className="h-12 w-12 rounded-full bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-300 mx-auto flex items-center justify-center">
+                      <CalendarX2 className="h-6 w-6" />
+                    </div>
+                    <h4 className="text-xl font-bold text-amber-900 dark:text-amber-200">
+                      Doctor Chamber Closed on this Date
+                    </h4>
+                    <p className="text-base text-amber-800 dark:text-amber-300 max-w-md mx-auto">
+                      {availabilityInfo?.reason ||
+                        "No consultation schedule found for this day of the week at this chamber. The doctor may be off or visiting another clinic. Please select another date on the calendar."}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pt-1">
                     {slots.map((slot) => {
-                      const isAvailable = !slot.isBooked && (slot.isAvailable ?? true);
-                      const isSelected = selectedSlot === slot.startTime;
+                      const slotKey = slot.startTime || slot.time;
+                      const isSelected = selectedSlot === slotKey;
+                      const isAvailable = slot.isAvailable && !slot.isBooked && !slot.isBreak;
 
+                      // 1. Doctor Break Slot
+                      if (slot.isBreak) {
+                        return (
+                          <div
+                            key={slotKey}
+                            className="p-3.5 rounded-xl border border-amber-200 bg-amber-50/80 text-amber-900 flex flex-col items-center justify-center text-center cursor-not-allowed opacity-85 select-none shadow-2xs"
+                            title={`Doctor Break: ${slot.breakTitle || "Break Time"}`}
+                          >
+                            <span className="text-base font-mono font-semibold">
+                              {formatSlotDisplay(slotKey)}
+                            </span>
+                            <span className="text-xs font-bold text-amber-700 flex items-center gap-1 mt-1">
+                              <Coffee className="h-3.5 w-3.5" />
+                              {slot.breakTitle || "Break"}
+                            </span>
+                          </div>
+                        );
+                      }
+
+                      // 2. Already Booked Slot (Disabled so double booking is impossible)
+                      if (slot.isBooked) {
+                        return (
+                          <div
+                            key={slotKey}
+                            className="p-3.5 rounded-xl border border-rose-200 bg-rose-50/70 text-slate-500 flex flex-col items-center justify-center text-center cursor-not-allowed opacity-80 select-none shadow-2xs"
+                            title="This slot has already been reserved by another patient"
+                          >
+                            <span className="text-base font-mono font-medium line-through text-slate-500">
+                              {formatSlotDisplay(slotKey)}
+                            </span>
+                            <span className="text-xs font-bold text-rose-500 flex items-center gap-1 mt-1">
+                              <XCircle className="h-3.5 w-3.5" />
+                              Booked
+                            </span>
+                          </div>
+                        );
+                      }
+
+                      // 3. Open & Available Slot
                       return (
                         <button
-                          key={slot.startTime}
+                          key={slotKey}
                           type="button"
-                          disabled={!isAvailable}
-                          onClick={() => setSelectedSlot(slot.startTime)}
-                          className={`py-2 px-3 rounded-lg text-xs font-mono font-medium border text-center transition-all ${
-                            !isAvailable
-                              ? "bg-muted text-muted-foreground/50 border-border cursor-not-allowed line-through"
-                              : isSelected
-                              ? "bg-primary text-primary-foreground border-primary shadow-xs font-bold"
-                              : "bg-card text-foreground border-border hover:border-primary/50"
+                          onClick={() => setSelectedSlot(slotKey)}
+                          className={`p-3.5 rounded-xl border-2 flex flex-col items-center justify-center text-center transition-all cursor-pointer ${
+                            isSelected
+                              ? "border-primary bg-primary text-white shadow-md font-bold scale-[1.02]"
+                              : "border-slate-200 bg-white hover:border-primary hover:bg-primary/5 text-slate-800 shadow-xs font-medium"
                           }`}
                         >
-                          {slot.startTime}
+                          <span className="text-base font-mono font-bold">
+                            {formatSlotDisplay(slotKey)}
+                          </span>
+                          <span
+                            className={`text-xs font-semibold flex items-center gap-1 mt-1 ${
+                              isSelected ? "text-white" : "text-emerald-600"
+                            }`}
+                          >
+                            {isSelected ? (
+                              <>
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                                Selected
+                              </>
+                            ) : (
+                              "Available"
+                            )}
+                          </span>
                         </button>
                       );
                     })}
                   </div>
-                ) : (
-                  <div className="p-6 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-400">
-                    No consultation schedule found for this date. The doctor may be off or at another chamber on this day. Please try another day.
-                  </div>
                 )}
               </div>
 
-              <div className="flex items-center justify-between pt-4 border-t border-border/50">
+              <div className="flex items-center justify-between pt-6 border-t border-border/50">
                 <Button
                   variant="outline"
                   onClick={() => setStep(1)}
-                  className="rounded-xl"
+                  className="rounded-xl h-11 px-5 text-base font-semibold"
                 >
-                  <ArrowLeft className="h-4 w-4 mr-1.5" /> Back
+                  <ArrowLeft className="h-5 w-5 mr-1.5" /> Back
                 </Button>
                 <Button
                   onClick={() => setStep(3)}
                   disabled={!selectedSlot}
-                  className="rounded-xl px-6"
+                  className="rounded-xl h-11 px-8 text-base font-bold bg-primary text-primary-foreground hover:bg-primary/90"
                 >
-                  Enter Patient Details <ArrowRight className="h-4 w-4 ml-1.5" />
+                  Enter Patient Details <ArrowRight className="h-5 w-5 ml-1.5" />
                 </Button>
               </div>
             </CardContent>
@@ -365,16 +489,18 @@ export default function BookingWizardPage() {
         {/* STEP 3: Patient Information Form */}
         {step === 3 && (
           <Card className="rounded-2xl border-border/80 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-xl">Patient Information</CardTitle>
-              <CardDescription>
-                Provide the patient details for computerized registration and SMS token generation.
+            <CardHeader className="p-6 pb-2">
+              <CardTitle className="text-2xl font-bold text-foreground">
+                Patient Information
+              </CardTitle>
+              <CardDescription className="text-base text-muted-foreground mt-1">
+                Provide patient credentials for appointment confirmation and computerized queue registration.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleBook} className="space-y-4">
+            <CardContent className="p-6">
+              <form onSubmit={handleBook} className="space-y-5">
                 <div className="space-y-1.5">
-                  <Label htmlFor="pName" className="text-xs font-semibold">
+                  <Label htmlFor="pName" className="text-base font-bold text-foreground">
                     Full Patient Name *
                   </Label>
                   <Input
@@ -383,46 +509,46 @@ export default function BookingWizardPage() {
                     value={patientName}
                     onChange={(e) => setPatientName(e.target.value)}
                     required
-                    className="rounded-xl h-11"
+                    className="rounded-xl h-12 text-base font-medium"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="pPhone" className="text-xs font-semibold">
+                    <Label htmlFor="pPhone" className="text-base font-bold text-foreground">
                       Mobile / WhatsApp Phone *
                     </Label>
                     <Input
                       id="pPhone"
-                      placeholder="e.g. 01811223344"
+                      placeholder="e.g. 01700112233"
                       value={patientPhone}
                       onChange={(e) => setPatientPhone(e.target.value)}
                       required
-                      className="rounded-xl h-11"
+                      className="rounded-xl h-12 text-base font-mono font-medium"
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <Label htmlFor="pAge" className="text-xs font-semibold">
+                      <Label htmlFor="pAge" className="text-base font-bold text-foreground">
                         Age (Years)
                       </Label>
                       <Input
                         id="pAge"
                         type="number"
-                        placeholder="e.g. 42"
+                        placeholder="e.g. 35"
                         value={patientAge}
                         onChange={(e) => setPatientAge(e.target.value)}
-                        className="rounded-xl h-11"
+                        className="rounded-xl h-12 text-base font-mono"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold">Gender</Label>
+                      <Label className="text-base font-bold text-foreground">Gender</Label>
                       <select
                         value={patientGender}
                         onChange={(e) => setPatientGender(e.target.value as any)}
-                        className="w-full h-11 px-3 rounded-xl border border-input bg-card text-xs font-medium focus:ring-2 focus:ring-primary focus:outline-none"
+                        className="w-full h-12 px-3 rounded-xl border border-input bg-card text-base font-medium focus:ring-2 focus:ring-primary focus:outline-none"
                       >
                         <option value="MALE">Male</option>
                         <option value="FEMALE">Female</option>
@@ -433,47 +559,50 @@ export default function BookingWizardPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="pComplaints" className="text-xs font-semibold">
-                    Chief Complaint / Primary Symptoms
+                  <Label htmlFor="pComplaints" className="text-base font-bold text-foreground">
+                    Chief Complaint / Primary Symptoms (Optional)
                   </Label>
                   <Input
                     id="pComplaints"
-                    placeholder="e.g. Fever for 3 days, body ache, dry cough"
+                    placeholder="e.g. High blood pressure follow-up, chest discomfort"
                     value={chiefComplaint}
                     onChange={(e) => setChiefComplaint(e.target.value)}
-                    className="rounded-xl h-11"
+                    className="rounded-xl h-12 text-base"
                   />
                 </div>
 
-                {/* Summary Pill */}
-                <div className="p-3.5 rounded-xl bg-primary/5 border border-primary/20 text-xs text-foreground space-y-1">
-                  <div className="font-semibold text-primary">Booking Summary:</div>
-                  <div className="text-muted-foreground">
-                    {currentChamber?.name} • {selectedDate} at {selectedSlot}
+                {/* Booking Summary Pill */}
+                <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20 text-base text-foreground space-y-1.5">
+                  <div className="font-bold text-primary flex items-center gap-1.5">
+                    <Sparkles className="h-4 w-4" />
+                    Booking Summary Preview:
+                  </div>
+                  <div className="text-foreground font-semibold">
+                    {currentChamber?.name} • {selectedDate} at {formatSlotDisplay(selectedSlot)}
                   </div>
                   <div className="text-muted-foreground font-mono">
-                    Service: {currentService?.name || "Consultation"} • Fee:{" "}
+                    Service: {currentService?.name || "Standard Consultation"} • Fee:{" "}
                     {(currentService?.fee ?? currentService?.price) === 0
                       ? "FREE (৳0)"
-                      : `৳${(currentService?.fee ?? currentService?.price)?.toLocaleString()}`}
+                      : `৳ ${(currentService?.fee ?? currentService?.price)?.toLocaleString()}`}
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-border/50">
+                <div className="flex items-center justify-between pt-6 border-t border-border/50">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setStep(2)}
-                    className="rounded-xl"
+                    className="rounded-xl h-11 px-5 text-base font-semibold"
                   >
-                    <ArrowLeft className="h-4 w-4 mr-1.5" /> Back
+                    <ArrowLeft className="h-5 w-5 mr-1.5" /> Back
                   </Button>
                   <Button
                     type="submit"
                     disabled={submitting}
-                    className="rounded-xl px-6 font-semibold"
+                    className="rounded-xl h-12 px-8 text-base font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs"
                   >
-                    {submitting ? "Confirming..." : "Confirm Booking"}
+                    {submitting ? "Confirming Booking..." : "Confirm & Book Slot"}
                   </Button>
                 </div>
               </form>
@@ -484,74 +613,78 @@ export default function BookingWizardPage() {
         {/* STEP 4: Confirmation Screen */}
         {step === 4 && (
           <Card className="rounded-2xl border-emerald-500/30 bg-emerald-500/5 shadow-md">
-            <CardHeader className="text-center pb-2">
-              <div className="mx-auto h-14 w-14 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2">
-                <CheckCircle2 className="h-8 w-8" />
+            <CardHeader className="text-center p-6 pb-2">
+              <div className="mx-auto h-16 w-16 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2">
+                <CheckCircle2 className="h-9 w-9" />
               </div>
-              <CardTitle className="text-2xl text-emerald-700 dark:text-emerald-300">
+              <CardTitle className="text-3xl font-black text-emerald-700 dark:text-emerald-300">
                 Appointment Confirmed!
               </CardTitle>
-              <CardDescription>
-                Your serial token has been reserved in the chamber queue.
+              <CardDescription className="text-base text-muted-foreground mt-1">
+                Your consultation slot has been officially reserved in the doctor's schedule.
               </CardDescription>
             </CardHeader>
 
-            <CardContent className="space-y-6 max-w-md mx-auto">
-              {/* Token Card */}
+            <CardContent className="p-6 space-y-6 max-w-lg mx-auto">
+              {/* Token & Reference Card */}
               <div className="p-6 rounded-2xl bg-card border border-border text-center shadow-xs space-y-2">
-                <span className="text-xs text-muted-foreground uppercase tracking-widest font-semibold">
+                <span className="text-base text-muted-foreground uppercase tracking-widest font-bold">
                   Queue Serial Token
                 </span>
                 <div className="text-4xl font-black text-primary">
                   Token #{bookingResult?.serialNumber || 1}
                 </div>
-                <div className="text-xs font-mono text-muted-foreground">
+                <div className="text-base font-mono text-muted-foreground">
                   Ref: {bookingResult?.appointmentRef || bookingResult?.id?.slice(0, 8).toUpperCase() || "APT-CONFIRMED"}
                 </div>
               </div>
 
-              {/* Details List */}
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between py-1.5 border-b border-border/60">
-                  <span className="text-muted-foreground">Patient:</span>
-                  <span className="font-semibold text-foreground">{patientName}</span>
+              {/* Appointment Details List */}
+              <div className="space-y-3 text-base">
+                <div className="flex justify-between py-2 border-b border-border/60">
+                  <span className="text-muted-foreground">Patient Name:</span>
+                  <span className="font-bold text-foreground">{patientName}</span>
                 </div>
-                <div className="flex justify-between py-1.5 border-b border-border/60">
-                  <span className="text-muted-foreground">Chamber:</span>
-                  <span className="font-semibold text-foreground">{currentChamber?.name}</span>
+                <div className="flex justify-between py-2 border-b border-border/60">
+                  <span className="text-muted-foreground">Chamber Location:</span>
+                  <span className="font-bold text-foreground">{currentChamber?.name}</span>
                 </div>
-                <div className="flex justify-between py-1.5 border-b border-border/60">
-                  <span className="text-muted-foreground">Date & Time:</span>
-                  <span className="font-semibold text-foreground">
-                    {selectedDate} at {selectedSlot}
+                <div className="flex justify-between py-2 border-b border-border/60">
+                  <span className="text-muted-foreground">Date & Slot:</span>
+                  <span className="font-bold text-primary font-mono">
+                    {selectedDate} at {formatSlotDisplay(selectedSlot)}
                   </span>
                 </div>
-                <div className="flex justify-between py-1.5 border-b border-border/60">
+                <div className="flex justify-between py-2 border-b border-border/60">
                   <span className="text-muted-foreground">Consultation Fee:</span>
                   <span className="font-bold font-mono text-foreground">
                     {(bookingResult?.fee ?? (currentService?.fee ?? currentService?.price)) === 0
                       ? "FREE (৳0)"
-                      : `৳${(bookingResult?.fee ?? (currentService?.fee ?? currentService?.price))?.toLocaleString()}`}
+                      : `৳ ${(bookingResult?.fee ?? (currentService?.fee ?? currentService?.price))?.toLocaleString()}`}
                   </span>
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-muted/60 text-xs text-muted-foreground space-y-1">
-                <div className="font-semibold text-foreground">Next Steps:</div>
+              <div className="p-4 rounded-xl bg-muted/60 text-base text-muted-foreground space-y-1.5">
+                <div className="font-bold text-foreground">Important Instructions:</div>
                 <p>• An SMS confirmation has been dispatched to {patientPhone}.</p>
-                <p>• Please arrive 10 minutes before your slot to complete vitals recording.</p>
-                <p>• Cancellation policy: Patient cancellations are non-refundable.</p>
+                <p>• Please arrive 10 minutes before your slot for computerized vitals check.</p>
+                <p>• To reschedule or cancel, visit your patient dashboard.</p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => window.print()}
+                  className="rounded-xl h-11 text-base font-semibold flex items-center justify-center gap-2"
+                >
+                  <Printer className="h-4 w-4" />
+                  Print Receipt
+                </Button>
                 <Link href="/user/dashboard/appointments" className="flex-1">
-                  <Button variant="outline" className="w-full rounded-xl">
+                  <Button variant="default" className="w-full rounded-xl h-11 text-base font-bold bg-primary text-primary-foreground hover:bg-primary/90">
                     View in Dashboard
-                  </Button>
-                </Link>
-                <Link href="/" className="flex-1">
-                  <Button variant="default" className="w-full rounded-xl">
-                    Back to Home
                   </Button>
                 </Link>
               </div>

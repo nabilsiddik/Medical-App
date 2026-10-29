@@ -61,7 +61,7 @@ export default async function AdminDashboardOverviewPage() {
     },
     {
       title: "Total Revenue",
-      value: `৳ ${stats.totalRevenue.toLocaleString()}`,
+      value: `৳ ${(stats?.totalRevenue || 0).toLocaleString()}`,
       subtitle: "Consultation fees collected",
       icon: CreditCard,
       color: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20",

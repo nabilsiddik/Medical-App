@@ -28,12 +28,10 @@ interface DoctorAnalyticsChartsProps {
 const PIE_COLORS = ["#0284c7", "#ec4899", "#8b5cf6", "#10b981"];
 
 export default function DoctorAnalyticsCharts({ analytics }: DoctorAnalyticsChartsProps) {
-  const {
-    patientsRegistrationByDate,
-    appointmentsByDate,
-    genderDistribution,
-    revenueByChamber,
-  } = analytics;
+  const patientsRegistrationByDate = analytics?.patientsRegistrationByDate || [];
+  const appointmentsByDate = analytics?.appointmentsByDate || [];
+  const genderDistribution = analytics?.genderDistribution || [];
+  const revenueByChamber = analytics?.revenueByChamber || [];
 
   // Format date labels nicely e.g. "Oct 25"
   const formatShortDate = (dateStr: string) => {

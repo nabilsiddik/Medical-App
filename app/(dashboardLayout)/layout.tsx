@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import { redirect } from "next/navigation";
 import { AppSidebar } from "@/components/app-sidebar";
 import DashboardNavbar from "@/components/modules/dashboard/dashboardNavbar/DashboardNavbar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -13,6 +14,10 @@ export default async function CommonDashboardLayout({
   children: React.ReactNode;
 }) {
   const userInfo = (await getLoggedInUser()) as IUserInfo | null;
+  if (!userInfo) {
+    redirect("/login");
+  }
+
   const isPatient = userInfo?.role === UserRole.PATIENT || userInfo?.role === UserRole.USER;
 
   return (
