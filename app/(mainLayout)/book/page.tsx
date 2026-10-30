@@ -26,6 +26,7 @@ import {
   ArrowLeft,
   User,
   Phone,
+  Mail,
   FileText,
   AlertCircle,
   Building,
@@ -36,6 +37,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import MedicalSpikeLoader from "@/components/shared/MedicalSpikeLoader";
+import { printAppointmentSlip } from "@/lib/printAppointmentSlip";
+import { getLoggedInUser } from "@/services/user/userServices";
 
 export default function BookingWizardPage() {
   const searchParams = useSearchParams();
@@ -53,6 +56,7 @@ export default function BookingWizardPage() {
   const [selectedSlot, setSelectedSlot] = useState<string>("");
   const [patientName, setPatientName] = useState<string>("");
   const [patientPhone, setPatientPhone] = useState<string>("");
+  const [patientEmail, setPatientEmail] = useState<string>("");
   const [patientAge, setPatientAge] = useState<string>("");
   const [patientGender, setPatientGender] = useState<"MALE" | "FEMALE" | "OTHER">("MALE");
   const [chiefComplaint, setChiefComplaint] = useState<string>("");
@@ -79,10 +83,10 @@ export default function BookingWizardPage() {
     return `${hours.toString().padStart(2, "0")}:${minutes} ${ampm}`;
   };
 
-  // Load chambers and services on mount
+  // Load chambers, services, and logged in user on mount
   useEffect(() => {
-    Promise.all([getChamberLocations(), getServices()])
-      .then(([chamberData, serviceData]) => {
+    Promise.all([getChamberLocations(), getServices(), getLoggedInUser().catch(() => null)])
+      .then(([chamberData, serviceData, currentUser]) => {
         setChambers(chamberData);
         if (chamberData.length > 0 && !selectedChamberId) {
           setSelectedChamberId(chamberData[0].id);
@@ -91,6 +95,15 @@ export default function BookingWizardPage() {
         setServices(serviceData);
         if (serviceData.length > 0 && !selectedServiceId) {
           setSelectedServiceId(serviceData[0].id);
+        }
+
+        if (currentUser) {
+          if (currentUser.fullName) setPatientName(currentUser.fullName);
+          if (currentUser.phoneNumber) setPatientPhone(currentUser.phoneNumber);
+          if (currentUser.email) setPatientEmail(currentUser.email);
+          if (currentUser.gender) {
+            setPatientGender(currentUser.gender === "FEMALE" ? "FEMALE" : "MALE");
+          }
         }
       })
       .finally(() => setLoadingChambers(false));
@@ -149,6 +162,7 @@ export default function BookingWizardPage() {
         startTime: selectedSlot,
         patientName,
         patientPhone,
+        patientEmail: patientEmail || undefined,
         patientAge: patientAge ? parseInt(patientAge) : undefined,
         patientGender,
         chiefComplaint: chiefComplaint || undefined,
@@ -528,33 +542,47 @@ export default function BookingWizardPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="pAge" className="text-base font-bold text-foreground">
-                        Age (Years)
-                      </Label>
-                      <Input
-                        id="pAge"
-                        type="number"
-                        placeholder="e.g. 35"
-                        value={patientAge}
-                        onChange={(e) => setPatientAge(e.target.value)}
-                        className="rounded-xl h-12 text-base font-mono"
-                      />
-                    </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="pEmail" className="text-base font-bold text-foreground">
+                      Email Address (Optional)
+                    </Label>
+                    <Input
+                      id="pEmail"
+                      type="email"
+                      placeholder="e.g. patient@gmail.com"
+                      value={patientEmail}
+                      onChange={(e) => setPatientEmail(e.target.value)}
+                      className="rounded-xl h-12 text-base font-medium"
+                    />
+                  </div>
+                </div>
 
-                    <div className="space-y-1.5">
-                      <Label className="text-base font-bold text-foreground">Gender</Label>
-                      <select
-                        value={patientGender}
-                        onChange={(e) => setPatientGender(e.target.value as any)}
-                        className="w-full h-12 px-3 rounded-xl border border-input bg-card text-base font-medium focus:ring-2 focus:ring-primary focus:outline-none"
-                      >
-                        <option value="MALE">Male</option>
-                        <option value="FEMALE">Female</option>
-                        <option value="OTHER">Other</option>
-                      </select>
-                    </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="pAge" className="text-base font-bold text-foreground">
+                      Age (Years)
+                    </Label>
+                    <Input
+                      id="pAge"
+                      type="number"
+                      placeholder="e.g. 35"
+                      value={patientAge}
+                      onChange={(e) => setPatientAge(e.target.value)}
+                      className="rounded-xl h-12 text-base font-mono"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-base font-bold text-foreground">Gender</Label>
+                    <select
+                      value={patientGender}
+                      onChange={(e) => setPatientGender(e.target.value as any)}
+                      className="w-full h-12 px-3 rounded-xl border border-input bg-card text-base font-medium focus:ring-2 focus:ring-primary focus:outline-none"
+                    >
+                      <option value="MALE">Male</option>
+                      <option value="FEMALE">Female</option>
+                      <option value="OTHER">Other</option>
+                    </select>
                   </div>
                 </div>
 
@@ -676,11 +704,34 @@ export default function BookingWizardPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => window.print()}
-                  className="rounded-xl h-11 text-base font-semibold flex items-center justify-center gap-2"
+                  onClick={() =>
+                    printAppointmentSlip({
+                      appointmentRef:
+                        bookingResult?.appointmentRef ||
+                        bookingResult?.id?.slice(0, 8).toUpperCase() ||
+                        "APT-CONFIRMED",
+                      serialNumber: bookingResult?.serialNumber || 1,
+                      patientName,
+                      patientPhone,
+                      patientAge,
+                      patientGender,
+                      chiefComplaint,
+                      chamberName: currentChamber?.name || "Care Chamber",
+                      chamberAddress: currentChamber?.address,
+                      chamberCity: currentChamber?.city,
+                      appointmentDate: selectedDate,
+                      startTime: formatSlotDisplay(selectedSlot),
+                      serviceName: currentService?.name || "Clinical Consultation",
+                      fee:
+                        bookingResult?.fee ??
+                        (currentService?.fee ?? currentService?.price ?? 0),
+                      isPaid: bookingResult?.isPaid || false,
+                    })
+                  }
+                  className="rounded-xl h-12 px-5 text-base font-bold flex items-center justify-center gap-2 border-primary/40 hover:bg-primary/10 text-primary cursor-pointer shadow-xs"
                 >
-                  <Printer className="h-4 w-4" />
-                  Print Receipt
+                  <Printer className="h-5 w-5" />
+                  <span>Download / Print PDF Receipt</span>
                 </Button>
                 <Link href="/user/dashboard/appointments" className="flex-1">
                   <Button variant="default" className="w-full rounded-xl h-11 text-base font-bold bg-primary text-primary-foreground hover:bg-primary/90">

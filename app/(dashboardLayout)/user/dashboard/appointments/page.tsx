@@ -11,6 +11,8 @@ import {
   RefreshCw,
   CheckCircle2,
   DollarSign,
+  Printer,
+  FileText,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +24,7 @@ import {
   getMyAppointments,
   cancelAppointmentByPatient,
 } from "@/services/doctor/appointmentServices";
+import { printAppointmentSlip } from "@/lib/printAppointmentSlip";
 
 export default function PatientAppointmentsPage() {
   const [appointments, setAppointments] = useState<IAppointment[]>([]);
@@ -34,9 +37,10 @@ export default function PatientAppointmentsPage() {
     setLoading(true);
     try {
       const data = await getMyAppointments();
-      setAppointments(data);
+      setAppointments(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
+      toast.error("Failed to load appointments");
     } finally {
       setLoading(false);
     }
@@ -71,28 +75,28 @@ export default function PatientAppointmentsPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <Calendar className="h-6 w-6 text-primary" />
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground flex items-center gap-2.5">
+            <Calendar className="h-7 w-7 text-primary" />
             <span>My Appointments</span>
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            Review your upcoming consultations, appointment history, and chamber locations.
+          <p className="text-base text-muted-foreground mt-1">
+            Review your upcoming consultations, appointment history, and download official queue passes.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
           <Button
             size="sm"
             variant="outline"
             onClick={loadAppointments}
-            className="rounded-xl text-xs whitespace-nowrap inline-flex items-center gap-1.5 shrink-0"
+            className="rounded-xl text-base font-semibold whitespace-nowrap inline-flex items-center gap-2 shrink-0 h-11 px-4 cursor-pointer"
           >
-            <RefreshCw className="h-3.5 w-3.5 shrink-0" />
+            <RefreshCw className="h-4 w-4 shrink-0" />
             <span>Refresh</span>
           </Button>
           <Link href="/book" className="shrink-0">
-            <Button size="sm" className="rounded-xl text-xs font-semibold whitespace-nowrap inline-flex items-center gap-1.5">
-              <PlusCircle className="h-3.5 w-3.5 shrink-0" />
+            <Button size="sm" className="rounded-xl text-base font-bold whitespace-nowrap inline-flex items-center gap-2 h-11 px-5 shadow-xs cursor-pointer">
+              <PlusCircle className="h-4 w-4 shrink-0" />
               <span>Book New Appointment</span>
             </Button>
           </Link>
@@ -100,37 +104,37 @@ export default function PatientAppointmentsPage() {
       </div>
 
       {/* Cancellation Policy Alert Banner */}
-      <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-200 text-xs flex items-start gap-3">
-        <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-        <div className="space-y-0.5">
+      <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-200 text-base flex items-start gap-3.5">
+        <AlertCircle className="h-6 w-6 text-amber-600 shrink-0 mt-0.5" />
+        <div className="space-y-1">
           <span className="font-bold">Clinic Policy Notice:</span>
-          <p className="text-muted-foreground text-[11px] leading-relaxed">
+          <p className="text-muted-foreground text-base leading-relaxed">
             If you cancel an appointment, it will not be refunded per standard practice policy. The reserved slot is immediately released and made available for other patients.
           </p>
         </div>
       </div>
 
       {/* Appointments List Card */}
-      <Card className="rounded-2xl border-border/80 shadow-xs">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-bold">
+      <Card className="rounded-2xl border-border/80 shadow-xs overflow-hidden">
+        <CardHeader className="p-6 pb-4 border-b border-border/60">
+          <CardTitle className="text-xl font-bold">
             Appointment Records ({appointments.length})
           </CardTitle>
-          <CardDescription className="text-xs">
+          <CardDescription className="text-base text-muted-foreground">
             Chronological booking history and active consultation passes
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left">
-              <thead className="bg-muted/40 border-y border-border/60 text-muted-foreground font-semibold uppercase tracking-wider text-[11px]">
+            <table className="w-full text-base text-left border-collapse">
+              <thead className="bg-muted/40 border-b border-border/60 text-muted-foreground font-bold uppercase tracking-wider text-base">
                 <tr>
-                  <th className="py-3 px-4">Booking Ref</th>
-                  <th className="py-3 px-4">Chamber</th>
-                  <th className="py-3 px-4">Date & Slot</th>
-                  <th className="py-3 px-4">Consultation Fee</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-4 px-5">Booking Ref</th>
+                  <th className="py-4 px-5">Chamber</th>
+                  <th className="py-4 px-5">Date &amp; Slot</th>
+                  <th className="py-4 px-5">Consultation Fee</th>
+                  <th className="py-4 px-5">Status</th>
+                  <th className="py-4 px-5 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
@@ -141,31 +145,31 @@ export default function PatientAppointmentsPage() {
 
                     return (
                       <tr key={apt.id} className="hover:bg-muted/30 transition-colors">
-                        <td className="py-3.5 px-4">
-                          <div className="font-mono font-bold text-foreground">
+                        <td className="py-4 px-5">
+                          <div className="font-mono font-bold text-foreground text-base">
                             {apt.appointmentRef || `APT-${apt.id.slice(0, 8)}`}
                           </div>
                           {apt.serialNumber && (
-                            <div className="text-[10px] text-muted-foreground">
+                            <div className="text-base font-bold text-primary mt-0.5">
                               Queue Token #{apt.serialNumber}
                             </div>
                           )}
                         </td>
 
-                        <td className="py-3.5 px-4">
-                          <div className="font-semibold text-foreground">
-                            {apt.chamberLocation?.name || apt.chamber?.name || "Chamber"}
+                        <td className="py-4 px-5">
+                          <div className="font-bold text-foreground text-base">
+                            {apt.chamberLocation?.name || (apt as any).chamber?.name || "Care Chamber"}
                           </div>
-                          <div className="text-[11px] text-muted-foreground flex items-center gap-1">
-                            <MapPin className="h-3 w-3 shrink-0" />
-                            <span className="truncate max-w-[180px]">
-                              {apt.chamberLocation?.address || apt.chamber?.address}
+                          <div className="text-base text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                            <MapPin className="h-4 w-4 text-primary shrink-0" />
+                            <span className="truncate max-w-[220px]">
+                              {apt.chamberLocation?.address || (apt as any).chamber?.address || "Medical Suite"}
                             </span>
                           </div>
                         </td>
 
-                        <td className="py-3.5 px-4">
-                          <div className="font-medium text-foreground">
+                        <td className="py-4 px-5">
+                          <div className="font-semibold text-foreground text-base">
                             {new Date(apt.appointmentDate).toLocaleDateString("en-US", {
                               weekday: "short",
                               year: "numeric",
@@ -173,25 +177,25 @@ export default function PatientAppointmentsPage() {
                               day: "numeric",
                             })}
                           </div>
-                          <div className="text-[11px] font-mono text-muted-foreground flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
+                          <div className="text-base font-mono text-[#1673b8] font-bold flex items-center gap-1.5 mt-0.5">
+                            <Clock className="h-4 w-4 shrink-0" />
                             <span>{apt.startTime || "Slot based"}</span>
                           </div>
                         </td>
 
-                        <td className="py-3.5 px-4">
-                          <div className="font-mono font-bold text-foreground">
+                        <td className="py-4 px-5">
+                          <div className="font-mono font-bold text-foreground text-base">
                             {apt.fee === 0 ? "FREE (৳0)" : `৳${apt.fee?.toLocaleString()}`}
                           </div>
-                          <div className="text-[10px] text-muted-foreground">
-                            {apt.isPaid ? "Paid" : "Pending"}
+                          <div className="text-base text-muted-foreground mt-0.5">
+                            {apt.isPaid ? "Paid" : "Due at Chamber"}
                           </div>
                         </td>
 
-                        <td className="py-3.5 px-4">
+                        <td className="py-4 px-5">
                           <Badge
                             variant="secondary"
-                            className={`text-[10px] font-semibold ${
+                            className={`text-base font-semibold px-3 py-1 ${
                               apt.status === "COMPLETED"
                                 ? "bg-blue-500/15 text-blue-600 dark:text-blue-400"
                                 : apt.status === "CONFIRMED"
@@ -204,30 +208,76 @@ export default function PatientAppointmentsPage() {
                             {apt.status}
                           </Badge>
                           {isCancelled && (
-                            <div className="text-[10px] text-muted-foreground pt-0.5">
+                            <div className="text-base text-muted-foreground pt-0.5">
                               {apt.isRefunded ? `Refunded: ৳${apt.refundAmount}` : "Non-refundable"}
                             </div>
                           )}
                         </td>
 
-                        <td className="py-3.5 px-4 text-right">
-                          {isUpcoming && (
+                        <td className="py-4 px-5 text-right">
+                          <div className="inline-flex items-center gap-2 justify-end">
+                            {/* PDF Slip Button */}
                             <Button
                               size="sm"
-                              variant="ghost"
-                              onClick={() => setCancelModalId(apt.id)}
-                              className="h-8 text-xs text-destructive hover:bg-destructive/10 px-2.5 rounded-xl cursor-pointer"
+                              variant="outline"
+                              onClick={() =>
+                                printAppointmentSlip({
+                                  appointmentRef:
+                                    apt.appointmentRef ||
+                                    `APT-${apt.id.slice(0, 8).toUpperCase()}`,
+                                  serialNumber:
+                                    apt.serialNumber ||
+                                    (apt as any)?.queueToken?.tokenNumber ||
+                                    1,
+                                  patientName:
+                                    (apt.patient as any)?.fullName || "Patient",
+                                  patientPhone:
+                                    (apt.patient as any)?.phone || "",
+                                  chamberName:
+                                    apt.chamberLocation?.name || "Care Chamber",
+                                  chamberAddress: apt.chamberLocation?.address,
+                                  chamberCity: apt.chamberLocation?.city,
+                                  appointmentDate: new Date(
+                                    apt.appointmentDate
+                                  ).toLocaleDateString("en-US", {
+                                    weekday: "short",
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                  }),
+                                  startTime: apt.startTime || "Slot based",
+                                  serviceName:
+                                    apt.service?.name || "Medical Consultation",
+                                  fee: apt.fee ?? 0,
+                                  isPaid: apt.isPaid || false,
+                                })
+                              }
+                              className="h-10 text-base font-bold px-3.5 rounded-xl inline-flex items-center gap-1.5 cursor-pointer border-primary/30 text-primary hover:bg-primary/10 shadow-xs"
+                              title="Download / Print PDF Slip"
                             >
-                              <XCircle className="h-3.5 w-3.5 mr-1" /> Cancel
+                              <Printer className="h-4 w-4" />
+                              <span>PDF Slip</span>
                             </Button>
-                          )}
+
+                            {isUpcoming && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setCancelModalId(apt.id)}
+                                className="h-10 text-base text-destructive hover:bg-destructive/10 px-3 rounded-xl cursor-pointer"
+                              >
+                                <XCircle className="h-4 w-4 mr-1" />
+                                <span>Cancel</span>
+                              </Button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
                   })
                 ) : (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-muted-foreground">
+                    <td colSpan={6} className="py-16 text-center text-muted-foreground text-base">
                       {loading
                         ? "Loading appointments..."
                         : "No appointment bookings found. Click 'Book New Appointment' to schedule one."}
@@ -242,43 +292,43 @@ export default function PatientAppointmentsPage() {
 
       {/* Confirmation Modal */}
       {cancelModalId && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-card border border-border/80 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 max-w-md w-full space-y-4 shadow-2xl">
             <div className="flex items-center gap-3 text-destructive">
-              <div className="h-10 w-10 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
-                <AlertCircle className="h-5 w-5" />
+              <div className="h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
+                <AlertCircle className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="font-bold text-base text-foreground">Cancel Appointment?</h3>
-                <p className="text-xs text-muted-foreground">Please review practice cancellation terms</p>
+                <h3 className="font-bold text-lg text-foreground">Cancel Appointment?</h3>
+                <p className="text-base text-muted-foreground">Please review practice cancellation terms</p>
               </div>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-destructive/10 border border-destructive/20 text-xs text-destructive space-y-1">
+            <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-base text-destructive space-y-1">
               <span className="font-bold">Non-refundable policy:</span>
-              <p className="text-[11px] leading-relaxed">
+              <p className="text-base leading-relaxed">
                 As per clinic policy, cancellations initiated by the patient are not refunded. Your time slot will be reopened immediately for other patients.
               </p>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">
+              <label className="text-base font-semibold text-foreground">
                 Reason for cancellation (optional):
               </label>
               <textarea
                 value={cancelReason}
                 onChange={(e) => setCancelReason(e.target.value)}
                 placeholder="e.g. Schedule conflict, feeling better, travelling..."
-                className="w-full text-xs p-2.5 rounded-xl border border-border bg-background h-20 resize-none"
+                className="w-full text-base p-3 rounded-xl border border-border bg-background h-24 resize-none"
               />
             </div>
 
-            <div className="flex items-center justify-end gap-2.5 pt-2">
+            <div className="flex items-center justify-end gap-3 pt-3">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setCancelModalId(null)}
-                className="rounded-xl text-xs"
+                className="rounded-xl text-base h-11 px-4 cursor-pointer"
               >
                 Keep Appointment
               </Button>
@@ -287,7 +337,7 @@ export default function PatientAppointmentsPage() {
                 size="sm"
                 isLoading={cancelling}
                 onClick={handleConfirmCancel}
-                className="rounded-xl text-xs font-semibold"
+                className="rounded-xl text-base font-semibold h-11 px-5 cursor-pointer"
               >
                 Yes, Cancel Appointment
               </Button>
@@ -298,4 +348,3 @@ export default function PatientAppointmentsPage() {
     </div>
   );
 }
-

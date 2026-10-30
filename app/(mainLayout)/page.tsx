@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import HeroSection from "@/components/medicate/home/HeroSection";
-import QuickAppointmentBar from "@/components/medicate/home/QuickAppointmentBar";
+import HeroThreeCardsSection from "@/components/medicate/home/HeroThreeCardsSection";
 import HeartScienceSection from "@/components/medicate/home/HeartScienceSection";
 import CaregivingServicesSection from "@/components/medicate/home/CaregivingServicesSection";
 import MedicalHealthCareSection from "@/components/medicate/home/MedicalHealthCareSection";
@@ -50,9 +50,12 @@ export default async function HomePage() {
       {/* 1. Hero Section (Includes its own fade & right-to-left slide animation) */}
       <HeroSection doctorName={doctorName} tagline={tagline} />
 
-      {/* 2. Quick Appointment Bar (overlapping Hero) */}
+      {/* 2. Three Cards Section (Emergency Cases, Doctors Timetable, Opening Hours) */}
       <ScrollReveal yOffset={20}>
-        <QuickAppointmentBar services={activeServices} locations={activeLocations} />
+        <HeroThreeCardsSection
+          emergencyPhone={config?.emergencyPhone || config?.contact?.emergencyPhone}
+          inquiryPhone={config?.contactPhone || config?.contact?.phone}
+        />
       </ScrollReveal>
 
       {/* 3. Medical Services: The Heart And Science Of Medicine Service */}
