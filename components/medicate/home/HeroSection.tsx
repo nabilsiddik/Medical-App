@@ -113,7 +113,7 @@ export default function HeroSection({
 
               {/* Backdrop Overlay for Centered Text Readability */}
               <div className="absolute inset-0 bg-white/80 sm:bg-white/75 backdrop-blur-[1px] pointer-events-none" />
-              <div className="absolute inset-0 bg-gradient-to-b from-white/85 via-white/60 to-white/90 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-white/10 to-primary/10 pointer-events-none" />
 
               {/* Slide Content with Framer Motion Center-Aligned Animation */}
               <div className="relative z-10 container mx-auto px-6 sm:px-10 lg:px-16 w-full flex items-center justify-center pt-16 sm:pt-20 pb-28 sm:pb-36 md:pb-40">
@@ -253,11 +253,10 @@ export default function HeroSection({
             type="button"
             onClick={() => swiperRef.current?.slideToLoop(idx)}
             aria-label={`Go to slide ${idx + 1}`}
-            className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
-              activeIndex === idx
-                ? "w-8 bg-primary"
-                : "w-2.5 bg-slate-400/50 hover:bg-slate-400"
-            }`}
+            className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${activeIndex === idx
+              ? "w-8 bg-primary"
+              : "w-2.5 bg-slate-400/50 hover:bg-slate-400"
+              }`}
           />
         ))}
       </div>
