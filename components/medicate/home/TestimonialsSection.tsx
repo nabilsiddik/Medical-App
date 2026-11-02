@@ -53,6 +53,24 @@ const DUMMY_TESTIMONIALS: TestimonialItem[] = [
     quote:
       "Booking an appointment was effortless. Having digital prescriptions verified online and accessing scheduled follow-ups gave my family complete peace of mind during treatment.",
   },
+  {
+    id: 5,
+    name: "Dr. Farhana Chowdhury",
+    role: "PEDIATRIC HEALTHCARE",
+    photo:
+      "https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=300",
+    quote:
+      "The preventive health screening and detailed consultation schedule gave us tremendous clarity. Dr. Sarah's chamber is equipped with modern patient monitoring, and the appointment system eliminates long waiting times.",
+  },
+  {
+    id: 6,
+    name: "Tariqul Islam",
+    role: "DIABETES & METABOLIC CARE",
+    photo:
+      "https://images.pexels.com/photos/834863/pexels-photo-834863.jpeg?auto=compress&cs=tinysrgb&w=300",
+    quote:
+      "I visited for routine glycemic control and cardiovascular follow-up. The computerized queue tokens and immediate digital prescription delivery to my phone made the entire chamber visit seamless and stress-free.",
+  },
 ];
 
 interface TestimonialsSectionProps {
@@ -62,7 +80,7 @@ interface TestimonialsSectionProps {
 export default function TestimonialsSection({ testimonials }: TestimonialsSectionProps) {
   // Use backend testimonials if available, merged or falling back to high-res dummy slides
   const items: TestimonialItem[] =
-    testimonials && testimonials.length >= 2
+    testimonials && testimonials.length >= 4
       ? testimonials.map((t, idx) => ({
           id: t.id || idx,
           name: t.patientName || "Verified Patient",
@@ -86,7 +104,7 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
             OUR CLIENTS
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0f2137] tracking-tight">
-            Our Client Happy Say About Us
+            Our Happy Clients
           </h2>
         </div>
 
@@ -107,7 +125,7 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
               disableOnInteraction: false,
               pauseOnMouseEnter: true,
             }}
-            loop={true}
+            loop={items.length > 2}
             pagination={{
               clickable: true,
               bulletClass: "custom-bullet",
@@ -116,15 +134,15 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
             className="pb-4"
           >
             {items.map((item) => (
-              <SwiperSlide key={item.id} className="h-auto">
-                <div className="h-full bg-[#edf2f7] hover:bg-[#e7edf5] transition-colors rounded-2xl p-8 sm:p-10 flex flex-col justify-between shadow-xs border border-slate-200/50">
+              <SwiperSlide key={item.id} className="!h-auto flex">
+                <div className="w-full h-full bg-[#edf2f7] hover:bg-[#e7edf5] transition-colors rounded-2xl p-8 sm:p-10 flex flex-col justify-between shadow-xs border border-slate-200/50">
                   {/* Quote Paragraph */}
-                  <p className="text-slate-600 leading-relaxed mb-8 text-base sm:text-lg font-normal">
+                  <p className="text-slate-600 leading-relaxed mb-8 text-base sm:text-lg font-normal flex-1">
                     {item.quote}
                   </p>
 
                   {/* Client Info Row */}
-                  <div className="flex items-center justify-between pt-4 border-t border-slate-300/40">
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-300/40 mt-auto">
                     <div className="flex items-center gap-4">
                       <img
                         src={item.photo}
@@ -158,6 +176,14 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 
       {/* Custom Swiper Pagination Styling */}
       <style jsx global>{`
+        .testimonial-slider-container .swiper-wrapper {
+          display: flex !important;
+          align-items: stretch !important;
+        }
+        .testimonial-slider-container .swiper-slide {
+          height: auto !important;
+          display: flex !important;
+        }
         .testimonial-slider-container .swiper-pagination {
           bottom: 0px !important;
           display: flex;

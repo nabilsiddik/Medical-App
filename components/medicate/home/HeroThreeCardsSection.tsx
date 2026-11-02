@@ -17,9 +17,9 @@ export default function HeroThreeCardsSection({
 
   return (
     <div className="relative z-20 container mx-auto px-4 sm:px-6 lg:px-8 -mt-16 sm:-mt-24">
-      <div className="grid grid-cols-1 md:grid-cols-3 rounded-2xl overflow-hidden shadow-2xl">
+      <div className="grid grid-cols-1 md:grid-cols-3  overflow-hidden  gap-5">
         {/* CARD 1: Emergency Cases (Primary Blue #1673b8) */}
-        <div className="bg-[#1673b8] text-white p-8 lg:p-10 relative overflow-hidden flex flex-col justify-between min-h-[340px] group transition-transform">
+        <div className="bg-[#1673b8] text-white p-8 lg:p-10 relative overflow-hidden flex flex-col justify-between min-h-[340px] group transition-transform rounded-2xl">
           {/* Subtle Watermark Icon in Top-Right */}
           <div className="absolute -top-3 -right-3 text-white/10 pointer-events-none group-hover:scale-110 transition-transform duration-500">
             <ShieldAlert className="w-36 h-36" strokeWidth={1} />
@@ -57,7 +57,7 @@ export default function HeroThreeCardsSection({
         </div>
 
         {/* CARD 2: Doctors Timetable (Dark Navy #0b1c2e) */}
-        <div className="bg-[#0b1c2e] text-white p-8 lg:p-10 relative overflow-hidden flex flex-col justify-between min-h-[340px] group transition-transform border-y md:border-y-0 md:border-x border-white/10">
+        <div className="bg-[#0b1c2e] text-white p-8 lg:p-10 relative overflow-hidden flex flex-col justify-between min-h-[340px] group transition-transform border-y md:border-y-0 md:border-x border-white/10 rounded-2xl">
           {/* Subtle Watermark Icon in Top-Right */}
           <div className="absolute -top-3 -right-3 text-white/10 pointer-events-none group-hover:scale-110 transition-transform duration-500">
             <Calendar className="w-36 h-36" strokeWidth={1} />
@@ -90,7 +90,7 @@ export default function HeroThreeCardsSection({
         </div>
 
         {/* CARD 3: Opening Hours (Primary Blue #1673b8) */}
-        <div className="bg-[#1673b8] text-white p-8 lg:p-10 relative overflow-hidden flex flex-col justify-between min-h-[340px] group transition-transform">
+        <div className="bg-[#1673b8] text-white p-8 lg:p-10 relative overflow-hidden flex flex-col justify-between min-h-[340px] group transition-transform rounded-2xl">
           {/* Subtle Watermark Icon in Top-Right */}
           <div className="absolute -top-3 -right-3 text-white/10 pointer-events-none group-hover:scale-110 transition-transform duration-500">
             <Activity className="w-36 h-36" strokeWidth={1} />

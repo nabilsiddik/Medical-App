@@ -1,5 +1,47 @@
+"use client";
+
+import React, { useRef, useState, useEffect } from "react";
+import { useInView } from "framer-motion";
+
+interface SkillItem {
+  label: string;
+  percent: number;
+}
+
+function AnimatedCounter({ target, inView }: { target: number; inView: boolean }) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!inView) return;
+    let startTime: number | null = null;
+    const duration = 1600; // ms
+
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      // easeOutExpo for a premium clinical countdown effect
+      const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      setCount(Math.round(easeProgress * target));
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        setCount(target);
+      }
+    };
+
+    const animId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animId);
+  }, [inView, target]);
+
+  return <span>{count}%</span>;
+}
+
 export default function ProtectLifeSection() {
-  const skills = [
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const isInView = useInView(containerRef, { once: true, margin: "-80px" });
+
+  const skills: SkillItem[] = [
     { label: "Heart Rate & Cardiology Care", percent: 85 },
     { label: "Diagnostic Accuracy & Screening", percent: 95 },
     { label: "Post-Treatment Patient Recovery", percent: 90 },
@@ -9,8 +51,8 @@ export default function ProtectLifeSection() {
     <section className="py-20 md:py-28 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          {/* Left: Text & Progress Bars */}
-          <div className="lg:col-span-6 space-y-6">
+          {/* Left: Text & Animated Progress Bars */}
+          <div ref={containerRef} className="lg:col-span-6 space-y-6">
             <span className="inline-block text-primary font-bold text-base tracking-widest uppercase">
               FEATURE
             </span>
@@ -23,18 +65,25 @@ export default function ProtectLifeSection() {
               Our clinical protocol is built on preventive medicine and personalized therapeutic pathways. We combine evidence-based clinical assessments with patient-centered communication to optimize outcomes across all ages.
             </p>
 
-            {/* Progress / Skill Bars */}
-            <div className="space-y-5 pt-3">
+            {/* Animated Progress / Skill Bars */}
+            <div className="space-y-6 pt-3">
               {skills.map((s, idx) => (
-                <div key={idx} className="space-y-2">
-                  <div className="flex justify-between text-base font-bold text-[#0b1c2e]">
+                <div key={idx} className="space-y-2.5">
+                  <div className="flex justify-between items-center text-base font-bold text-[#0b1c2e]">
                     <span>{s.label}</span>
-                    <span className="text-primary">{s.percent}%</span>
+                    <span className="text-primary font-mono text-lg font-black">
+                      <AnimatedCounter target={s.percent} inView={isInView} />
+                    </span>
                   </div>
-                  <div className="h-2.5 w-full bg-[#eaedf2] rounded-full overflow-hidden">
+
+                  {/* Enhanced Bar: Increased height (h-4) with smooth progress fill */}
+                  <div className="h-4 w-full bg-[#eaedf2] rounded-full overflow-hidden p-0.5 shadow-inner">
                     <div
-                      className="h-full bg-primary rounded-full transition-all duration-1000"
-                      style={{ width: `${s.percent}%` }}
+                      className="h-full bg-gradient-to-r from-primary to-[#258bd6] rounded-full transition-all duration-[1600ms] ease-out shadow-xs"
+                      style={{
+                        width: isInView ? `${s.percent}%` : "0%",
+                        transitionDelay: `${idx * 150}ms`,
+                      }}
                     />
                   </div>
                 </div>

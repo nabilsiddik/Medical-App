@@ -1,3 +1,6 @@
+"use client";
+
+import React from "react";
 import { FaFacebookF, FaLinkedinIn, FaTwitter } from "react-icons/fa";
 import ScrollReveal from "@/components/shared/animations/ScrollReveal";
 
@@ -6,7 +9,7 @@ export default function SpecialistDoctorsSection() {
     {
       name: "Prof. Dr. Sarah Rahman",
       role: "Senior Consultant Physician & Cardiologist",
-      image: "https://images.unsplash.com/photo-1594824813579-99435b5a886a?auto=format&fit=crop&w=600&q=80",
+      image: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=600&q=80",
     },
     {
       name: "Dr. Michael Chen",
@@ -38,11 +41,15 @@ export default function SpecialistDoctorsSection() {
               delay={idx * 0.15}
               className="bg-white rounded-sm overflow-hidden border border-slate-200/70 shadow-xs hover:shadow-lg transition-all group h-full flex flex-col justify-between"
             >
-              {/* Doctor Image */}
+              {/* Doctor Image with fallback on error */}
               <div className="relative h-80 overflow-hidden bg-slate-100">
                 <img
                   src={doc.image}
                   alt={doc.name}
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src =
+                      "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=600&q=80";
+                  }}
                   className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
