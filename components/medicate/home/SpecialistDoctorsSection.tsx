@@ -27,7 +27,7 @@ export default function SpecialistDoctorsSection() {
     <section id="doctors" className="py-20 md:py-28 bg-[#f8fafd] overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <ScrollReveal delay={0} yOffset={20}>
-          <span className="inline-block text-[#1673b8] font-bold text-sm tracking-widest uppercase mb-2">
+          <span className="inline-block text-[#1673b8] font-bold text-base tracking-widest uppercase mb-2">
             OUR TEAM
           </span>
 
@@ -58,43 +58,43 @@ export default function SpecialistDoctorsSection() {
                   />
                 </div>
 
-                {/* Name & Specialty */}
+                {/* Name & Specialty - Natural readable font */}
                 <div className="p-6 text-center">
                   <h3 className="text-xl font-bold text-[#0b1c2e] mb-1">
                     {doc.name}
                   </h3>
-                  <p className="text-sm text-[#1673b8] font-semibold tracking-wider uppercase mb-4">
+                  <p className="text-base text-[#1673b8] font-semibold tracking-wider uppercase mb-4">
                     {doc.role}
                   </p>
 
                   {/* Social icons */}
-                  <div className="flex items-center justify-center gap-2 text-slate-400">
+                  <div className="flex items-center justify-center gap-2.5 text-slate-400">
                     <a
                       href="https://facebook.com"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center hover:bg-[#1673b8] hover:text-white hover:border-[#1673b8] transition-colors"
+                      className="w-9 h-9 rounded-full border border-slate-200 flex items-center justify-center hover:bg-[#1673b8] hover:text-white hover:border-[#1673b8] transition-colors"
                       aria-label="Facebook"
                     >
-                      <FaFacebookF className="h-3 w-3" />
+                      <FaFacebookF className="h-4 w-4" />
                     </a>
                     <a
                       href="https://twitter.com"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center hover:bg-[#1673b8] hover:text-white hover:border-[#1673b8] transition-colors"
+                      className="w-9 h-9 rounded-full border border-slate-200 flex items-center justify-center hover:bg-[#1673b8] hover:text-white hover:border-[#1673b8] transition-colors"
                       aria-label="Twitter"
                     >
-                      <FaTwitter className="h-3 w-3" />
+                      <FaTwitter className="h-4 w-4" />
                     </a>
                     <a
                       href="https://linkedin.com"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center hover:bg-[#1673b8] hover:text-white hover:border-[#1673b8] transition-colors"
+                      className="w-9 h-9 rounded-full border border-slate-200 flex items-center justify-center hover:bg-[#1673b8] hover:text-white hover:border-[#1673b8] transition-colors"
                       aria-label="LinkedIn"
                     >
-                      <FaLinkedinIn className="h-3 w-3" />
+                      <FaLinkedinIn className="h-4 w-4" />
                     </a>
                   </div>
                 </div>

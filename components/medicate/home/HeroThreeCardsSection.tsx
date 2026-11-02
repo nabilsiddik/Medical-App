@@ -128,7 +128,7 @@ export default function HeroThreeCardsSection({
                 </div>
                 <div className="flex items-center justify-between pt-1 text-white">
                   <span className="font-bold">Emergency Hotline</span>
-                  <span className="font-mono bg-white/20 px-2.5 py-0.5 rounded-md font-bold text-sm tracking-wider uppercase">
+                  <span className="font-mono bg-white/20 px-3 py-1 rounded-md font-bold text-base tracking-wider uppercase">
                     24HRS 7Days
                   </span>
                 </div>

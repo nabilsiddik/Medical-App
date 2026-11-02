@@ -27,19 +27,19 @@ export default function PageBanner({
             {title}
           </h1>
 
-          {/* Breadcrumb Navigation */}
-          <nav className="flex items-center gap-2 text-xs font-bold tracking-wider uppercase text-slate-500">
+          {/* Breadcrumb Navigation - Standard Natural Readable Font */}
+          <nav className="flex items-center gap-2 text-base font-bold tracking-wider uppercase text-slate-500">
             <Link
               href="/"
-              className="flex items-center gap-1 hover:text-[#1673b8] transition-colors"
+              className="flex items-center gap-1.5 hover:text-[#1673b8] transition-colors"
             >
-              <Home className="h-3.5 w-3.5 text-[#1673b8]" />
+              <Home className="h-4 w-4 text-[#1673b8]" />
               <span>HOME</span>
             </Link>
 
             {breadcrumbs.map((crumb, idx) => (
               <div key={idx} className="flex items-center gap-2">
-                <ChevronRight className="h-3 w-3 text-slate-400" />
+                <ChevronRight className="h-4 w-4 text-slate-400" />
                 {crumb.href ? (
                   <Link
                     href={crumb.href}
@@ -48,7 +48,7 @@ export default function PageBanner({
                     {crumb.label}
                   </Link>
                 ) : (
-                  <span className="text-[#1673b8]">{crumb.label}</span>
+                  <span className="text-[#1673b8] font-bold">{crumb.label}</span>
                 )}
               </div>
             ))}

@@ -20,7 +20,7 @@ export default async function LoginPage({
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             Welcome back
           </h1>
-          <p className="text-xs text-muted-foreground sm:text-sm">
+          <p className="text-base text-muted-foreground">
             Sign in to access your admin or user dashboard
           </p>
         </div>
@@ -31,7 +31,7 @@ export default async function LoginPage({
         </div>
 
         {/* Security Feature Highlights */}
-        <div className="flex items-center justify-center gap-6 text-[11px] text-muted-foreground">
+        <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
           <span className="flex items-center gap-1">
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
             JWT Security

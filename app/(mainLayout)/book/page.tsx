@@ -417,8 +417,8 @@ export default function BookingWizardPage() {
                             <span className="text-base font-mono font-semibold">
                               {formatSlotDisplay(slotKey)}
                             </span>
-                            <span className="text-xs font-bold text-amber-700 flex items-center gap-1 mt-1">
-                              <Coffee className="h-3.5 w-3.5" />
+                            <span className="text-sm font-bold text-amber-700 flex items-center gap-1 mt-1">
+                              <Coffee className="h-4 w-4" />
                               {slot.breakTitle || "Break"}
                             </span>
                           </div>
@@ -436,8 +436,8 @@ export default function BookingWizardPage() {
                             <span className="text-base font-mono font-medium line-through text-slate-500">
                               {formatSlotDisplay(slotKey)}
                             </span>
-                            <span className="text-xs font-bold text-rose-500 flex items-center gap-1 mt-1">
-                              <XCircle className="h-3.5 w-3.5" />
+                            <span className="text-sm font-bold text-rose-500 flex items-center gap-1 mt-1">
+                              <XCircle className="h-4 w-4" />
                               Booked
                             </span>
                           </div>
@@ -460,13 +460,13 @@ export default function BookingWizardPage() {
                             {formatSlotDisplay(slotKey)}
                           </span>
                           <span
-                            className={`text-xs font-semibold flex items-center gap-1 mt-1 ${
+                            className={`text-sm font-semibold flex items-center gap-1 mt-1 ${
                               isSelected ? "text-white" : "text-emerald-600"
                             }`}
                           >
                             {isSelected ? (
                               <>
-                                <CheckCircle2 className="h-3.5 w-3.5" />
+                                <CheckCircle2 className="h-4 w-4" />
                                 Selected
                               </>
                             ) : (

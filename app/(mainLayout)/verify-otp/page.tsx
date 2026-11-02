@@ -23,7 +23,7 @@ export default async function VerifyOtpPage({
               ? "Verify Reset OTP"
               : "Verify Your Email"}
           </h1>
-          <p className="text-xs text-muted-foreground sm:text-sm">
+          <p className="text-base text-muted-foreground">
             Enter the 6-digit security code sent to your registered email
           </p>
         </div>
@@ -38,7 +38,7 @@ export default async function VerifyOtpPage({
           <div className="pt-4 mt-4 border-t border-border/40 text-center">
             <Link
               href="/login"
-              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-medium transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground font-medium transition-colors"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               <span>Back to Sign In</span>

@@ -15,7 +15,7 @@ export default function SignupPage() {
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             Create an Account
           </h1>
-          <p className="text-xs text-muted-foreground sm:text-sm">
+          <p className="text-base text-muted-foreground">
             Sign up to get instant access to your personalized dashboard
           </p>
         </div>
@@ -28,7 +28,7 @@ export default function SignupPage() {
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t border-border" />
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
+            <div className="relative flex justify-center text-sm uppercase">
               <span className="bg-card px-2 text-muted-foreground font-medium">
                 Or continue with
               </span>
@@ -39,7 +39,7 @@ export default function SignupPage() {
         </div>
 
         {/* Security Feature Highlights */}
-        <div className="flex items-center justify-center gap-6 text-[11px] text-muted-foreground">
+        <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
           <span className="flex items-center gap-1">
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
             Email Verification

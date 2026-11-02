@@ -15,7 +15,7 @@ export default function ForgotPasswordPage() {
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             Reset Your Password
           </h1>
-          <p className="text-xs text-muted-foreground sm:text-sm">
+          <p className="text-base text-muted-foreground">
             Enter your registered email address to receive password reset instructions
           </p>
         </div>
@@ -27,7 +27,7 @@ export default function ForgotPasswordPage() {
           <div className="pt-4 mt-4 border-t border-border/40 text-center">
             <Link
               href="/login"
-              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-medium transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground font-medium transition-colors"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               <span>Back to Sign In</span>
