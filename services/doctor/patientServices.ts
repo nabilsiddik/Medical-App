@@ -23,12 +23,19 @@ export const getPatients = async (query?: {
   }
 };
 
-export const getPatientById = async (id: string): Promise<IPatient | null> => {
+export const getPatientById = async (id: string): Promise<(IPatient & { timeline?: any[] }) | null> => {
   try {
     const res = await serverFetch.get(`/patient/${id}`);
     if (!res.ok) return null;
     const json = await res.json();
-    return json.data || null;
+    const data = json.data;
+    if (data && data.patient) {
+      return {
+        ...data.patient,
+        timeline: data.timeline || [],
+      };
+    }
+    return data || null;
   } catch (error) {
     console.error("Failed to load patient:", error);
     return null;
