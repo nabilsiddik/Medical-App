@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Sparkles, ArrowRight, ShieldAlert } from "lucide-react";
+import { Sparkles, ArrowRight } from "lucide-react";
 
 interface DemoNoticeBannerProps {
   role?: string;
@@ -46,4 +46,3 @@ export default function DemoNoticeBanner({ role, userEmail }: DemoNoticeBannerPr
     </div>
   );
 }
-

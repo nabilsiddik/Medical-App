@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import SocialLogin from "../shared/SocialLogin";
 
 export function LoginForm({
   className,
@@ -71,22 +72,33 @@ export function LoginForm({
 
       const res = await demoLoginUser(role, redirect);
       if (res && !res.success) {
-        toast.error(res.message || "Demo login failed", { id: "demo-login-toast" });
+        toast.error(res.message || "Demo login failed", { id: "demo-login-toast", duration: 3000 });
         setDemoLoading(null);
       } else {
         toast.success(`Welcome to ${roleTitle}! Exploring in read-only mode.`, {
           id: "demo-login-toast",
+          duration: 2000,
         });
         router.refresh();
       }
     } catch (err: any) {
       if (err?.digest?.startsWith("NEXT_REDIRECT")) {
-        // Next.js redirect thrown by server action
+        // Next.js redirect thrown by server action on successful login
+        toast.success(`Signed in to ${roleTitle}!`, {
+          id: "demo-login-toast",
+          duration: 2000,
+        });
+        setTimeout(() => {
+          toast.dismiss("demo-login-toast");
+        }, 1200);
         return;
       }
       toast.error("Demo login encountered an error. Please try again.", {
         id: "demo-login-toast",
+        duration: 3000,
       });
+      setDemoLoading(null);
+    } finally {
       setDemoLoading(null);
     }
   };
@@ -105,97 +117,6 @@ export function LoginForm({
 
   return (
     <div className={cn("space-y-6", className)}>
-      {/* 1-Click Interactive Demo Login Box */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-sky-500/10 border border-primary/20 shadow-xs space-y-3.5">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-primary/20 text-primary flex items-center justify-center shrink-0">
-              <Sparkles className="h-4 w-4" />
-            </div>
-            <div>
-              <h3 className="text-xs sm:text-sm font-bold text-foreground leading-tight">
-                Live Interactive Demo
-              </h3>
-              <p className="text-[11px] text-muted-foreground leading-tight">
-                1-click access to test all dashboard features
-              </p>
-            </div>
-          </div>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/15 text-primary uppercase tracking-wider">
-            Read-Only
-          </span>
-        </div>
-
-        {/* 1-Click Action Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-          <button
-            type="button"
-            disabled={!!demoLoading || isPending}
-            onClick={() => handleDemoLogin("DOCTOR")}
-            className="flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-xs sm:text-sm hover:bg-primary/90 transition-all shadow-xs cursor-pointer disabled:opacity-60"
-          >
-            {demoLoading === "DOCTOR" ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Stethoscope className="h-4 w-4 shrink-0" />
-            )}
-            <span>Demo Doctor</span>
-          </button>
-
-          <button
-            type="button"
-            disabled={!!demoLoading || isPending}
-            onClick={() => handleDemoLogin("PATIENT")}
-            className="flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-foreground border border-slate-200 dark:border-slate-700 font-semibold text-xs sm:text-sm hover:border-primary hover:text-primary transition-all shadow-xs cursor-pointer disabled:opacity-60"
-          >
-            {demoLoading === "PATIENT" ? (
-              <Loader2 className="h-4 w-4 animate-spin text-primary" />
-            ) : (
-              <User className="h-4 w-4 shrink-0" />
-            )}
-            <span>Demo Patient</span>
-          </button>
-        </div>
-
-        {/* Quick Autofill Chips & Info */}
-        <div className="pt-1 flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted-foreground border-t border-primary/10">
-          <span className="flex items-center gap-1 font-medium">
-            <ShieldAlert className="h-3 w-3 text-amber-500 shrink-0" />
-            Modifications & deletions disabled
-          </span>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => handleFillDemo("DOCTOR")}
-              className="text-[10px] text-primary hover:underline font-semibold cursor-pointer"
-            >
-              Fill Doctor
-            </button>
-            <span>•</span>
-            <button
-              type="button"
-              onClick={() => handleFillDemo("PATIENT")}
-              className="text-[10px] text-primary hover:underline font-semibold cursor-pointer"
-            >
-              Fill Patient
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Or Divider */}
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-border" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-3 text-muted-foreground font-semibold">
-            Or sign in with account
-          </span>
-        </div>
-      </div>
-
       {/* Manual Login Form */}
       <form
         id="login-form"
@@ -226,7 +147,7 @@ export function LoginForm({
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@example.com"
+              placeholder="Email"
               className="pl-10 h-11 rounded-xl text-sm"
               required
             />
@@ -291,6 +212,37 @@ export function LoginForm({
           Sign In
         </Button>
 
+        {/* 1-Click Action Buttons */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+          <button
+            type="button"
+            disabled={!!demoLoading || isPending}
+            onClick={() => handleDemoLogin("DOCTOR")}
+            className="flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-xs sm:text-sm hover:bg-primary/90 transition-all shadow-xs cursor-pointer disabled:opacity-60"
+          >
+            {demoLoading === "DOCTOR" ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Stethoscope className="h-4 w-4 shrink-0" />
+            )}
+            <span>Demo Doctor</span>
+          </button>
+
+          <button
+            type="button"
+            disabled={!!demoLoading || isPending}
+            onClick={() => handleDemoLogin("PATIENT")}
+            className="flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-xs sm:text-sm hover:bg-primary/90 transition-all shadow-xs cursor-pointer disabled:opacity-60"
+          >
+            {demoLoading === "PATIENT" ? (
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+            ) : (
+              <User className="h-4 w-4 shrink-0" />
+            )}
+            <span>Demo Patient</span>
+          </button>
+        </div>
+
         {/* Signup Link */}
         <p className="text-center text-xs text-muted-foreground pt-1">
           Don&apos;t have an account yet?{" "}
@@ -299,6 +251,19 @@ export function LoginForm({
           </Link>
         </p>
       </form>
+
+      <div className="relative my-5">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-border" />
+        </div>
+        <div className="relative flex justify-center text-sm uppercase">
+          <span className="bg-card px-2 text-muted-foreground font-medium">
+            Or continue with
+          </span>
+        </div>
+      </div>
+
+      <SocialLogin />
     </div>
   );
 }

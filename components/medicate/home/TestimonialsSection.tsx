@@ -70,7 +70,7 @@ const DUMMY_TESTIMONIALS: TestimonialItem[] = [
     photo:
       "https://images.pexels.com/photos/834863/pexels-photo-834863.jpeg?auto=compress&cs=tinysrgb&w=300",
     quote:
-      "I visited for routine glycemic control and cardiovascular follow-up. The computerized queue tokens and immediate digital prescription delivery to my phone made the entire chamber visit seamless and stress-free.",
+      "I visited for routine glycemic control and cardiovascular follow-up. The computerized serial tokens and immediate digital prescription delivery to my phone made the entire chamber visit seamless and stress-free.",
   },
 ];
 

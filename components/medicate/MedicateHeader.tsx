@@ -59,7 +59,6 @@ export default function MedicateHeader({ user }: MedicateHeaderProps) {
   const navLinks = [
     { label: "HOME", href: "/" },
     { label: "SERVICES", href: "/services" },
-    { label: "LIVE QUEUE", href: "/queue" },
     { label: "BLOG", href: "/blog" },
     { label: "CONTACT US", href: "/contact" },
   ];
@@ -306,7 +305,7 @@ export default function MedicateHeader({ user }: MedicateHeaderProps) {
                     <div className="px-3 py-2 bg-slate-50 dark:bg-slate-800/60 rounded-lg mb-1.5">
                       <p className="text-xs font-bold text-foreground">Welcome to Care Portal</p>
                       <p className="text-[11px] text-muted-foreground mt-0.5">
-                        Access appointments, digital Rx, and queue tracking.
+                        Access appointments and verified digital prescriptions.
                       </p>
                     </div>
 
@@ -339,16 +338,6 @@ export default function MedicateHeader({ user }: MedicateHeaderProps) {
                       >
                         <CalendarPlus className="h-4 w-4 text-primary" />
                         <span>Book Appointment</span>
-                      </Link>
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href="/queue"
-                        className="flex items-center gap-2.5 px-3 py-2 text-sm font-medium rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                      >
-                        <Activity className="h-4 w-4 text-primary" />
-                        <span>Live Queue Board</span>
                       </Link>
                     </DropdownMenuItem>
 

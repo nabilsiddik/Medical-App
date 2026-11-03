@@ -173,7 +173,7 @@ export default function PatientAppointmentsPage() {
             <span>My Appointments</span>
           </h1>
           <p className="text-base text-muted-foreground mt-1">
-            Review your upcoming consultations, appointment history, and download official queue passes.
+            Review your upcoming consultations, appointment history, and download official appointment passes.
           </p>
         </div>
 

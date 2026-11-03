@@ -43,11 +43,6 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/queue" className="hover:text-primary transition-colors">
-                  Live Queue Board
-                </Link>
-              </li>
-              <li>
                 <Link href="/#services" className="hover:text-primary transition-colors">
                   Consultation Types
                 </Link>

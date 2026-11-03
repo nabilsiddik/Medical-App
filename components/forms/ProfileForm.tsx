@@ -159,7 +159,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                     id="fullName"
                     name="fullName"
                     defaultValue={user?.fullName || ""}
-                    placeholder="John Doe"
+                    placeholder="Your Name"
                     className="pl-10 h-11 text-sm rounded-xl"
                     required
                   />

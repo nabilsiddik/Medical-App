@@ -9,9 +9,6 @@ export default function SignupPage() {
       <div className="w-full max-w-lg space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="flex justify-center pb-2">
-            <Logo size="lg" />
-          </div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             Create an Account
           </h1>
@@ -36,22 +33,6 @@ export default function SignupPage() {
           </div>
 
           <SocialLogin />
-        </div>
-
-        {/* Security Feature Highlights */}
-        <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-            Email Verification
-          </span>
-          <span className="flex items-center gap-1">
-            <Lock className="h-3.5 w-3.5 text-blue-500" />
-            Argon2/Bcrypt Hash
-          </span>
-          <span className="flex items-center gap-1">
-            <UserCheck className="h-3.5 w-3.5 text-purple-500" />
-            Instant Activation
-          </span>
         </div>
       </div>
     </div>

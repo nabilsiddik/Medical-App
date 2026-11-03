@@ -7,7 +7,6 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { getLoggedInUser } from "@/services/user/userServices";
 import { IUserInfo, UserRole } from "@/types/user.interface";
 import LiveChatWidget from "@/components/chat/LiveChatWidget";
-import DemoNoticeBanner from "@/components/shared/DemoNoticeBanner";
 
 export default async function CommonDashboardLayout({
   children,
@@ -31,7 +30,6 @@ export default async function CommonDashboardLayout({
       <SidebarInset className="min-w-0 w-full max-w-full bg-muted/20 overflow-x-hidden">
         <DashboardNavbar />
         <main className="px-3 py-3.5 sm:px-6 sm:py-6 md:px-8 md:py-8 lg:px-10 w-full max-w-full space-y-4 sm:space-y-6 min-h-[calc(100vh-4rem)] overflow-x-hidden">
-          {isDemo && <DemoNoticeBanner role={userInfo?.role} userEmail={userInfo?.email} />}
           {children}
         </main>
         {isPatient && <LiveChatWidget />}

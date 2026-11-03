@@ -384,29 +384,6 @@ export default function DoctorSchedulesPage() {
 
   return (
     <div className="space-y-6 pb-16">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <Clock className="h-7 w-7 text-primary" />
-            Doctor Consultation Schedules & Breaks
-          </h1>
-          <p className="text-base text-muted-foreground mt-1">
-            Configure your consultation hours and break slots for each day.
-            Patients can only book slots during your active hours outside break times.
-          </p>
-        </div>
-
-        {/* Add Chamber Dialog Trigger */}
-        <Button
-          onClick={() => setIsNewChamberOpen(true)}
-          className="rounded-xl font-bold text-base gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs shrink-0"
-        >
-          <Plus className="h-5 w-5" />
-          Add Chamber Location
-        </Button>
-      </div>
-
       {/* Add Chamber Modal Dialog */}
       <Dialog open={isNewChamberOpen} onOpenChange={setIsNewChamberOpen}>
         <DialogContent className="max-w-lg rounded-2xl p-6">
@@ -561,15 +538,14 @@ export default function DoctorSchedulesPage() {
       <Card className="rounded-2xl border-border/80 shadow-xs">
         <CardContent className="p-5 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <Label className="font-bold text-base text-foreground flex items-center gap-2">
-                <Building className="h-5 w-5 text-primary" />
-                Select Chamber Location to Configure
-              </Label>
-              <p className="text-base text-muted-foreground">
-                Each chamber maintains its independent weekly consultation hours and break intervals.
-              </p>
-            </div>
+            {/* Add Chamber Dialog Trigger */}
+            <Button
+              onClick={() => setIsNewChamberOpen(true)}
+              className="rounded-xl font-bold text-base gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs shrink-0"
+            >
+              <Plus className="h-5 w-5" />
+              Add Chamber Location
+            </Button>
 
             {chambers.length > 0 ? (
               <div className="flex flex-wrap gap-2.5">
@@ -578,11 +554,10 @@ export default function DoctorSchedulesPage() {
                     key={chamber.id}
                     type="button"
                     onClick={() => handleSelectChamber(chamber.id)}
-                    className={`px-4 py-2.5 rounded-xl text-base font-semibold transition-all border flex items-center gap-2 ${
-                      selectedChamberId === chamber.id
-                        ? "bg-primary text-primary-foreground border-primary shadow-xs"
-                        : "bg-muted/40 hover:bg-muted text-foreground border-border/80"
-                    }`}
+                    className={`px-4 py-2.5 rounded-xl text-base font-semibold transition-all border flex items-center gap-2 ${selectedChamberId === chamber.id
+                      ? "bg-primary text-primary-foreground border-primary shadow-xs"
+                      : "bg-muted/40 hover:bg-muted text-foreground border-border/80"
+                      }`}
                   >
                     <MapPin className="h-4 w-4" />
                     <span>{chamber.name}</span>
@@ -621,22 +596,20 @@ export default function DoctorSchedulesPage() {
           return (
             <Card
               key={day.dayOfWeek}
-              className={`rounded-2xl transition-all border ${
-                day.isActive
-                  ? "border-primary/40 bg-card shadow-xs"
-                  : "border-border/60 bg-muted/20 opacity-80"
-              }`}
+              className={`rounded-2xl transition-all border ${day.isActive
+                ? "border-primary/40 bg-card shadow-xs"
+                : "border-border/60 bg-muted/20 opacity-80"
+                }`}
             >
               <CardContent className="p-5 sm:p-6 space-y-5">
                 {/* Day Header Bar */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-border/60">
                   <div className="flex items-center gap-3">
                     <span
-                      className={`h-10 w-10 rounded-xl flex items-center justify-center font-bold text-base ${
-                        day.isActive
-                          ? "bg-primary text-primary-foreground shadow-xs"
-                          : "bg-muted text-muted-foreground"
-                      }`}
+                      className={`h-10 w-10 rounded-xl flex items-center justify-center font-bold text-base ${day.isActive
+                        ? "bg-primary text-primary-foreground shadow-xs"
+                        : "bg-muted text-muted-foreground"
+                        }`}
                     >
                       {dayInfo.short}
                     </span>
@@ -653,16 +626,14 @@ export default function DoctorSchedulesPage() {
                     <button
                       type="button"
                       onClick={() => updateDayField(day.dayOfWeek, "isActive", !day.isActive)}
-                      className={`px-4 py-2 rounded-full font-semibold text-base transition-colors flex items-center gap-2 ${
-                        day.isActive
-                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800"
-                          : "bg-muted text-muted-foreground border border-border"
-                      }`}
+                      className={`cursor-pointer px-4 py-2 rounded-full font-semibold text-base transition-colors flex items-center gap-2 ${day.isActive
+                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800"
+                        : "bg-muted text-muted-foreground border border-border"
+                        }`}
                     >
                       <span
-                        className={`h-2.5 w-2.5 rounded-full ${
-                          day.isActive ? "bg-emerald-600 animate-pulse" : "bg-muted-foreground"
-                        }`}
+                        className={`h-2.5 w-2.5 rounded-full ${day.isActive ? "bg-emerald-600 animate-pulse" : "bg-muted-foreground"
+                          }`}
                       />
                       {day.isActive ? "Active / Open" : "Day Off / Closed"}
                     </button>

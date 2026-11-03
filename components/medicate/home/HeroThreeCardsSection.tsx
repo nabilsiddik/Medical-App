@@ -78,7 +78,7 @@ export default function HeroThreeCardsSection({
               </h3>
 
               <p className="text-white/80 text-base leading-relaxed mb-6 font-normal">
-                Review specialized consultation schedules, chamber locations, and book your verified slot in our digital queue.
+                Review specialized consultation schedules, chamber locations, and book your verified consultation slot.
               </p>
             </div>
 

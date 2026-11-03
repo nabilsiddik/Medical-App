@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const doctorName = config?.doctor?.name || "Prof. Dr. Sarah Rahman";
   const tagline = config?.branding?.brandTagline || "Trusted Clinical Care & Preventive Health";
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://drsarahrahman.com";
-  const description = `${doctorName} (${doctorTitle}) - ${tagline}. Book private chamber consultations, check real-time queue status, access digital prescriptions, and explore preventive healthcare services.`;
+  const description = `${doctorName} (${doctorTitle}) - ${tagline}. Book private chamber consultations, access verified digital prescriptions, and explore preventive healthcare services.`;
 
   return {
     metadataBase: new URL(siteUrl),

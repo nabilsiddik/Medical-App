@@ -82,7 +82,7 @@ export function SignupForm({ className }: { className?: string }) {
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            placeholder="John Doe"
+            placeholder="Your Name"
             className="pl-10 h-11 text-sm rounded-xl"
             required
           />
@@ -107,7 +107,7 @@ export function SignupForm({ className }: { className?: string }) {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="patient@example.com"
+            placeholder="Your Email"
             className="pl-10 h-11 text-sm rounded-xl"
             required
           />

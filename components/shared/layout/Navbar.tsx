@@ -37,7 +37,6 @@ export default async function Navbar() {
   const navigationLinks = [
     { href: "/#chambers", label: "Chambers" },
     { href: "/#services", label: "Services" },
-    { href: "/queue", label: "Live Queue" },
     { href: "/book", label: "Book Appointment" },
     { href: "/#faq", label: "Patient Info" },
   ];

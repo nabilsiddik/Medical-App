@@ -69,11 +69,6 @@ export function NavMain({ userInfo }: { userInfo?: IUserInfo | null }) {
           url: "/admin/dashboard/prescriptions",
           icon: FileText,
         },
-        {
-          title: "Live Queue Board",
-          url: "/admin/dashboard/queue",
-          icon: Tv,
-        },
       ],
     },
     {

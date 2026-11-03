@@ -508,7 +508,7 @@ export default function BookingWizardPage() {
                 Patient Information
               </CardTitle>
               <CardDescription className="text-base text-muted-foreground mt-1">
-                Provide patient credentials for appointment confirmation and computerized queue registration.
+                Provide patient credentials for appointment confirmation and computerized registration.
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6">
