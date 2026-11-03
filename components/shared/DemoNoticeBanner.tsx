@@ -46,3 +46,4 @@ export default function DemoNoticeBanner({ role, userEmail }: DemoNoticeBannerPr
     </div>
   );
 }
+

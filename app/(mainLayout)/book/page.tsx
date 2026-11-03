@@ -411,14 +411,15 @@ export default function BookingWizardPage() {
                         return (
                           <div
                             key={slotKey}
-                            className="p-3.5 rounded-xl border border-amber-200 bg-amber-50/80 text-amber-900 flex flex-col items-center justify-center text-center cursor-not-allowed opacity-85 select-none shadow-2xs"
+                            className="p-3 rounded-xl border border-amber-200 bg-amber-50/80 text-amber-900 flex flex-col items-center justify-center text-center cursor-not-allowed opacity-85 select-none shadow-2xs"
                             title={`Doctor Break: ${slot.breakTitle || "Break Time"}`}
                           >
-                            <span className="text-base font-mono font-semibold">
+                            <span className="text-sm font-mono font-semibold">
                               {formatSlotDisplay(slotKey)}
+                              {slot.endTime && ` - ${formatSlotDisplay(slot.endTime)}`}
                             </span>
-                            <span className="text-sm font-bold text-amber-700 flex items-center gap-1 mt-1">
-                              <Coffee className="h-4 w-4" />
+                            <span className="text-xs font-bold text-amber-700 flex items-center gap-1 mt-1">
+                              <Coffee className="h-3.5 w-3.5" />
                               {slot.breakTitle || "Break"}
                             </span>
                           </div>
@@ -430,14 +431,15 @@ export default function BookingWizardPage() {
                         return (
                           <div
                             key={slotKey}
-                            className="p-3.5 rounded-xl border border-rose-200 bg-rose-50/70 text-slate-500 flex flex-col items-center justify-center text-center cursor-not-allowed opacity-80 select-none shadow-2xs"
+                            className="p-3 rounded-xl border border-rose-200 bg-rose-50/70 text-slate-500 flex flex-col items-center justify-center text-center cursor-not-allowed opacity-80 select-none shadow-2xs"
                             title="This slot has already been reserved by another patient"
                           >
-                            <span className="text-base font-mono font-medium line-through text-slate-500">
+                            <span className="text-sm font-mono font-medium line-through text-slate-500">
                               {formatSlotDisplay(slotKey)}
+                              {slot.endTime && ` - ${formatSlotDisplay(slot.endTime)}`}
                             </span>
-                            <span className="text-sm font-bold text-rose-500 flex items-center gap-1 mt-1">
-                              <XCircle className="h-4 w-4" />
+                            <span className="text-xs font-bold text-rose-500 flex items-center gap-1 mt-1">
+                              <XCircle className="h-3.5 w-3.5" />
                               Booked
                             </span>
                           </div>
@@ -450,23 +452,28 @@ export default function BookingWizardPage() {
                           key={slotKey}
                           type="button"
                           onClick={() => setSelectedSlot(slotKey)}
-                          className={`p-3.5 rounded-xl border-2 flex flex-col items-center justify-center text-center transition-all cursor-pointer ${
+                          className={`p-3 rounded-xl border-2 flex flex-col items-center justify-center text-center transition-all cursor-pointer ${
                             isSelected
                               ? "border-primary bg-primary text-white shadow-md font-bold scale-[1.02]"
                               : "border-slate-200 bg-white hover:border-primary hover:bg-primary/5 text-slate-800 shadow-xs font-medium"
                           }`}
                         >
-                          <span className="text-base font-mono font-bold">
+                          <span className="text-sm sm:text-base font-mono font-bold leading-tight">
                             {formatSlotDisplay(slotKey)}
                           </span>
+                          {slot.endTime && (
+                            <span className={`text-[11px] font-mono leading-tight ${isSelected ? "text-white/90" : "text-muted-foreground"}`}>
+                              until {formatSlotDisplay(slot.endTime)}
+                            </span>
+                          )}
                           <span
-                            className={`text-sm font-semibold flex items-center gap-1 mt-1 ${
+                            className={`text-xs font-semibold flex items-center gap-1 mt-1 ${
                               isSelected ? "text-white" : "text-emerald-600"
                             }`}
                           >
                             {isSelected ? (
                               <>
-                                <CheckCircle2 className="h-4 w-4" />
+                                <CheckCircle2 className="h-3.5 w-3.5" />
                                 Selected
                               </>
                             ) : (

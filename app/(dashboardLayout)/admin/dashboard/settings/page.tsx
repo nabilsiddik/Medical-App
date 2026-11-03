@@ -202,24 +202,11 @@ export default function ClinicSettingsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
-          Clinic Settings & Dynamic Branding
-          <Badge variant="outline" className="text-base text-primary border-primary/40 py-0.5 px-3">
-            White-Label Ready
-          </Badge>
-        </h1>
-        <p className="text-base text-muted-foreground mt-1">
-          Single-source branding system: change primary/secondary hex colors to instantly retheme the entire web app, public home page, header, booking engine, emails, and PDFs.
-        </p>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
+
         {/* LEFT COLUMN: Profile & Chambers */}
         <div className="lg:col-span-7 space-y-6">
-          
+
           {/* Clinic Profile Card */}
           <Card className="rounded-2xl border-border/80 shadow-xs">
             <CardHeader className="pb-4">
@@ -345,7 +332,7 @@ export default function ClinicSettingsPage() {
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-2">
-                    <Badge variant="secondary" className="text-emerald-600">
+                    <Badge variant="secondary" className="text-white">
                       Active Chamber
                     </Badge>
                     <Link href={`/admin/dashboard/schedules?chamberId=${chamber.id}`}>

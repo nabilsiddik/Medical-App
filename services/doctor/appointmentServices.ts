@@ -5,6 +5,7 @@ export interface ISlotItem {
   time: string;
   startTime: string;
   endTime?: string;
+  durationMinutes?: number;
   isAvailable: boolean;
   isBooked: boolean;
   isBreak: boolean;
@@ -24,6 +25,7 @@ export interface IAvailabilityResponse {
     city: string;
   };
   date: string;
+  requiredDurationMinutes?: number;
   totalSlots: number;
   availableSlotsCount: number;
   bookedSlotsCount?: number;
