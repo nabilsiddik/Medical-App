@@ -21,7 +21,7 @@ export default function MedicateFooter() {
 
   return (
     <footer className="bg-[#0e2942] text-slate-300 relative text-base">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-28 lg:pt-32 pb-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Column 1: Dynamic Brand Info */}
           <div className="space-y-5">
