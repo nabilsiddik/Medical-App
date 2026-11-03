@@ -6,13 +6,19 @@ export const getInvoices = async (query?: {
   limit?: number;
   status?: string;
   patientId?: string;
+  searchTerm?: string;
+  sortBy?: string;
+  sortOrder?: string;
 }) => {
   try {
     const params = new URLSearchParams();
     if (query?.page) params.append("page", query.page.toString());
     if (query?.limit) params.append("limit", query.limit.toString());
-    if (query?.status) params.append("status", query.status);
+    if (query?.status && query.status !== "ALL") params.append("status", query.status);
     if (query?.patientId) params.append("patientId", query.patientId);
+    if (query?.searchTerm) params.append("searchTerm", query.searchTerm);
+    if (query?.sortBy) params.append("sortBy", query.sortBy);
+    if (query?.sortOrder) params.append("sortOrder", query.sortOrder);
 
     const res = await serverFetch.get(`/billing/invoices?${params.toString()}`);
     if (!res.ok) return { data: [], meta: { page: 1, limit: 10, total: 0, totalPage: 1 } };
@@ -46,7 +52,7 @@ export const recordPayment = async (
     transactionRef?: string;
   }
 ) => {
-  const res = await serverFetch.post(`/billing/invoices/${invoiceId}/payments`, {
+  const res = await serverFetch.post(`/billing/invoices/${invoiceId}/payment`, {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });

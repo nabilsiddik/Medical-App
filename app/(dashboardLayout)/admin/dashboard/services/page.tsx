@@ -1,17 +1,107 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Plus, Trash2, Pencil, Stethoscope, CheckCircle2, XCircle, RefreshCw, AlertCircle, X } from "lucide-react";
+import { useState, useEffect, useTransition } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import {
+  Plus,
+  Trash2,
+  Pencil,
+  Stethoscope,
+  CheckCircle2,
+  XCircle,
+  RefreshCw,
+  AlertCircle,
+  X,
+  Search,
+  RotateCcw,
+  Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
-import { getServices, createService, updateService, deleteService } from "@/services/doctor/clinicServices";
+import {
+  getServices,
+  createService,
+  updateService,
+  deleteService,
+} from "@/services/doctor/clinicServices";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/shared/buttons/Button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { TablePagination } from "@/components/shared/tables/TablePagination";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function AdminServicesPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+
+  // URL Query Parameters
+  const urlSearchTerm = searchParams.get("searchTerm") || "";
+  const urlType = searchParams.get("type") || "ALL";
+  const urlStatus = searchParams.get("status") || "ALL";
+  const urlPage = parseInt(searchParams.get("page") || "1", 10);
+  const urlLimit = parseInt(searchParams.get("limit") || "10", 10);
+
+  // Search input state with debounce
+  const [searchInput, setSearchInput] = useState(urlSearchTerm);
+  const debouncedSearch = useDebounce(searchInput, 400);
+
+  // Filter dropdown states
+  const [typeFilter, setTypeFilter] = useState(urlType);
+  const [statusFilter, setStatusFilter] = useState(urlStatus);
+
   const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingService, setEditingService] = useState<any | null>(null);
+
+  // Sync state if URL changes externally
+  useEffect(() => {
+    setSearchInput(urlSearchTerm);
+    setTypeFilter(urlType);
+    setStatusFilter(urlStatus);
+  }, [urlSearchTerm, urlType, urlStatus]);
+
+  // Push debounced search to URL
+  useEffect(() => {
+    if (debouncedSearch.trim() !== urlSearchTerm) {
+      updateUrl({ searchTerm: debouncedSearch.trim() });
+    }
+  }, [debouncedSearch]);
+
+  const updateUrl = (updates: Record<string, string | null>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", "1"); // Reset to page 1 on filter/search change
+
+    Object.entries(updates).forEach(([key, value]) => {
+      if (!value || value === "ALL") {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    });
+
+    startTransition(() => {
+      router.push(`${pathname}?${params.toString()}`);
+    });
+  };
+
+  const handleResetFilters = () => {
+    setSearchInput("");
+    setTypeFilter("ALL");
+    setStatusFilter("ALL");
+    startTransition(() => {
+      router.push(pathname);
+    });
+  };
 
   // Add Form State
   const [name, setName] = useState("");
@@ -168,6 +258,38 @@ export default function AdminServicesPage() {
     }
   };
 
+  const hasActiveFilters = Boolean(
+    urlSearchTerm ||
+    (urlType && urlType !== "ALL") ||
+    (urlStatus && urlStatus !== "ALL")
+  );
+
+  const filteredServices = services.filter((srv: any) => {
+    const term = urlSearchTerm.toLowerCase();
+    const matchesSearch =
+      !urlSearchTerm ||
+      srv.name?.toLowerCase().includes(term) ||
+      srv.description?.toLowerCase().includes(term) ||
+      srv.slug?.toLowerCase().includes(term);
+
+    const matchesType =
+      urlType === "ALL" || srv.consultationType === urlType;
+
+    const matchesStatus =
+      urlStatus === "ALL" ||
+      (urlStatus === "ACTIVE" ? srv.isActive : !srv.isActive);
+
+    return matchesSearch && matchesType && matchesStatus;
+  });
+
+  const total = filteredServices.length;
+  const totalPage = Math.max(1, Math.ceil(total / urlLimit));
+  const currentPage = Math.min(urlPage, totalPage);
+  const paginatedServices = filteredServices.slice(
+    (currentPage - 1) * urlLimit,
+    currentPage * urlLimit
+  );
+
   return (
     <div className="space-y-6">
       {/* Top Action Header */}
@@ -211,8 +333,112 @@ export default function AdminServicesPage() {
         </div>
       </div>
 
+      {/* Dynamic Search & Filter Bar */}
+      <div className="p-4 rounded-2xl bg-card border border-border shadow-xs">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          {/* Search Input with Debounce */}
+          <div className="relative flex-1 min-w-[240px]">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search service by name, slug or description..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="pl-10 pr-9 h-11 text-base rounded-xl bg-background border-border/80 focus-visible:ring-primary/20"
+            />
+            {searchInput && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchInput("");
+                  updateUrl({ searchTerm: "" });
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                title="Clear search"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* Consultation Type Filter */}
+            <Select
+              value={typeFilter}
+              onValueChange={(val) => {
+                setTypeFilter(val);
+                updateUrl({ type: val });
+              }}
+            >
+              <SelectTrigger className="h-11 min-w-[150px] text-base font-medium rounded-xl">
+                <SelectValue placeholder="All Types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Types</SelectItem>
+                <SelectItem value="IN_PERSON">In-Person</SelectItem>
+                <SelectItem value="VIDEO">Video Call</SelectItem>
+                <SelectItem value="FOLLOW_UP">Follow-Up</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Status Filter */}
+            <Select
+              value={statusFilter}
+              onValueChange={(val) => {
+                setStatusFilter(val);
+                updateUrl({ status: val });
+              }}
+            >
+              <SelectTrigger className="h-11 min-w-[140px] text-base font-medium rounded-xl">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Status</SelectItem>
+                <SelectItem value="ACTIVE">Active</SelectItem>
+                <SelectItem value="INACTIVE">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Reset Button */}
+            {hasActiveFilters && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleResetFilters}
+                className="h-11 px-3.5 rounded-xl text-base font-medium text-muted-foreground hover:text-foreground cursor-pointer"
+                title="Reset filters"
+              >
+                <RotateCcw className="h-4 w-4 mr-1.5" />
+                Reset
+              </Button>
+            )}
+
+            {/* Refresh Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={fetchServices}
+              disabled={loading}
+              className="h-11 px-3.5 rounded-xl text-base text-muted-foreground cursor-pointer"
+              title="Refresh table"
+            >
+              <RefreshCw className={`h-4 w-4 mr-1.5 ${loading ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {/* Services Table */}
-      <div className="bg-card rounded-2xl border border-border shadow-xs overflow-hidden">
+      <div className="bg-card rounded-2xl border border-border shadow-xs overflow-hidden relative">
+        {loading && (
+          <div className="absolute inset-0 z-10 bg-background/50 backdrop-blur-[1px] flex items-center justify-center">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card border border-border shadow-md">
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              <span className="text-base font-medium text-foreground">Loading services...</span>
+            </div>
+          </div>
+        )}
+
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-base">
             <thead>
@@ -234,14 +460,14 @@ export default function AdminServicesPage() {
                     Loading clinical services...
                   </td>
                 </tr>
-              ) : services.length === 0 ? (
+              ) : paginatedServices.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="p-10 text-center text-muted-foreground">
-                    No clinical services found in database. Click &ldquo;Add New Service&rdquo; to create one.
+                    No clinical services found matching your filters.
                   </td>
                 </tr>
               ) : (
-                services.map((srv) => {
+                paginatedServices.map((srv) => {
                   const feeInBdt = Math.round((srv.price || 0) / 100);
                   const isFree = feeInBdt === 0;
 
@@ -315,6 +541,15 @@ export default function AdminServicesPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Table Pagination */}
+        <div className="px-6 border-t border-border">
+          <TablePagination
+            meta={{ page: currentPage, limit: urlLimit, total, totalPage }}
+            itemName="services"
+            isPending={loading || isPending}
+          />
         </div>
       </div>
 

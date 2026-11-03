@@ -25,7 +25,7 @@ interface TablePaginationProps {
 
 export function TablePagination({
   meta = { page: 1, limit: 10, total: 0, totalPage: 1 },
-  itemName = "users",
+  itemName = "items",
   isPending = false,
 }: TablePaginationProps) {
   const router = useRouter();
@@ -86,7 +86,7 @@ export function TablePagination({
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4 px-1">
       {/* Left side: Results Count & Limit Selector */}
-      <div className="flex items-center gap-4 text-xs text-muted-foreground w-full sm:w-auto justify-between sm:justify-start">
+      <div className="flex items-center gap-4 text-sm text-muted-foreground w-full sm:w-auto justify-between sm:justify-start">
         <p>
           Showing <span className="font-semibold text-foreground">{startItem}</span> to{" "}
           <span className="font-semibold text-foreground">{endItem}</span> of{" "}
@@ -94,13 +94,13 @@ export function TablePagination({
         </p>
 
         <div className="flex items-center gap-2">
-          <span className="hidden sm:inline">Rows per page:</span>
+          <span className="hidden sm:inline text-sm">Rows per page:</span>
           <Select
             value={limit.toString()}
             onValueChange={handleLimitChange}
             disabled={isPending}
           >
-            <SelectTrigger className="h-8 w-[72px] text-xs font-medium">
+            <SelectTrigger className="h-9 w-[76px] text-sm font-medium">
               <SelectValue placeholder={limit.toString()} />
             </SelectTrigger>
             <SelectContent side="top">
@@ -119,7 +119,7 @@ export function TablePagination({
         <Button
           variant="outline"
           size="icon"
-          className="h-8 w-8 hidden sm:flex cursor-pointer disabled:opacity-40"
+          className="h-9 w-9 hidden sm:flex cursor-pointer disabled:opacity-40"
           onClick={() => handlePageChange(1)}
           disabled={page <= 1 || isPending}
           title="First page"
@@ -132,7 +132,7 @@ export function TablePagination({
         <Button
           variant="outline"
           size="icon"
-          className="h-8 w-8 cursor-pointer disabled:opacity-40"
+          className="h-9 w-9 cursor-pointer disabled:opacity-40"
           onClick={() => handlePageChange(page - 1)}
           disabled={page <= 1 || isPending}
           title="Previous page"
@@ -148,7 +148,7 @@ export function TablePagination({
               return (
                 <span
                   key={`ellipsis-${idx}`}
-                  className="px-2 text-xs text-muted-foreground select-none"
+                  className="px-2 text-sm text-muted-foreground select-none"
                 >
                   ...
                 </span>
@@ -161,8 +161,8 @@ export function TablePagination({
                 key={`page-${p}`}
                 variant={isCurrent ? "default" : "outline"}
                 size="icon"
-                className={`h-8 w-8 text-xs font-medium cursor-pointer ${
-                  isCurrent ? "shadow-xs" : ""
+                className={`h-9 w-9 text-sm font-medium cursor-pointer ${
+                  isCurrent ? "shadow-xs font-bold" : ""
                 }`}
                 onClick={() => handlePageChange(Number(p))}
                 disabled={isPending}
@@ -177,7 +177,7 @@ export function TablePagination({
         <Button
           variant="outline"
           size="icon"
-          className="h-8 w-8 cursor-pointer disabled:opacity-40"
+          className="h-9 w-9 cursor-pointer disabled:opacity-40"
           onClick={() => handlePageChange(page + 1)}
           disabled={page >= totalPage || isPending}
           title="Next page"
@@ -190,7 +190,7 @@ export function TablePagination({
         <Button
           variant="outline"
           size="icon"
-          className="h-8 w-8 hidden sm:flex cursor-pointer disabled:opacity-40"
+          className="h-9 w-9 hidden sm:flex cursor-pointer disabled:opacity-40"
           onClick={() => handlePageChange(totalPage)}
           disabled={page >= totalPage || isPending}
           title="Last page"

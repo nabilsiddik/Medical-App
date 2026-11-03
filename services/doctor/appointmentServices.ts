@@ -108,15 +108,19 @@ export const getAppointments = async (query?: {
   status?: string;
   date?: string;
   chamberId?: string;
+  sortBy?: string;
+  sortOrder?: string;
 }) => {
   try {
     const params = new URLSearchParams();
     if (query?.page) params.append("page", query.page.toString());
     if (query?.limit) params.append("limit", query.limit.toString());
     if (query?.searchTerm) params.append("searchTerm", query.searchTerm);
-    if (query?.status) params.append("status", query.status);
+    if (query?.status && query.status !== "ALL") params.append("status", query.status);
     if (query?.date) params.append("date", query.date);
-    if (query?.chamberId) params.append("chamberId", query.chamberId);
+    if (query?.chamberId && query.chamberId !== "ALL") params.append("chamberId", query.chamberId);
+    if (query?.sortBy) params.append("sortBy", query.sortBy);
+    if (query?.sortOrder) params.append("sortOrder", query.sortOrder);
 
     const res = await serverFetch.get(`/appointment?${params.toString()}`);
     if (!res.ok) return { data: [], meta: { page: 1, limit: 10, total: 0, totalPage: 1 } };

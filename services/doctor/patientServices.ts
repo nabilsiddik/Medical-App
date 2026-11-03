@@ -6,13 +6,19 @@ export const getPatients = async (query?: {
   limit?: number;
   searchTerm?: string;
   gender?: string;
+  bloodGroup?: string;
+  sortBy?: string;
+  sortOrder?: string;
 }) => {
   try {
     const params = new URLSearchParams();
     if (query?.page) params.append("page", query.page.toString());
     if (query?.limit) params.append("limit", query.limit.toString());
     if (query?.searchTerm) params.append("searchTerm", query.searchTerm);
-    if (query?.gender) params.append("gender", query.gender);
+    if (query?.gender && query.gender !== "ALL") params.append("gender", query.gender);
+    if (query?.bloodGroup && query.bloodGroup !== "ALL") params.append("bloodGroup", query.bloodGroup);
+    if (query?.sortBy) params.append("sortBy", query.sortBy);
+    if (query?.sortOrder) params.append("sortOrder", query.sortOrder);
 
     const res = await serverFetch.get(`/patient?${params.toString()}`);
     if (!res.ok) return { data: [], meta: { page: 1, limit: 10, total: 0, totalPage: 1 } };

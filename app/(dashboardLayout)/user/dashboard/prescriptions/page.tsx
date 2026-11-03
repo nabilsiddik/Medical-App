@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useTransition } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
   FileText,
   Download,
@@ -9,27 +10,82 @@ import {
   Pill,
   Stethoscope,
   RefreshCw,
-  Clock,
-  ShieldCheck,
+  Search,
+  RotateCcw,
+  X,
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/shared/buttons/Button";
+import { Input } from "@/components/ui/input";
+import { TablePagination } from "@/components/shared/tables/TablePagination";
+import { useDebounce } from "@/hooks/useDebounce";
 import Link from "next/link";
+import { toast } from "sonner";
 import { IPrescription } from "@/types/doctor.interface";
 import { getMyPrescriptions } from "@/services/doctor/prescriptionServices";
 
 export default function PatientPrescriptionsPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+
+  const urlSearchTerm = searchParams.get("searchTerm") || "";
+  const urlPage = parseInt(searchParams.get("page") || "1", 10);
+  const urlLimit = parseInt(searchParams.get("limit") || "10", 10);
+
+  const [searchInput, setSearchInput] = useState(urlSearchTerm);
+  const debouncedSearch = useDebounce(searchInput, 400);
+
   const [prescriptions, setPrescriptions] = useState<IPrescription[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const backendUrl = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000/api/v1";
+
+  useEffect(() => {
+    setSearchInput(urlSearchTerm);
+  }, [urlSearchTerm]);
+
+  useEffect(() => {
+    if (debouncedSearch.trim() !== urlSearchTerm) {
+      updateUrl({ searchTerm: debouncedSearch.trim() });
+    }
+  }, [debouncedSearch]);
+
+  const updateUrl = (updates: Record<string, string | null>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", "1");
+
+    Object.entries(updates).forEach(([key, value]) => {
+      if (!value) {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    });
+
+    startTransition(() => {
+      router.push(`${pathname}?${params.toString()}`);
+    });
+  };
+
+  const handleResetFilters = () => {
+    setSearchInput("");
+    startTransition(() => {
+      router.push(pathname);
+    });
+  };
 
   const loadPrescriptions = async () => {
     setLoading(true);
     try {
       const data = await getMyPrescriptions();
-      setPrescriptions(data);
+      setPrescriptions(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
+      toast.error("Failed to load prescriptions");
     } finally {
       setLoading(false);
     }
@@ -39,18 +95,40 @@ export default function PatientPrescriptionsPage() {
     loadPrescriptions();
   }, []);
 
-  const backendUrl = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000/api/v1";
+  const hasActiveFilters = Boolean(urlSearchTerm);
+
+  // Filter prescriptions locally
+  const filteredPrescriptions = prescriptions.filter((rx) => {
+    const term = urlSearchTerm.toLowerCase();
+    const matchesSearch =
+      !urlSearchTerm ||
+      rx.prescriptionNumber?.toLowerCase().includes(term) ||
+      rx.doctor?.fullName?.toLowerCase().includes(term) ||
+      rx.diagnosis?.toLowerCase().includes(term) ||
+      (Array.isArray(rx.diagnoses) && rx.diagnoses.some((d) => d.toLowerCase().includes(term))) ||
+      (rx.items && rx.items.some((item) => item.drugName?.toLowerCase().includes(term) || (item as any).brandName?.toLowerCase().includes(term)));
+
+    return matchesSearch;
+  });
+
+  const total = filteredPrescriptions.length;
+  const totalPage = Math.max(1, Math.ceil(total / urlLimit));
+  const currentPage = Math.min(urlPage, totalPage);
+  const paginatedPrescriptions = filteredPrescriptions.slice(
+    (currentPage - 1) * urlLimit,
+    currentPage * urlLimit
+  );
 
   return (
     <div className="space-y-6">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <FileText className="h-6 w-6 text-primary" />
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <FileText className="h-7 w-7 text-primary" />
             <span>My Prescriptions (Rx)</span>
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground mt-1">
             Access, review, and download signed digital medical prescriptions issued during your visits.
           </p>
         </div>
@@ -59,90 +137,152 @@ export default function PatientPrescriptionsPage() {
           size="sm"
           variant="outline"
           onClick={loadPrescriptions}
-          className="rounded-xl text-xs"
+          disabled={loading}
+          className="rounded-xl text-sm h-10 px-4 cursor-pointer"
         >
-          <RefreshCw className="h-3.5 w-3.5 mr-1" /> Refresh
+          <RefreshCw className={`h-4 w-4 mr-1.5 ${loading ? "animate-spin" : ""}`} /> Refresh
         </Button>
       </div>
 
-      {/* Prescriptions List Card */}
+      {/* Dynamic Search & Reset Bar */}
       <Card className="rounded-2xl border-border/80 shadow-xs">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-bold">
-            Medical Prescription Archive ({prescriptions.length})
-          </CardTitle>
-          <CardDescription className="text-xs">
+        <CardContent className="p-4">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+            {/* Search Input with Debounce */}
+            <div className="relative flex-1 min-w-[240px]">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search prescription by medicine name, doctor, diagnosis, or Rx #..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="pl-10 pr-9 h-11 text-base rounded-xl bg-background border-border/80 focus-visible:ring-primary/20"
+              />
+              {searchInput && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchInput("");
+                    updateUrl({ searchTerm: "" });
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                  title="Clear search"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+
+            {hasActiveFilters && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleResetFilters}
+                className="h-11 px-3.5 rounded-xl text-base font-medium text-muted-foreground hover:text-foreground cursor-pointer"
+                title="Reset search"
+              >
+                <RotateCcw className="h-4 w-4 mr-1.5" />
+                Reset
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Prescriptions List Card */}
+      <Card className="rounded-2xl border-border/80 shadow-xs overflow-hidden">
+        <CardHeader className="p-6 pb-4 border-b border-border/60">
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-xl font-bold">
+              Medical Prescription Archive
+            </CardTitle>
+            <Badge variant="secondary" className="font-semibold text-xs px-2.5 py-0.5">
+              {total} Prescriptions
+            </Badge>
+          </div>
+          <CardDescription className="text-base text-muted-foreground mt-0.5">
             Authentic, QR-verifiable prescriptions with dosage guidelines and doctor advice
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="p-0 relative">
+          {/* Loading Overlay */}
+          {loading && (
+            <div className="absolute inset-0 z-10 bg-background/50 backdrop-blur-[1px] flex items-center justify-center">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card border border-border shadow-md">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <span className="text-base font-medium text-foreground">Loading prescriptions...</span>
+              </div>
+            </div>
+          )}
+
           <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left">
-              <thead className="bg-muted/40 border-y border-border/60 text-muted-foreground font-semibold uppercase tracking-wider text-[11px]">
+            <table className="w-full text-base text-left border-collapse">
+              <thead className="bg-muted/40 border-b border-border/60 text-muted-foreground font-bold uppercase tracking-wider text-base">
                 <tr>
-                  <th className="py-3 px-4">Rx Number / Date</th>
-                  <th className="py-3 px-4">Consultant Doctor</th>
-                  <th className="py-3 px-4">Diagnoses</th>
-                  <th className="py-3 px-4">Prescribed Medicines</th>
-                  <th className="py-3 px-4">Follow-Up Date</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-4 px-5">Rx Number / Date</th>
+                  <th className="py-4 px-5">Consultant Doctor</th>
+                  <th className="py-4 px-5">Diagnoses</th>
+                  <th className="py-4 px-5">Prescribed Medicines</th>
+                  <th className="py-4 px-5">Follow-Up Date</th>
+                  <th className="py-4 px-5 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
-                {prescriptions.length > 0 ? (
-                  prescriptions.map((rx) => {
+                {paginatedPrescriptions.length > 0 ? (
+                  paginatedPrescriptions.map((rx) => {
                     const diagnosesList = Array.isArray(rx.diagnoses)
                       ? rx.diagnoses.join(", ")
                       : rx.diagnosis || "Clinical Consultation";
 
                     return (
                       <tr key={rx.id} className="hover:bg-muted/30 transition-colors">
-                        <td className="py-3.5 px-4">
-                          <div className="font-mono font-bold text-foreground">
+                        <td className="py-4 px-5">
+                          <div className="font-mono font-bold text-foreground text-base">
                             {rx.prescriptionNumber || `RX-${rx.id.slice(0, 8)}`}
                           </div>
-                          <div className="text-[11px] text-muted-foreground flex items-center gap-1 font-mono">
-                            <Calendar className="h-3 w-3" />
+                          <div className="text-sm text-muted-foreground flex items-center gap-1.5 font-mono mt-0.5">
+                            <Calendar className="h-3.5 w-3.5" />
                             <span>{new Date(rx.createdAt).toLocaleDateString()}</span>
                           </div>
                         </td>
 
-                        <td className="py-3.5 px-4">
-                          <div className="font-semibold text-foreground flex items-center gap-1.5">
-                            <Stethoscope className="h-3.5 w-3.5 text-primary shrink-0" />
+                        <td className="py-4 px-5">
+                          <div className="font-bold text-foreground text-base flex items-center gap-1.5">
+                            <Stethoscope className="h-4 w-4 text-primary shrink-0" />
                             <span>{rx.doctor?.fullName || "Prof. Dr. Sarah Ahmed"}</span>
                           </div>
-                          <div className="text-[10px] text-muted-foreground">
+                          <div className="text-sm text-muted-foreground mt-0.5">
                             Senior Consultant Physician
                           </div>
                         </td>
 
-                        <td className="py-3.5 px-4">
-                          <Badge variant="secondary" className="text-[11px] font-medium max-w-[200px] truncate">
+                        <td className="py-4 px-5">
+                          <Badge variant="secondary" className="text-sm font-medium max-w-[200px] truncate px-2.5 py-0.5">
                             {diagnosesList}
                           </Badge>
                         </td>
 
-                        <td className="py-3.5 px-4 font-mono font-medium">
-                          <span className="inline-flex items-center gap-1">
-                            <Pill className="h-3.5 w-3.5 text-blue-500" />
+                        <td className="py-4 px-5 font-mono font-medium text-base">
+                          <span className="inline-flex items-center gap-1.5">
+                            <Pill className="h-4 w-4 text-blue-500" />
                             <span>{rx.items?.length || 0} Medications</span>
                           </span>
                         </td>
 
-                        <td className="py-3.5 px-4 font-mono text-muted-foreground">
+                        <td className="py-4 px-5 font-mono text-muted-foreground text-base">
                           {rx.nextFollowUpDate || rx.followUpDate
                             ? new Date(rx.nextFollowUpDate || rx.followUpDate!).toLocaleDateString()
                             : "As needed"}
                         </td>
 
-                        <td className="py-3.5 px-4 text-right space-x-2">
+                        <td className="py-4 px-5 text-right space-x-2">
                           {/* QR Authenticity Verify */}
-                          <Link href={`/verify-rx/${rx.verificationToken}`} target="_blank">
-                            <Button size="sm" variant="outline" className="h-7 text-[11px] px-2.5 rounded-lg">
-                              <ExternalLink className="h-3 w-3 mr-1" /> Verify
-                            </Button>
-                          </Link>
+                          {rx.verificationToken && (
+                            <Link href={`/verify-rx/${rx.verificationToken}`} target="_blank">
+                              <Button size="sm" variant="outline" className="h-9 text-sm px-3 rounded-xl cursor-pointer">
+                                <ExternalLink className="h-3.5 w-3.5 mr-1" /> Verify
+                              </Button>
+                            </Link>
+                          )}
 
                           {/* Download PDF stream */}
                           <a
@@ -153,9 +293,9 @@ export default function PatientPrescriptionsPage() {
                             <Button
                               size="sm"
                               variant="default"
-                              className="h-7 text-[11px] px-3 rounded-lg font-semibold shadow-xs"
+                              className="h-9 text-sm px-3.5 rounded-xl font-semibold shadow-xs cursor-pointer"
                             >
-                              <Download className="h-3 w-3 mr-1" /> Download PDF
+                              <Download className="h-3.5 w-3.5 mr-1.5" /> Download PDF
                             </Button>
                           </a>
                         </td>
@@ -164,19 +304,27 @@ export default function PatientPrescriptionsPage() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-muted-foreground">
+                    <td colSpan={6} className="py-16 text-center text-muted-foreground text-base">
                       {loading
                         ? "Loading prescriptions..."
-                        : "No medical prescriptions recorded yet. Your prescriptions will appear here following consultations."}
+                        : "No medical prescriptions recorded yet matching your search."}
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
+
+          {/* Table Pagination */}
+          <div className="px-6 border-t border-border/60">
+            <TablePagination
+              meta={{ page: currentPage, limit: urlLimit, total, totalPage }}
+              itemName="prescriptions"
+              isPending={loading || isPending}
+            />
+          </div>
         </CardContent>
       </Card>
     </div>
   );
 }
-

@@ -18,6 +18,8 @@ export const getPrescriptions = async (query?: {
   limit?: number;
   patientId?: string;
   searchTerm?: string;
+  sortBy?: string;
+  sortOrder?: string;
 }) => {
   try {
     const params = new URLSearchParams();
@@ -25,6 +27,8 @@ export const getPrescriptions = async (query?: {
     if (query?.limit) params.append("limit", query.limit.toString());
     if (query?.patientId) params.append("patientId", query.patientId);
     if (query?.searchTerm) params.append("searchTerm", query.searchTerm);
+    if (query?.sortBy) params.append("sortBy", query.sortBy);
+    if (query?.sortOrder) params.append("sortOrder", query.sortOrder);
 
     const res = await serverFetch.get(`/prescription?${params.toString()}`);
     if (!res.ok) return { data: [], meta: { page: 1, limit: 10, total: 0, totalPage: 1 } };

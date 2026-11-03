@@ -321,16 +321,21 @@ export interface IInvoice {
   invoiceNumber: string;
   patientId: string;
   appointmentId?: string | null;
-  totalAmount: number;
-  discountAmount: number;
-  taxAmount: number;
-  netAmount: number;
+  total?: number;
+  totalAmount?: number;
+  subtotal?: number;
+  discount?: number;
+  discountAmount?: number;
+  tax?: number;
+  taxAmount?: number;
+  netAmount?: number;
   paidAmount: number;
-  balanceAmount: number;
-  status: PaymentStatus;
+  dueAmount?: number;
+  balanceAmount?: number;
+  status: PaymentStatus | string;
   notes?: string | null;
   createdAt: string;
-  patient?: IPatient;
+  patient?: IPatient | any;
   items?: IInvoiceItem[];
   payments?: IPaymentRecord[];
 }

@@ -1,7 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useTransition } from "react";
 import Link from "next/link";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { TablePagination } from "@/components/shared/tables/TablePagination";
+import { useDebounce } from "@/hooks/useDebounce";
 import {
   getAllBlogsAdmin,
   createBlogPost,
@@ -44,6 +47,7 @@ import {
   ArrowLeft,
   ExternalLink,
   RefreshCw,
+  RotateCcw,
   Minus,
   UploadCloud,
   X,
@@ -81,11 +85,60 @@ const FORMAT_OPTIONS = [
 ];
 
 export default function AdminBlogsPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+
+  const urlSearchTerm = searchParams.get("searchTerm") || "";
+  const urlCategory = searchParams.get("category") || "ALL";
+  const urlPage = parseInt(searchParams.get("page") || "1", 10);
+  const urlLimit = parseInt(searchParams.get("limit") || "10", 10);
+
   const [blogs, setBlogs] = useState<IBlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"list" | "editor">("list");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState("ALL");
+  const [searchQuery, setSearchQuery] = useState(urlSearchTerm);
+  const debouncedSearch = useDebounce(searchQuery, 400);
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState(urlCategory);
+
+  // Sync state if URL changes externally
+  useEffect(() => {
+    setSearchQuery(urlSearchTerm);
+    setSelectedCategoryFilter(urlCategory);
+  }, [urlSearchTerm, urlCategory]);
+
+  // Push debounced search to URL
+  useEffect(() => {
+    if (debouncedSearch.trim() !== urlSearchTerm) {
+      updateUrl({ searchTerm: debouncedSearch.trim() });
+    }
+  }, [debouncedSearch]);
+
+  const updateUrl = (updates: Record<string, string | null>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", "1"); // Reset to page 1 on filter/search change
+
+    Object.entries(updates).forEach(([key, value]) => {
+      if (!value || value === "ALL") {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    });
+
+    startTransition(() => {
+      router.push(`${pathname}?${params.toString()}`);
+    });
+  };
+
+  const handleResetFilters = () => {
+    setSearchQuery("");
+    setSelectedCategoryFilter("ALL");
+    startTransition(() => {
+      router.push(pathname);
+    });
+  };
 
   // WordPress-style Editor State
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
@@ -606,18 +659,33 @@ export default function AdminBlogsPage() {
     }
   };
 
+  const hasActiveFilters = Boolean(
+    urlSearchTerm ||
+    (urlCategory && urlCategory !== "ALL")
+  );
+
   // Filtered blogs for table
   const filteredBlogs = blogs.filter((b) => {
+    const term = urlSearchTerm.toLowerCase();
     const matchesQuery =
-      b.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      b.slug.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (b.category && b.category.toLowerCase().includes(searchQuery.toLowerCase()));
+      !urlSearchTerm ||
+      b.title.toLowerCase().includes(term) ||
+      b.slug.toLowerCase().includes(term) ||
+      (b.category && b.category.toLowerCase().includes(term));
 
     const matchesCategory =
-      selectedCategoryFilter === "ALL" || b.category === selectedCategoryFilter;
+      urlCategory === "ALL" || b.category === urlCategory;
 
     return matchesQuery && matchesCategory;
   });
+
+  const total = filteredBlogs.length;
+  const totalPage = Math.max(1, Math.ceil(total / urlLimit));
+  const currentPage = Math.min(urlPage, totalPage);
+  const paginatedBlogs = filteredBlogs.slice(
+    (currentPage - 1) * urlLimit,
+    currentPage * urlLimit
+  );
 
   return (
     <div className="space-y-6 pb-12">
@@ -650,24 +718,40 @@ export default function AdminBlogsPage() {
 
           {/* Search & Filter Bar */}
           <Card className="rounded-2xl border-border/80 shadow-xs">
-            <CardContent className="p-5 flex flex-col md:flex-row gap-4 justify-between items-center">
-              <div className="relative w-full md:w-96">
-                <Search className="h-5 w-5 absolute left-3.5 top-3 text-muted-foreground" />
+            <CardContent className="p-4 flex flex-col md:flex-row gap-3 justify-between items-stretch md:items-center">
+              <div className="relative flex-1 min-w-[240px]">
+                <Search className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Search articles by title, slug, or topic..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-11 rounded-xl h-11 text-base"
+                  className="pl-10 pr-9 rounded-xl h-11 text-base bg-background border-border/80"
                 />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery("");
+                      updateUrl({ searchTerm: "" });
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                    title="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
               </div>
 
-              <div className="flex items-center gap-3 w-full md:w-auto">
+              <div className="flex flex-wrap items-center gap-2.5">
                 <Label className="font-semibold text-muted-foreground whitespace-nowrap text-base">
                   Filter Topic:
                 </Label>
                 <select
                   value={selectedCategoryFilter}
-                  onChange={(e) => setSelectedCategoryFilter(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedCategoryFilter(e.target.value);
+                    updateUrl({ category: e.target.value });
+                  }}
                   className="rounded-xl border border-input bg-background h-11 px-3 text-foreground font-semibold text-base"
                 >
                   <option value="ALL">All Categories ({blogs.length})</option>
@@ -677,12 +761,46 @@ export default function AdminBlogsPage() {
                     </option>
                   ))}
                 </select>
+
+                {hasActiveFilters && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleResetFilters}
+                    className="h-11 px-3.5 rounded-xl text-base font-medium text-muted-foreground hover:text-foreground cursor-pointer"
+                    title="Reset filters"
+                  >
+                    <RotateCcw className="h-4 w-4 mr-1.5" />
+                    Reset
+                  </Button>
+                )}
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={fetchBlogs}
+                  disabled={loading}
+                  className="h-11 px-3.5 rounded-xl text-base text-muted-foreground cursor-pointer"
+                  title="Refresh articles"
+                >
+                  <RefreshCw className={`h-4 w-4 mr-1.5 ${loading ? "animate-spin" : ""}`} />
+                  Refresh
+                </Button>
               </div>
             </CardContent>
           </Card>
 
           {/* Posts Table */}
-          <Card className="rounded-2xl border-border/80 shadow-xs overflow-hidden">
+          <Card className="rounded-2xl border-border/80 shadow-xs overflow-hidden relative">
+            {loading && (
+              <div className="absolute inset-0 z-10 bg-background/50 backdrop-blur-[1px] flex items-center justify-center">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card border border-border shadow-md">
+                  <RefreshCw className="h-4 w-4 animate-spin text-primary" />
+                  <span className="text-base font-medium text-foreground">Loading articles...</span>
+                </div>
+              </div>
+            )}
+
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
@@ -703,7 +821,7 @@ export default function AdminBlogsPage() {
                         Loading published articles...
                       </td>
                     </tr>
-                  ) : filteredBlogs.length === 0 ? (
+                  ) : paginatedBlogs.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="p-10 text-center text-muted-foreground">
                         <FileText className="h-12 w-12 mx-auto mb-2 text-muted-foreground/40" />
@@ -718,7 +836,7 @@ export default function AdminBlogsPage() {
                       </td>
                     </tr>
                   ) : (
-                    filteredBlogs.map((post) => (
+                    paginatedBlogs.map((post) => (
                       <tr
                         key={post.id}
                         className="hover:bg-muted/30 transition-colors group"
@@ -797,6 +915,15 @@ export default function AdminBlogsPage() {
                   )}
                 </tbody>
               </table>
+            </div>
+
+            {/* Table Pagination */}
+            <div className="px-6 border-t border-border/80">
+              <TablePagination
+                meta={{ page: currentPage, limit: urlLimit, total, totalPage }}
+                itemName="articles"
+                isPending={loading || isPending}
+              />
             </div>
           </Card>
         </div>
