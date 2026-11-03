@@ -59,6 +59,7 @@ export default function AdminServicesPage() {
 
   const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingService, setEditingService] = useState<any | null>(null);
@@ -126,7 +127,7 @@ export default function AdminServicesPage() {
   const fetchServices = async () => {
     setLoading(true);
     try {
-      const data = await getServices();
+      const data = await getServices(true);
       setServices(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to load services:", err);
@@ -258,6 +259,24 @@ export default function AdminServicesPage() {
     }
   };
 
+  const handleToggleActive = async (srv: any) => {
+    const newStatus = !srv.isActive;
+    setTogglingId(srv.id);
+    try {
+      const res = await updateService(srv.id, { isActive: newStatus });
+      if (res.success || res.id || res.data) {
+        toast.success(`"${srv.name}" marked as ${newStatus ? "Active" : "Inactive"}`);
+        fetchServices();
+      } else {
+        toast.error(res.message || "Failed to update service status");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Error updating service status");
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
   const hasActiveFilters = Boolean(
     urlSearchTerm ||
     (urlType && urlType !== "ALL") ||
@@ -322,17 +341,6 @@ export default function AdminServicesPage() {
         </div>
       </div>
 
-      {/* Info Card explaining what services do */}
-      <div className="p-5 rounded-2xl bg-primary/5 border border-primary/20 text-base flex items-start gap-3.5">
-        <AlertCircle className="h-6 w-6 text-primary shrink-0 mt-0.5" />
-        <div className="space-y-1">
-          <span className="font-bold text-foreground">Where do these services show?</span>
-          <p className="text-muted-foreground text-base leading-relaxed">
-            Every service created here is immediately available in the <strong>Patient Booking Wizard (/book)</strong> under &ldquo;Select Appointment Type &amp; Pricing&rdquo;, and on the public <strong>Services Directory (/services)</strong>. Patients can book directly for that service, and selecting a price of <strong>0 BDT</strong> allows patients to book for free (e.g. Free Report Review).
-          </p>
-        </div>
-      </div>
-
       {/* Dynamic Search & Filter Bar */}
       <div className="p-4 rounded-2xl bg-card border border-border shadow-xs">
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
@@ -388,13 +396,17 @@ export default function AdminServicesPage() {
                 updateUrl({ status: val });
               }}
             >
-              <SelectTrigger className="h-11 min-w-[140px] text-base font-medium rounded-xl">
+              <SelectTrigger className="h-11 min-w-[160px] text-base font-medium rounded-xl">
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">All Status</SelectItem>
-                <SelectItem value="ACTIVE">Active</SelectItem>
-                <SelectItem value="INACTIVE">Inactive</SelectItem>
+                <SelectItem value="ALL">All Status ({services.length})</SelectItem>
+                <SelectItem value="ACTIVE">
+                  Active ({services.filter((s) => s.isActive).length})
+                </SelectItem>
+                <SelectItem value="INACTIVE">
+                  Inactive ({services.filter((s) => !s.isActive).length})
+                </SelectItem>
               </SelectContent>
             </Select>
 
@@ -503,17 +515,36 @@ export default function AdminServicesPage() {
                         )}
                       </td>
                       <td className="p-4">
-                        {srv.isActive ? (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-base font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                            <CheckCircle2 className="h-4 w-4" />
-                            Active
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-base font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400">
-                            <XCircle className="h-4 w-4" />
-                            Inactive
-                          </span>
-                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleToggleActive(srv)}
+                          disabled={togglingId === srv.id}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-base font-bold transition-all cursor-pointer border ${
+                            togglingId === srv.id
+                              ? "bg-muted text-muted-foreground border-border"
+                              : srv.isActive
+                              ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                              : "bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border-rose-500/20"
+                          }`}
+                          title={`Click to ${srv.isActive ? "Deactivate" : "Activate"} this service`}
+                        >
+                          {togglingId === srv.id ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              Updating...
+                            </>
+                          ) : srv.isActive ? (
+                            <>
+                              <CheckCircle2 className="h-4 w-4" />
+                              Active
+                            </>
+                          ) : (
+                            <>
+                              <XCircle className="h-4 w-4" />
+                              Inactive
+                            </>
+                          )}
+                        </button>
                       </td>
                       <td className="p-4 text-right">
                         <div className="inline-flex items-center gap-1.5">

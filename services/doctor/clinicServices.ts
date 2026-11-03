@@ -106,9 +106,11 @@ export const updateLocationSchedules = async (
   return res.json();
 };
 
-export const getServices = async () => {
+export const getServices = async (includeInactive: boolean = false) => {
   try {
-    const res = await serverFetch.get("/service", { next: { revalidate: 60 } });
+    const endpoint = includeInactive ? "/service?includeInactive=true" : "/service";
+    const options = includeInactive ? { cache: "no-store" as RequestCache } : { next: { revalidate: 60 } };
+    const res = await serverFetch.get(endpoint, options);
     if (!res.ok) return [];
     const json = await res.json();
     return json.data || [];
