@@ -49,7 +49,7 @@ export default async function UserDashboardPage() {
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 p-6 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-700 text-white shadow-md">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 p-6 rounded-2xl bg-primary text-white shadow-md">
         <div className="flex items-center gap-4">
           <Avatar className="h-16 w-16 ring-4 ring-white/20 shrink-0">
             <AvatarImage src={user?.profilePhoto || undefined} alt={user?.fullName} />

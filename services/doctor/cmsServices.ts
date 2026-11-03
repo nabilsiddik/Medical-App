@@ -83,6 +83,18 @@ export const getAllBlogsAdmin = async (): Promise<IBlogPost[]> => {
   }
 };
 
+export const getBlogCategories = async (): Promise<string[]> => {
+  try {
+    const res = await serverFetch.get("/cms/blogs/categories");
+    if (!res.ok) return [];
+    const json = await res.json();
+    return Array.isArray(json.data) ? json.data : [];
+  } catch (error) {
+    console.error("Failed to load blog categories:", error);
+    return [];
+  }
+};
+
 export const updateBlogPost = async (id: string, data: any) => {
   const res = await serverFetch.patch(`/cms/blogs/${id}`, {
     headers: { "Content-Type": "application/json" },

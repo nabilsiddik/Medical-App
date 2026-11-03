@@ -84,15 +84,8 @@ export default function BlogSidebar({
       });
     }
 
-    // Default fallback categories if no blogs found
     if (map.size === 0) {
-      return [
-        { name: "Clinical Cardiology", count: 0 },
-        { name: "Health Tips", count: 0 },
-        { name: "General Medicine", count: 0 },
-        { name: "Preventive Care", count: 0 },
-        { name: "Diabetes & Endocrinology", count: 0 },
-      ];
+      return [];
     }
 
     return Array.from(map.entries())

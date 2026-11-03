@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useTransition } from "react";
+import React, { useState, useEffect, useRef, useTransition, useMemo } from "react";
 import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { TablePagination } from "@/components/shared/tables/TablePagination";
@@ -63,17 +63,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-const PRESET_CATEGORIES = [
-  "Clinical Cardiology",
-  "General Medicine",
-  "Health Tips",
-  "Neurology",
-  "Rehabilitation",
-  "Preventive Care",
-  "Endocrinology",
-  "Surgery & Recovery",
-];
-
 const FORMAT_OPTIONS = [
   { label: "Paragraph", tag: "p", className: "text-base font-normal" },
   { label: "Heading 1", tag: "h1", className: "text-xl font-bold" },
@@ -101,6 +90,16 @@ export default function AdminBlogsPage() {
   const [searchQuery, setSearchQuery] = useState(urlSearchTerm);
   const debouncedSearch = useDebounce(searchQuery, 400);
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState(urlCategory);
+
+  // Dynamic Categories from database blogs (No static predefined list)
+  const existingCategories: string[] = useMemo(() => {
+    const set = new Set<string>();
+    blogs.forEach((b: IBlogPost) => {
+      const cat = b.category?.trim();
+      if (cat) set.add(cat);
+    });
+    return Array.from(set).sort((a: string, b: string) => a.localeCompare(b));
+  }, [blogs]);
 
   // Sync state if URL changes externally
   useEffect(() => {
@@ -149,7 +148,8 @@ export default function AdminBlogsPage() {
   const [htmlContent, setHtmlContent] = useState("");
   const [summary, setSummary] = useState("");
   const [coverImage, setCoverImage] = useState("");
-  const [category, setCategory] = useState("Health Tips");
+  const [category, setCategory] = useState("");
+  const [customCategoryInput, setCustomCategoryInput] = useState("");
   const [tagsInput, setTagsInput] = useState("");
   const [authorName, setAuthorName] = useState("Prof. Dr. Sarah Rahman");
   const [isPublished, setIsPublished] = useState(true);
@@ -286,7 +286,8 @@ export default function AdminBlogsPage() {
     setHtmlContent(initialText);
     setSummary("");
     setCoverImage("");
-    setCategory("Health Tips");
+    setCategory(existingCategories.length > 0 ? existingCategories[0] : "");
+    setCustomCategoryInput("");
     setTagsInput("Healthcare, Medicine, Wellness");
     setIsPublished(true);
     setViewMode("editor");
@@ -309,7 +310,11 @@ export default function AdminBlogsPage() {
     setHtmlContent(content);
     setSummary(post.summary || "");
     setCoverImage(post.coverImage || "");
-    setCategory(post.category || "Health Tips");
+    const postCat = (post.category || "").trim();
+    setCategory(postCat);
+    setCustomCategoryInput(
+      existingCategories.some((c: string) => c.toLowerCase() === postCat.toLowerCase()) ? "" : postCat
+    );
     setTagsInput(post.tags ? post.tags.join(", ") : "");
     setIsPublished(post.isPublished ?? true);
     setAuthorName(post.authorName || "Prof. Dr. Sarah Rahman");
@@ -578,6 +583,11 @@ export default function AdminBlogsPage() {
       return;
     }
 
+    if (!category.trim()) {
+      toast.error("Please select a category or enter a new one");
+      return;
+    }
+
     const cleanSlug = (
       slug.trim() ||
       title
@@ -597,7 +607,7 @@ export default function AdminBlogsPage() {
       summary: summary.trim() || finalHtml.replace(/<[^>]*>/g, " ").substring(0, 160).trim(),
       content: finalHtml,
       coverImage: coverImage.trim() || undefined,
-      category: category.trim() || "Health Tips",
+      category: category.trim(),
       tags: tagsArray,
       authorName: authorName.trim() || "Prof. Dr. Sarah Rahman",
       isPublished: publishStatus,
@@ -755,11 +765,16 @@ export default function AdminBlogsPage() {
                   className="rounded-xl border border-input bg-background h-11 px-3 text-foreground font-semibold text-base"
                 >
                   <option value="ALL">All Categories ({blogs.length})</option>
-                  {PRESET_CATEGORIES.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
+                  {existingCategories.map((c: string) => {
+                    const count = blogs.filter(
+                      (b: IBlogPost) => (b.category || "").trim().toLowerCase() === c.toLowerCase()
+                    ).length;
+                    return (
+                      <option key={c} value={c}>
+                        {c} ({count})
+                      </option>
+                    );
+                  })}
                 </select>
 
                 {hasActiveFilters && (
@@ -1639,38 +1654,102 @@ export default function AdminBlogsPage() {
               {/* Box 3: Categories */}
               <Card className="rounded-xl border-border shadow-xs">
                 <CardHeader className="py-4 px-5 border-b border-border/60">
-                  <CardTitle className="text-lg font-bold flex items-center gap-2">
-                    <Folder className="h-5 w-5 text-primary" />
-                    Category
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-bold flex items-center gap-2">
+                      <Folder className="h-5 w-5 text-primary" />
+                      Category
+                    </CardTitle>
+                    {category && (
+                      <Badge variant="secondary" className="text-xs font-semibold text-primary bg-primary/10 border-primary/20">
+                        {category}
+                      </Badge>
+                    )}
+                  </div>
                 </CardHeader>
-                <CardContent className="p-5 space-y-3">
-                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                    {PRESET_CATEGORIES.map((cat) => (
-                      <label
-                        key={cat}
-                        className="flex items-center gap-2.5 font-semibold text-foreground cursor-pointer hover:text-primary py-0.5 text-base"
-                      >
-                        <input
-                          type="radio"
-                          name="blogCategory"
-                          checked={category === cat}
-                          onChange={() => setCategory(cat)}
-                          className="text-primary focus:ring-primary rounded h-4 w-4 cursor-pointer"
-                        />
-                        <span>{cat}</span>
-                      </label>
-                    ))}
+                <CardContent className="p-5 space-y-4">
+                  <div>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
+                      Saved Categories {existingCategories.length > 0 ? `(${existingCategories.length})` : ""}
+                    </Label>
+                    {existingCategories.length === 0 ? (
+                      <p className="text-sm text-muted-foreground italic py-1">
+                        No categories found in database. Enter a new category below.
+                      </p>
+                    ) : (
+                      <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                        {existingCategories.map((cat: string) => {
+                          const isSelected = category.trim().toLowerCase() === cat.trim().toLowerCase();
+                          return (
+                            <label
+                              key={cat}
+                              className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg border text-base font-medium cursor-pointer transition-colors ${
+                                isSelected
+                                  ? "bg-primary/10 border-primary/40 text-primary font-bold"
+                                  : "border-transparent hover:bg-muted text-foreground"
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name="blogCategory"
+                                checked={isSelected}
+                                onChange={() => {
+                                  setCategory(cat);
+                                  setCustomCategoryInput("");
+                                }}
+                                className="text-primary focus:ring-primary rounded h-4 w-4 cursor-pointer"
+                              />
+                              <span className="truncate">{cat}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
 
-                  <div className="pt-3 border-t border-border/60 space-y-1">
-                    <Label className="font-semibold text-base">Or custom category:</Label>
-                    <Input
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      placeholder="e.g. Pediatric Cardiology"
-                      className="rounded-xl h-10 text-base"
-                    />
+                  <div className="pt-3 border-t border-border/60 space-y-2">
+                    <Label className="font-semibold text-base">Or add new category:</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        value={customCategoryInput}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setCustomCategoryInput(val);
+                          if (val.trim()) {
+                            setCategory(val.trim());
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            if (customCategoryInput.trim()) {
+                              setCategory(customCategoryInput.trim());
+                            }
+                          }
+                        }}
+                        placeholder="e.g. Pediatric Cardiology"
+                        className="rounded-xl h-10 text-base"
+                      />
+                      {customCategoryInput.trim() && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="h-10 px-3 rounded-xl shrink-0"
+                          onClick={() => {
+                            if (customCategoryInput.trim()) {
+                              setCategory(customCategoryInput.trim());
+                            }
+                          }}
+                        >
+                          Set
+                        </Button>
+                      )}
+                    </div>
+                    {category && !existingCategories.some((c: string) => c.toLowerCase() === category.toLowerCase()) && (
+                      <p className="text-xs text-primary font-medium flex items-center gap-1.5 pt-0.5">
+                        <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+                        <span>New category &ldquo;{category}&rdquo; will be stored in database with this post.</span>
+                      </p>
+                    )}
                   </div>
                 </CardContent>
               </Card>

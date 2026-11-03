@@ -48,8 +48,9 @@ export default function DoctorAnalyticsCharts({ analytics }: DoctorAnalyticsChar
     formattedDate: formatShortDate(item.date),
   }));
 
-  const formattedApptData = appointmentsByDate.map((item) => ({
+  const formattedApptData = appointmentsByDate.map((item: any) => ({
     ...item,
+    count: Number(item.count ?? item.total ?? 0),
     formattedDate: formatShortDate(item.date),
   }));
 
@@ -133,14 +134,14 @@ export default function DoctorAnalyticsCharts({ analytics }: DoctorAnalyticsChar
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-base font-bold flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-emerald-500" />
+                  <Calendar className="h-4 w-4 text-primary" />
                   <span>Appointments by Date</span>
                 </CardTitle>
                 <CardDescription className="text-xs">
                   Clinical consultations scheduled and completed
                 </CardDescription>
               </div>
-              <Badge variant="outline" className="text-xs font-mono font-medium text-emerald-600 bg-emerald-500/10 border-emerald-500/20">
+              <Badge variant="outline" className="text-xs font-mono font-medium text-primary bg-primary/10 border-primary/20">
                 14-Day View
               </Badge>
             </div>
@@ -149,6 +150,12 @@ export default function DoctorAnalyticsCharts({ analytics }: DoctorAnalyticsChar
             <div className="h-[260px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={formattedApptData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="appointmentsBarGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#1673b8" stopOpacity={1} />
+                      <stop offset="100%" stopColor="#0ea5e9" stopOpacity={0.85} />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border/50" />
                   <XAxis
                     dataKey="formattedDate"
@@ -165,6 +172,7 @@ export default function DoctorAnalyticsCharts({ analytics }: DoctorAnalyticsChar
                     allowDecimals={false}
                   />
                   <Tooltip
+                    cursor={{ fill: "rgba(22, 115, 184, 0.12)", radius: 6 }}
                     contentStyle={{
                       backgroundColor: "rgba(15, 23, 42, 0.95)",
                       borderRadius: "12px",
@@ -177,9 +185,10 @@ export default function DoctorAnalyticsCharts({ analytics }: DoctorAnalyticsChar
                   />
                   <Bar
                     dataKey="count"
-                    fill="#10b981"
+                    fill="url(#appointmentsBarGradient)"
                     radius={[6, 6, 0, 0]}
                     maxBarSize={40}
+                    activeBar={{ fill: "#1673b8", opacity: 0.9 }}
                   />
                 </BarChart>
               </ResponsiveContainer>
