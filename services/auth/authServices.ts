@@ -422,3 +422,21 @@ export const logoutUser = async (): Promise<any> => {
   }
   return { success: true, message: "Logged out successfully" };
 };
+
+// 9. One-Click Demo Login (Doctor or Patient)
+export const demoLoginUser = async (
+  role: "DOCTOR" | "PATIENT",
+  redirectPath?: string | null
+): Promise<any> => {
+  const email = role === "DOCTOR" ? "demo.doctor@chamber.com" : "demo.patient@chamber.com";
+  const password = role === "DOCTOR" ? "Demo@Doctor2026" : "Demo@Patient2026";
+
+  const formData = new FormData();
+  formData.set("email", email);
+  formData.set("password", password);
+  if (redirectPath) {
+    formData.set("redirect", redirectPath);
+  }
+
+  return loginUser(null, formData);
+};

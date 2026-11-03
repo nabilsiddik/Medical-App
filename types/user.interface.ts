@@ -30,6 +30,7 @@ export interface IUserInfo {
   isEmailVerified?: boolean;
   status?: UserStatus;
   gender?: Gender | string | null;
+  isDemo?: boolean;
 }
 
 export interface IUser {
@@ -51,6 +52,7 @@ export interface IUser {
 
   createdAt: string;
   updatedAt: string;
+  isDemo?: boolean;
 }
 
 export interface IMeta {
