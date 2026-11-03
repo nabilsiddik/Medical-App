@@ -336,16 +336,16 @@ export default function QueueBoardPage() {
         </CardHeader>
 
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full min-w-[650px] text-xs text-left">
               <thead className="bg-muted/40 border-y border-border/60 text-muted-foreground font-semibold uppercase tracking-wider text-[11px]">
                 <tr>
-                  <th className="py-3 px-4">Token #</th>
-                  <th className="py-3 px-4">Patient Name</th>
-                  <th className="py-3 px-4">Phone</th>
-                  <th className="py-3 px-4">Slot</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4 whitespace-nowrap">Token #</th>
+                  <th className="py-3 px-4 whitespace-nowrap">Patient Name</th>
+                  <th className="py-3 px-4 whitespace-nowrap">Phone</th>
+                  <th className="py-3 px-4 whitespace-nowrap">Slot</th>
+                  <th className="py-3 px-4 whitespace-nowrap">Status</th>
+                  <th className="py-3 px-4 whitespace-nowrap text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">

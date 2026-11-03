@@ -78,7 +78,7 @@ export default function BillingManagementPage() {
   const [payModalOpen, setPayModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<IInvoice | null>(null);
   const [payAmount, setPayAmount] = useState("");
-  const [payMethod, setPayMethod] = useState<"CASH" | "CARD" | "BKASH" | "SSLCOMMERZ">("CASH");
+  const [payMethod, setPayMethod] = useState<"CASH" | "CARD" | "CARD_ON_SITE" | "BKASH" | "SSLCOMMERZ" | "ONLINE">("CASH");
   const [recordingPayment, setRecordingPayment] = useState(false);
 
   // New Invoice Modal
@@ -577,17 +577,17 @@ export default function BillingManagementPage() {
             </div>
           )}
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full min-w-[780px] text-sm text-left">
               <thead className="bg-muted/40 border-y border-border/60 text-muted-foreground font-semibold uppercase tracking-wider text-xs">
                 <tr>
-                  <th className="py-3.5 px-6">Invoice #</th>
-                  <th className="py-3.5 px-6">Patient</th>
-                  <th className="py-3.5 px-6">Net Total</th>
-                  <th className="py-3.5 px-6">Paid</th>
-                  <th className="py-3.5 px-6">Balance</th>
-                  <th className="py-3.5 px-6">Status</th>
-                  <th className="py-3.5 px-6 text-right">Actions</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Invoice #</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Patient</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Net Total</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Paid</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Balance</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Status</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
@@ -602,14 +602,14 @@ export default function BillingManagementPage() {
 
                     return (
                       <tr key={inv.id} className="hover:bg-muted/30 transition-colors">
-                        <td className="py-4 px-6 font-mono font-bold text-foreground">
+                        <td className="py-3.5 px-4 sm:px-6 font-mono font-bold text-foreground whitespace-nowrap">
                           {inv.invoiceNumber}
                           <div className="text-xs text-muted-foreground font-normal mt-0.5">
                             {inv.createdAt ? new Date(inv.createdAt).toLocaleDateString() : "N/A"}
                           </div>
                         </td>
 
-                        <td className="py-4 px-6">
+                        <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
                           <div className="font-semibold text-foreground">
                             {patientName}
                           </div>
@@ -618,19 +618,19 @@ export default function BillingManagementPage() {
                           </div>
                         </td>
 
-                        <td className="py-4 px-6 font-mono font-bold text-foreground">
+                        <td className="py-3.5 px-4 sm:px-6 font-mono font-bold text-foreground whitespace-nowrap">
                           ৳ {netTotal.toLocaleString()}
                         </td>
 
-                        <td className="py-4 px-6 font-mono text-emerald-600 dark:text-emerald-400 font-semibold">
+                        <td className="py-3.5 px-4 sm:px-6 font-mono text-emerald-600 dark:text-emerald-400 font-semibold whitespace-nowrap">
                           ৳ {paid.toLocaleString()}
                         </td>
 
-                        <td className="py-4 px-6 font-mono text-amber-600 dark:text-amber-400 font-bold">
+                        <td className="py-3.5 px-4 sm:px-6 font-mono text-amber-600 dark:text-amber-400 font-bold whitespace-nowrap">
                           ৳ {balance.toLocaleString()}
                         </td>
 
-                        <td className="py-4 px-6">
+                        <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
                           <Badge
                             variant="secondary"
                             className={`text-xs font-semibold px-2.5 py-0.5 ${
@@ -645,7 +645,7 @@ export default function BillingManagementPage() {
                           </Badge>
                         </td>
 
-                        <td className="py-4 px-6 text-right">
+                        <td className="py-3.5 px-4 sm:px-6 text-right whitespace-nowrap">
                           <div className="flex items-center justify-end gap-2">
                             {balance > 0 ? (
                               <Button
@@ -714,7 +714,7 @@ export default function BillingManagementPage() {
                 className="w-full h-10 px-3 rounded-xl border border-input bg-card text-sm focus:ring-2 focus:ring-primary focus:outline-none"
               >
                 <option value="CASH">Cash (Reception Drawer)</option>
-                <option value="CARD">Debit / Credit Card (POS Terminal)</option>
+                <option value="CARD_ON_SITE">Debit / Credit Card (POS Terminal)</option>
                 <option value="BKASH">bKash (MFS Transfer)</option>
                 <option value="SSLCOMMERZ">Online Gateway</option>
               </select>

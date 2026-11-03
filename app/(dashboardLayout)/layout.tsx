@@ -23,9 +23,9 @@ export default async function CommonDashboardLayout({
   return (
     <SidebarProvider>
       <AppSidebar userInfo={userInfo} />
-      <SidebarInset className="min-w-0 bg-muted/20">
+      <SidebarInset className="min-w-0 w-full max-w-full bg-muted/20 overflow-x-hidden">
         <DashboardNavbar />
-        <main className="px-6 py-6 sm:px-8 md:px-10 lg:px-12 xl:px-14 w-full space-y-6 min-h-[calc(100vh-4rem)]">
+        <main className="px-3 py-3.5 sm:px-6 sm:py-6 md:px-8 md:py-8 lg:px-10 w-full max-w-full space-y-4 sm:space-y-6 min-h-[calc(100vh-4rem)] overflow-x-hidden">
           {children}
         </main>
         {isPatient && <LiveChatWidget />}

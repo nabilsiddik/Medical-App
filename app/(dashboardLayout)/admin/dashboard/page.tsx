@@ -166,15 +166,15 @@ export default async function AdminDashboardOverviewPage() {
               </Link>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs text-left">
+              <div className="overflow-x-auto w-full">
+                <table className="w-full min-w-[650px] text-xs text-left">
                   <thead className="bg-muted/40 border-y border-border/60 text-muted-foreground font-semibold uppercase tracking-wider text-[11px]">
                     <tr>
-                      <th className="py-2.5 px-4">Ref / Patient</th>
-                      <th className="py-2.5 px-4">Chamber</th>
-                      <th className="py-2.5 px-4">Date / Slot</th>
-                      <th className="py-2.5 px-4">Status</th>
-                      <th className="py-2.5 px-4 text-right">Fee</th>
+                      <th className="py-2.5 px-4 whitespace-nowrap">Ref / Patient</th>
+                      <th className="py-2.5 px-4 whitespace-nowrap">Chamber</th>
+                      <th className="py-2.5 px-4 whitespace-nowrap">Date / Slot</th>
+                      <th className="py-2.5 px-4 whitespace-nowrap">Status</th>
+                      <th className="py-2.5 px-4 whitespace-nowrap text-right">Fee</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/60">

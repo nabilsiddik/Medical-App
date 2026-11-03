@@ -438,17 +438,17 @@ export default function PatientsListPage() {
             </div>
           )}
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full min-w-[780px] text-sm text-left">
               <thead className="bg-muted/40 border-y border-border/60 text-muted-foreground font-semibold uppercase tracking-wider text-xs">
                 <tr>
-                  <th className="py-3.5 px-6">Patient Name</th>
-                  <th className="py-3.5 px-6">Phone</th>
-                  <th className="py-3.5 px-6">Age / Gender</th>
-                  <th className="py-3.5 px-6">Blood Group</th>
-                  <th className="py-3.5 px-6">Allergies</th>
-                  <th className="py-3.5 px-6">Visits</th>
-                  <th className="py-3.5 px-6 text-right">Actions</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Patient Name</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Phone</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Age / Gender</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Blood Group</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Allergies</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Visits</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
@@ -460,7 +460,7 @@ export default function PatientsListPage() {
 
                     return (
                       <tr key={p.id} className="hover:bg-muted/30 transition-colors">
-                        <td className="py-4 px-6">
+                        <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
                           <Link
                             href={`/admin/dashboard/patients/${p.id}`}
                             className="font-bold text-foreground hover:text-primary transition-colors text-sm"
@@ -472,21 +472,21 @@ export default function PatientsListPage() {
                           </div>
                         </td>
 
-                        <td className="py-4 px-6 font-mono text-muted-foreground">
+                        <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap font-mono text-muted-foreground">
                           {patientPhone}
                         </td>
 
-                        <td className="py-4 px-6">
+                        <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
                           {p.ageYears ? `${p.ageYears} yrs` : "N/A"} • {p.gender}
                         </td>
 
-                        <td className="py-4 px-6">
+                        <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
                           <Badge variant="secondary" className="font-mono text-xs font-bold px-2 py-0.5">
                             {p.bloodGroup || "Unknown"}
                           </Badge>
                         </td>
 
-                        <td className="py-4 px-6">
+                        <td className="py-3.5 px-4 sm:px-6">
                           {p.allergies && p.allergies.length > 0 ? (
                             <div className="flex flex-wrap gap-1">
                               {p.allergies.map((allg) => (
@@ -504,11 +504,11 @@ export default function PatientsListPage() {
                           )}
                         </td>
 
-                        <td className="py-4 px-6 font-mono font-medium">
+                        <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap font-mono font-medium">
                           {p._count?.appointments || 0} visits
                         </td>
 
-                        <td className="py-4 px-6 text-right space-x-2">
+                        <td className="py-3.5 px-4 sm:px-6 text-right whitespace-nowrap space-x-2">
                           <Link href={`/admin/dashboard/patients/${p.id}`}>
                             <Button size="sm" variant="outline" className="h-8 text-xs px-2.5 rounded-lg cursor-pointer">
                               <Eye className="h-3.5 w-3.5 mr-1" /> View EMR

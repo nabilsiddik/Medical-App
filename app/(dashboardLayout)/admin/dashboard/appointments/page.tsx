@@ -407,24 +407,24 @@ export default function AppointmentsPage() {
             </div>
           )}
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full min-w-[800px] text-sm text-left">
               <thead className="bg-muted/40 border-y border-border/60 text-muted-foreground font-semibold uppercase tracking-wider text-xs">
                 <tr>
-                  <th className="py-3.5 px-6">Ref / Token</th>
-                  <th className="py-3.5 px-6">Patient</th>
-                  <th className="py-3.5 px-6">Chamber</th>
-                  <th className="py-3.5 px-6">Date & Slot</th>
-                  <th className="py-3.5 px-6">Status</th>
-                  <th className="py-3.5 px-6">Fee / Refund</th>
-                  <th className="py-3.5 px-6 text-right">Actions</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Ref / Token</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Patient</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Chamber</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Date & Slot</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Status</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Fee / Refund</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
                 {appointments.length > 0 ? (
                   appointments.map((app) => (
                     <tr key={app.id} className="hover:bg-muted/30 transition-colors">
-                      <td className="py-4 px-6">
+                      <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
                         <div className="font-mono font-bold text-sm text-foreground">
                           {app.appointmentRef || `APT-${app.id.slice(0, 8)}`}
                         </div>
@@ -435,7 +435,7 @@ export default function AppointmentsPage() {
                         )}
                       </td>
 
-                      <td className="py-4 px-6">
+                      <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
                         <div className="font-semibold text-foreground">
                           {app.patientName || app.patient?.fullName || app.patient?.name || "Patient"}
                         </div>
@@ -444,11 +444,11 @@ export default function AppointmentsPage() {
                         </div>
                       </td>
 
-                      <td className="py-4 px-6 font-medium text-foreground">
+                      <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap font-medium text-foreground">
                         {app.chamberLocation?.name || app.chamber?.name || "Chamber"}
                       </td>
 
-                      <td className="py-4 px-6 font-mono text-muted-foreground">
+                      <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap font-mono text-muted-foreground">
                         <div className="font-medium text-foreground">
                           {new Date(app.appointmentDate).toLocaleDateString()}
                         </div>
@@ -457,7 +457,7 @@ export default function AppointmentsPage() {
                         </div>
                       </td>
 
-                      <td className="py-4 px-6">
+                      <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
                         <Badge
                           variant="secondary"
                           className={`text-xs font-semibold px-2.5 py-0.5 ${
@@ -476,7 +476,7 @@ export default function AppointmentsPage() {
                         </Badge>
                       </td>
 
-                      <td className="py-4 px-6">
+                      <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
                         <div className="font-mono font-bold text-foreground">
                           {app.fee === 0 ? "FREE (৳0)" : `৳${app.fee?.toLocaleString()}`}
                         </div>
@@ -493,7 +493,7 @@ export default function AppointmentsPage() {
                         )}
                       </td>
 
-                      <td className="py-4 px-6 text-right space-x-1.5">
+                      <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap text-right space-x-1.5">
                         {app.status === "PENDING" && (
                           <Button
                             size="sm"

@@ -228,16 +228,16 @@ export default function PrescriptionsListPage() {
             </div>
           )}
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full min-w-[780px] text-sm text-left">
               <thead className="bg-muted/40 border-y border-border/60 text-muted-foreground font-semibold uppercase tracking-wider text-xs">
                 <tr>
-                  <th className="py-3.5 px-6">Date / Token</th>
-                  <th className="py-3.5 px-6">Patient</th>
-                  <th className="py-3.5 px-6">Diagnosis</th>
-                  <th className="py-3.5 px-6">Medicines Prescribed</th>
-                  <th className="py-3.5 px-6">Follow-up</th>
-                  <th className="py-3.5 px-6 text-right">Actions</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Date / Token</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Patient</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Diagnosis</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Medicines Prescribed</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Follow-up</th>
+                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
@@ -252,7 +252,7 @@ export default function PrescriptionsListPage() {
 
                     return (
                       <tr key={rx.id} className="hover:bg-muted/30 transition-colors">
-                        <td className="py-4 px-6">
+                        <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
                           <div className="font-mono font-bold text-foreground">
                             {new Date(rx.createdAt).toLocaleDateString()}
                           </div>
@@ -261,7 +261,7 @@ export default function PrescriptionsListPage() {
                           </div>
                         </td>
 
-                        <td className="py-4 px-6">
+                        <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
                           <div className="font-semibold text-foreground">
                             {patientName}
                           </div>
@@ -270,23 +270,23 @@ export default function PrescriptionsListPage() {
                           </div>
                         </td>
 
-                        <td className="py-4 px-6">
+                        <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
                           <Badge variant="secondary" className="text-xs font-medium px-2.5 py-0.5 max-w-[200px] truncate">
                             {diagnosesList}
                           </Badge>
                         </td>
 
-                        <td className="py-4 px-6 font-mono font-medium">
+                        <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap font-mono font-medium">
                           {rx.items?.length || 0} drugs
                         </td>
 
-                        <td className="py-4 px-6 font-mono text-muted-foreground">
+                        <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap font-mono text-muted-foreground">
                           {rx.followUpDate || rx.nextFollowUpDate
                             ? new Date(rx.followUpDate || rx.nextFollowUpDate!).toLocaleDateString()
                             : "As needed"}
                         </td>
 
-                        <td className="py-4 px-6 text-right space-x-2">
+                        <td className="py-3.5 px-4 sm:px-6 text-right whitespace-nowrap space-x-2">
                           {/* Public QR Verification Link */}
                           {rx.verificationToken && (
                             <Link

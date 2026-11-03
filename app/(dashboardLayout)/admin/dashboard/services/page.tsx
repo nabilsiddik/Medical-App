@@ -439,17 +439,17 @@ export default function AdminServicesPage() {
           </div>
         )}
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-base">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full min-w-[780px] text-left border-collapse text-base">
             <thead>
               <tr className="border-b border-border bg-muted/40 text-muted-foreground font-bold uppercase tracking-wider text-base">
-                <th className="p-4">Service Name</th>
-                <th className="p-4">Slug</th>
-                <th className="p-4">Type</th>
-                <th className="p-4">Duration</th>
-                <th className="p-4">Fee</th>
-                <th className="p-4">Status</th>
-                <th className="p-4 text-right">Actions</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Service Name</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Slug</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Type</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Duration</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Fee</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Status</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">

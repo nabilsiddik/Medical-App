@@ -141,8 +141,13 @@ export function TablePagination({
           <span className="sr-only">Previous page</span>
         </Button>
 
-        {/* Page Numbers */}
-        <div className="flex items-center gap-1">
+        {/* Page indicator on mobile, numbered buttons on tablet & desktop */}
+        <div className="flex sm:hidden items-center px-2.5 py-1 text-sm font-semibold text-foreground bg-muted/50 rounded-lg">
+          Page {page} of {totalPage}
+        </div>
+
+        {/* Page Numbers for sm+ */}
+        <div className="hidden sm:flex items-center gap-1">
           {getPageNumbers().map((p, idx) => {
             if (p === "...") {
               return (

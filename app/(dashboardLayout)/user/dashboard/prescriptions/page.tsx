@@ -214,16 +214,16 @@ export default function PatientPrescriptionsPage() {
             </div>
           )}
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-base text-left border-collapse">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full min-w-[760px] text-base text-left border-collapse">
               <thead className="bg-muted/40 border-b border-border/60 text-muted-foreground font-bold uppercase tracking-wider text-base">
                 <tr>
-                  <th className="py-4 px-5">Rx Number / Date</th>
-                  <th className="py-4 px-5">Consultant Doctor</th>
-                  <th className="py-4 px-5">Diagnoses</th>
-                  <th className="py-4 px-5">Prescribed Medicines</th>
-                  <th className="py-4 px-5">Follow-Up Date</th>
-                  <th className="py-4 px-5 text-right">Actions</th>
+                  <th className="py-4 px-4 sm:px-5 whitespace-nowrap">Rx Number / Date</th>
+                  <th className="py-4 px-4 sm:px-5 whitespace-nowrap">Consultant Doctor</th>
+                  <th className="py-4 px-4 sm:px-5 whitespace-nowrap">Diagnoses</th>
+                  <th className="py-4 px-4 sm:px-5 whitespace-nowrap">Prescribed Medicines</th>
+                  <th className="py-4 px-4 sm:px-5 whitespace-nowrap">Follow-Up Date</th>
+                  <th className="py-4 px-4 sm:px-5 whitespace-nowrap text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">

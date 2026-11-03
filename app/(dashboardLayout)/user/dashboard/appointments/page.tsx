@@ -313,16 +313,16 @@ export default function PatientAppointmentsPage() {
             </div>
           )}
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-base text-left border-collapse">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full min-w-[760px] text-base text-left border-collapse">
               <thead className="bg-muted/40 border-b border-border/60 text-muted-foreground font-bold uppercase tracking-wider text-base">
                 <tr>
-                  <th className="py-4 px-5">Booking Ref</th>
-                  <th className="py-4 px-5">Chamber</th>
-                  <th className="py-4 px-5">Date &amp; Slot</th>
-                  <th className="py-4 px-5">Consultation Fee</th>
-                  <th className="py-4 px-5">Status</th>
-                  <th className="py-4 px-5 text-right">Actions</th>
+                  <th className="py-4 px-4 sm:px-5 whitespace-nowrap">Booking Ref</th>
+                  <th className="py-4 px-4 sm:px-5 whitespace-nowrap">Chamber</th>
+                  <th className="py-4 px-4 sm:px-5 whitespace-nowrap">Date &amp; Slot</th>
+                  <th className="py-4 px-4 sm:px-5 whitespace-nowrap">Consultation Fee</th>
+                  <th className="py-4 px-4 sm:px-5 whitespace-nowrap">Status</th>
+                  <th className="py-4 px-4 sm:px-5 whitespace-nowrap text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">

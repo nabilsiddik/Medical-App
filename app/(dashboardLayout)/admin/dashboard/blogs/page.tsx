@@ -816,16 +816,16 @@ export default function AdminBlogsPage() {
               </div>
             )}
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto w-full">
+              <table className="w-full min-w-[780px] text-left border-collapse">
                 <thead>
                   <tr className="bg-muted/50 border-b border-border/80 text-muted-foreground font-bold text-base">
-                    <th className="p-4 pl-6">Title</th>
-                    <th className="p-4">Author</th>
-                    <th className="p-4">Category</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4">Date</th>
-                    <th className="p-4 pr-6 text-right">Actions</th>
+                    <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Title</th>
+                    <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Author</th>
+                    <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Category</th>
+                    <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Status</th>
+                    <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Date</th>
+                    <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/60 text-base">

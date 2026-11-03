@@ -48,7 +48,7 @@ export const recordPayment = async (
   invoiceId: string,
   payload: {
     amount: number;
-    method: "CASH" | "CARD" | "BKASH" | "SSLCOMMERZ" | "STRIPE" | "OTHER";
+    method: "CASH" | "CARD" | "CARD_ON_SITE" | "BKASH" | "SSLCOMMERZ" | "ONLINE" | "STRIPE" | "OTHER";
     transactionRef?: string;
   }
 ) => {
