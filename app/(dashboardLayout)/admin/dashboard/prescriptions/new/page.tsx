@@ -45,10 +45,7 @@ export default function NewPrescriptionPage() {
   // Medicines (Rx) rows
   const [items, setItems] = useState<IPrescriptionItem[]>([
     {
-      brandName: "Napa Extra",
-      genericName: "Paracetamol + Caffeine",
-      strength: "500mg+65mg",
-      form: "Tablet",
+      brandName: "",
       dosage: "1+0+1",
       duration: "5 days",
       instruction: "After meal",
@@ -183,27 +180,36 @@ export default function NewPrescriptionPage() {
                   className="w-full h-11 px-3 rounded-xl border border-input bg-card text-xs font-medium focus:ring-2 focus:ring-primary focus:outline-none"
                 >
                   <option value="">-- Choose Patient --</option>
-                  {patients.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} ({p.phoneNumber}) - {p.ageYears ? `${p.ageYears} yrs` : "Age N/A"}
-                    </option>
-                  ))}
+                  {patients.map((p: any) => {
+                    const displayName = p.fullName || p.name || `Patient #${p.patientId || p.id.slice(0, 6)}`;
+                    const displayPhone = p.phone || p.phoneNumber ? `(${p.phone || p.phoneNumber})` : "";
+                    const displayAge = (p.age !== undefined && p.age !== null)
+                      ? `${p.age} yrs`
+                      : p.ageYears
+                      ? `${p.ageYears} yrs`
+                      : "Age N/A";
+                    return (
+                      <option key={p.id} value={p.id}>
+                        {displayName} {displayPhone} - {displayAge}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
               {currentPatient && (
-                <div className="p-3 rounded-xl bg-muted/40 border border-border/60 text-xs flex items-center justify-between">
+                <div className="p-3.5 rounded-xl bg-muted/40 border border-border/60 text-xs flex items-center justify-between">
                   <div>
                     <span className="font-bold text-foreground text-sm block">
-                      {currentPatient.name}
+                      {(currentPatient as any).fullName || currentPatient.name || "Patient"}
                     </span>
                     <span className="text-muted-foreground">
-                      {currentPatient.ageYears || "--"} Yrs • {currentPatient.gender} • Blood: {currentPatient.bloodGroup || "Unknown"}
+                      {((currentPatient as any).age ?? currentPatient.ageYears ?? "--")} Yrs • {currentPatient.gender || "Unknown"} • Blood: {currentPatient.bloodGroup || "Unknown"}
                     </span>
                   </div>
                   <div className="text-right">
                     <span className="text-[11px] font-mono text-muted-foreground block">
-                      {currentPatient.phoneNumber}
+                      {(currentPatient as any).phone || currentPatient.phoneNumber || ""}
                     </span>
                   </div>
                 </div>
