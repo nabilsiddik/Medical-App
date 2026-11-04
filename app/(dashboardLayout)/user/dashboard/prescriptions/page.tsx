@@ -141,60 +141,57 @@ export default function PatientPrescriptionsPage() {
         </Button>
       </div>
 
-      {/* Dynamic Search & Reset Bar */}
-      <Card className="rounded-2xl border-border/80 shadow-xs">
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-            {/* Search Input with Debounce */}
-            <div className="relative flex-1 min-w-[240px]">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search prescription by medicine name, doctor, diagnosis, or Rx #..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                className="pl-10 pr-9 h-11 text-base rounded-xl bg-background border-border/80 focus-visible:ring-primary/20"
-              />
-              {searchInput && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchInput("");
-                    updateUrl({ searchTerm: "" });
-                  }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
-                  title="Clear search"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-
-            {hasActiveFilters && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleResetFilters}
-                className="h-11 px-3.5 rounded-xl text-base font-medium text-muted-foreground hover:text-foreground cursor-pointer"
-                title="Reset search"
-              >
-                <RotateCcw className="h-4 w-4 mr-1.5" />
-                Reset
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Prescriptions List Card */}
       <Card className="rounded-2xl border-border/80 shadow-xs overflow-hidden">
-        <CardHeader className="p-6 pb-4 border-b border-border/60">
-          <div className="flex items-center gap-2">
-            <CardTitle className="text-xl font-bold">
-              Medical Prescription Archive
-            </CardTitle>
-            <Badge variant="secondary" className="font-semibold text-xs px-2.5 py-0.5">
-              {total} Prescriptions
-            </Badge>
+        <CardHeader className="p-4 sm:p-5 border-b border-border/60">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 shrink-0">
+              <CardTitle className="text-lg sm:text-xl font-bold">
+                Medical Prescription Archive
+              </CardTitle>
+              <Badge variant="secondary" className="font-semibold text-xs px-2.5 py-0.5">
+                {total} Prescriptions
+              </Badge>
+            </div>
+
+            {/* Integrated Search Input with Clear & Reset */}
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <div className="relative flex-1 md:w-80 lg:w-96">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by medicine, doctor, diagnosis, Rx #..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  className="pl-9 pr-8 h-10 text-sm rounded-xl bg-background border-border/80 focus-visible:ring-primary/20"
+                />
+                {searchInput && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchInput("");
+                      updateUrl({ searchTerm: "" });
+                    }}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                    title="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+
+              {hasActiveFilters && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResetFilters}
+                  className="h-10 px-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground cursor-pointer shrink-0"
+                  title="Reset search"
+                >
+                  <RotateCcw className="h-3.5 w-3.5 mr-1" />
+                  Reset
+                </Button>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent className="p-0 relative">
