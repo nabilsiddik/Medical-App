@@ -11,6 +11,8 @@ import {
   Sparkles,
   Database,
   Layers,
+  Download,
+  Copy,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -95,6 +97,30 @@ export default function GoogleSheetKnowledgeBasePage() {
     } finally {
       setToggling(false);
     }
+  };
+
+  const handleDownloadCsv = () => {
+    const link = document.createElement("a");
+    link.href = "/medical_kb_template.csv";
+    link.download = "medical_kb_template.csv";
+    link.click();
+    toast.success("CSV template downloaded!");
+  };
+
+  const handleCopyCsv = () => {
+    const csvContent = `Service / Topic,Price (BDT),Duration,Chamber Location,Timings,Clinical Notes
+New Patient Consultation,1000,20 mins,Dhanmondi Care Chamber,Sun-Thu 5:00 PM - 9:00 PM,Comprehensive medical evaluation by Prof. Dr. Sarah Rahman
+Follow-up Consultation,800,15 mins,Dhanmondi Care Chamber,Sun-Thu 5:00 PM - 9:00 PM,Review of lab tests and treatment response within 30 days
+Free Report Review,0 (FREE),10 mins,All Chambers,During consultation hours,Complimentary review of lab test results within 14 days
+Online Video Call,1200,15 mins,Telemedicine / Virtual,Slot based booking,High-definition video consultation with digital prescription PDF
+Diabetes & Metabolic Package,2500,30 mins,Dhanmondi Care Chamber,Sun & Tue 5:00 PM - 9:00 PM,Glycemic profile review diet advice & neuropathy check
+Emergency Guidance,N/A,Immediate,Nearest Hospital Emergency,24/7 Hotline: +880 1700-112233,Urgent chest pain or breathing difficulty requires immediate hospital visit
+Doctor Qualifications,N/A,N/A,Prof. Dr. Sarah Rahman,Consultant Physician & Cardiologist,MBBS FCPS (Medicine) MD (Cardiology) MACP (USA) BMDC A-54321
+Booking Instructions,N/A,N/A,Website / Patient Portal,Available 24/7,Select chamber choose available slot window and confirm via SMS
+Doctor Break Times,N/A,N/A,All Chambers,1:00 PM - 1:30 PM & 4:00 PM - 5:00 PM,No appointments are scheduled during doctor breaks and prayer times`;
+
+    navigator.clipboard.writeText(csvContent);
+    toast.success("CSV content copied to clipboard! Ready to paste into Google Sheets.");
   };
 
   return (
@@ -259,13 +285,35 @@ export default function GoogleSheetKnowledgeBasePage() {
 
       {/* Format Guidelines Card */}
       <Card className="rounded-2xl border-border/80 shadow-xs bg-muted/20">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-bold">
-            Recommended Google Sheet Column Structure
-          </CardTitle>
-          <CardDescription className="text-xs">
-            To achieve the highest AI answer precision, structure your Google Sheet headers like this:
-          </CardDescription>
+        <CardHeader className="pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <CardTitle className="text-sm font-bold">
+              Recommended Google Sheet Column Structure
+            </CardTitle>
+            <CardDescription className="text-xs">
+              To achieve the highest AI answer precision, structure your Google Sheet headers like this:
+            </CardDescription>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleDownloadCsv}
+              className="rounded-xl text-xs font-semibold h-9"
+            >
+              <Download className="h-3.5 w-3.5 mr-1.5 text-emerald-600" /> Download Template (.csv)
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleCopyCsv}
+              className="rounded-xl text-xs font-semibold h-9"
+            >
+              <Copy className="h-3.5 w-3.5 mr-1.5 text-primary" /> Copy CSV
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto rounded-xl border border-border/70 bg-card">

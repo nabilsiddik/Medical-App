@@ -17,6 +17,7 @@ import {
   Volume2,
   VolumeX,
   FileText,
+  ArrowLeft,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -62,13 +63,16 @@ export default function DoctorChatInboxPage() {
   const [loading, setLoading] = useState(true);
   const [patientTyping, setPatientTyping] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [mobileShowChat, setMobileShowChat] = useState(false);
 
   const socketRef = useRef<Socket | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll
+  // Auto-scroll inside chat container (without scrolling the outer window)
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
@@ -232,11 +236,16 @@ export default function DoctorChatInboxPage() {
       {/* Messenger Split-Pane Layout */}
       <Card className="rounded-2xl border-border/80 shadow-xs overflow-hidden">
         <CardContent className="p-0">
-          <div className="grid grid-cols-1 md:grid-cols-12 h-[calc(100vh-14rem)] min-h-[550px]">
-            {/* Left Conversations Sidebar (4 cols) */}
-            <div className="md:col-span-4 border-r border-border/70 flex flex-col h-full bg-muted/10">
+          <div className="flex flex-col md:grid md:grid-cols-12 h-[calc(100vh-14rem)] min-h-[550px]">
+            {/* Left Conversations Sidebar (4 cols on desktop, full width on mobile) */}
+            <div
+              className={cn(
+                "md:col-span-5 lg:col-span-4 border-r border-border/70 flex flex-col h-full bg-muted/10 min-h-0",
+                mobileShowChat ? "hidden md:flex" : "flex flex-1"
+              )}
+            >
               {/* Search Bar */}
-              <div className="p-3 border-b border-border/70 bg-card">
+              <div className="p-3 border-b border-border/70 bg-card shrink-0">
                 <form onSubmit={handleSearchSubmit} className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                   <Input
@@ -249,7 +258,7 @@ export default function DoctorChatInboxPage() {
               </div>
 
               {/* Conversations List */}
-              <div className="flex-1 overflow-y-auto divide-y divide-border/50">
+              <div className="flex-1 overflow-y-auto divide-y divide-border/50 min-h-0">
                 {conversations.length > 0 ? (
                   conversations.map((conv) => {
                     const isSelected = selectedConversation?.id === conv.id;
@@ -259,12 +268,15 @@ export default function DoctorChatInboxPage() {
                       <button
                         key={conv.id}
                         type="button"
-                        onClick={() => loadConversationDetails(conv.id)}
+                        onClick={() => {
+                          loadConversationDetails(conv.id);
+                          setMobileShowChat(true);
+                        }}
                         className={cn(
-                          "w-full text-left p-3.5 transition-colors cursor-pointer flex items-start gap-3",
+                          "w-full text-left p-3.5 transition-colors cursor-pointer flex items-start gap-3 relative border-l-4",
                           isSelected
-                            ? "bg-primary/10 border-l-4 border-primary"
-                            : "hover:bg-muted/30"
+                            ? "bg-primary/10 border-l-primary"
+                            : "border-l-transparent hover:bg-muted/30"
                         )}
                       >
                         <div className="h-10 w-10 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center shrink-0">
@@ -312,13 +324,27 @@ export default function DoctorChatInboxPage() {
               </div>
             </div>
 
-            {/* Right Chat Thread (8 cols) */}
-            <div className="md:col-span-8 flex flex-col h-full bg-card">
+            {/* Right Chat Thread (8 cols on desktop, full width on mobile) */}
+            <div
+              className={cn(
+                "md:col-span-7 lg:col-span-8 flex flex-col h-full bg-card min-h-0",
+                mobileShowChat ? "flex flex-1" : "hidden md:flex"
+              )}
+            >
               {selectedConversation ? (
                 <>
                   {/* Chat Header */}
-                  <div className="p-3.5 border-b border-border/70 flex items-center justify-between gap-4 bg-muted/20">
-                    <div className="flex items-center gap-3 min-w-0">
+                  <div className="p-3.5 border-b border-border/70 flex items-center justify-between gap-3 bg-muted/20 shrink-0">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {/* Mobile Back Button */}
+                      <button
+                        type="button"
+                        onClick={() => setMobileShowChat(false)}
+                        className="md:hidden p-2 -ml-1 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer shrink-0"
+                        title="Back to conversation list"
+                      >
+                        <ArrowLeft className="h-5 w-5" />
+                      </button>
                       <div className="h-10 w-10 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center shrink-0">
                         {selectedConversation.patientName ? selectedConversation.patientName[0].toUpperCase() : "P"}
                       </div>
@@ -346,7 +372,7 @@ export default function DoctorChatInboxPage() {
                   </div>
 
                   {/* Message Thread */}
-                  <div className="flex-1 p-4 overflow-y-auto space-y-3.5 bg-muted/10">
+                  <div ref={chatScrollRef} className="flex-1 p-4 overflow-y-auto space-y-3.5 bg-muted/10 min-h-0">
                     {messages.map((msg) => {
                       const isDoctor = msg.senderType === "DOCTOR";
                       const isAi = msg.isAi || msg.senderType === "AI";
@@ -379,7 +405,7 @@ export default function DoctorChatInboxPage() {
                           {/* Bubble */}
                           <div
                             className={cn(
-                              "max-w-[80%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed whitespace-pre-wrap break-words shadow-xs",
+                              "max-w-[85%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed whitespace-pre-wrap break-words shadow-xs",
                               isPatient
                                 ? "bg-muted text-foreground border border-border/70 rounded-tl-xs"
                                 : isAi
@@ -402,8 +428,6 @@ export default function DoctorChatInboxPage() {
                         </span>
                       </div>
                     )}
-
-                    <div ref={messagesEndRef} />
                   </div>
 
                   {/* Reply Input Bar */}

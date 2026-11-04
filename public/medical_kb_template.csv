@@ -1,0 +1,10 @@
+Service / Topic,Price (BDT),Duration,Chamber Location,Timings,Clinical Notes
+New Patient Consultation,1000,20 mins,Dhanmondi Care Chamber,Sun-Thu 5:00 PM - 9:00 PM,Comprehensive medical evaluation by Prof. Dr. Sarah Rahman
+Follow-up Consultation,800,15 mins,Dhanmondi Care Chamber,Sun-Thu 5:00 PM - 9:00 PM,Review of lab tests and treatment response within 30 days
+Free Report Review,0 (FREE),10 mins,All Chambers,During consultation hours,Complimentary review of lab test results within 14 days
+Online Video Call,1200,15 mins,Telemedicine / Virtual,Slot based booking,High-definition video consultation with digital prescription PDF
+Diabetes & Metabolic Package,2500,30 mins,Dhanmondi Care Chamber,Sun & Tue 5:00 PM - 9:00 PM,Glycemic profile review diet advice & neuropathy check
+Emergency Guidance,N/A,Immediate,Nearest Hospital Emergency,24/7 Hotline: +880 1700-112233,Urgent chest pain or breathing difficulty requires immediate hospital visit
+Doctor Qualifications,N/A,N/A,Prof. Dr. Sarah Rahman,Consultant Physician & Cardiologist,MBBS FCPS (Medicine) MD (Cardiology) MACP (USA) BMDC A-54321
+Booking Instructions,N/A,N/A,Website / Patient Portal,Available 24/7,Select chamber choose available slot window and confirm via SMS
+Doctor Break Times,N/A,N/A,All Chambers,1:00 PM - 1:30 PM & 4:00 PM - 5:00 PM,No appointments are scheduled during doctor breaks and prayer times
