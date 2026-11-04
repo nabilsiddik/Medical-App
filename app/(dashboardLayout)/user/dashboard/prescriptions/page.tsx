@@ -128,9 +128,6 @@ export default function PatientPrescriptionsPage() {
             <FileText className="h-7 w-7 text-primary" />
             <span>My Prescriptions (Rx)</span>
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Access, review, and download signed digital medical prescriptions issued during your visits.
-          </p>
         </div>
 
         <Button
@@ -199,9 +196,6 @@ export default function PatientPrescriptionsPage() {
               {total} Prescriptions
             </Badge>
           </div>
-          <CardDescription className="text-base text-muted-foreground mt-0.5">
-            Authentic, QR-verifiable prescriptions with dosage guidelines and doctor advice
-          </CardDescription>
         </CardHeader>
         <CardContent className="p-0 relative">
           {/* Loading Overlay */}

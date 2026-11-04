@@ -136,7 +136,7 @@ export default async function PrescriptionVerifyPage({ params }: VerifyPageProps
               {/* Actions */}
               <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
                 <a
-                  href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1"}/prescription/${rx.id}/pdf`}
+                  href={`${process.env.NEXT_PUBLIC_SERVER_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1"}/prescription/${rx.id}/pdf`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full sm:flex-1"
