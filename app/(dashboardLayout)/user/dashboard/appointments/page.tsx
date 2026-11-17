@@ -197,7 +197,7 @@ export default function PatientAppointmentsPage() {
       </div>
 
       {/* Cancellation Policy Alert Banner */}
-      <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-200 text-base flex items-start gap-3.5">
+      {/* <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-200 text-base flex items-start gap-3.5">
         <AlertCircle className="h-6 w-6 text-amber-600 shrink-0 mt-0.5" />
         <div className="space-y-1">
           <span className="font-bold">Clinic Policy Notice:</span>
@@ -205,7 +205,7 @@ export default function PatientAppointmentsPage() {
             If you cancel an appointment, it will not be refunded per standard practice policy. The reserved slot is immediately released and made available for other patients.
           </p>
         </div>
-      </div>
+      </div> */}
 
       {/* Dynamic Search & Filter Bar */}
       <Card className="rounded-2xl border-border/80 shadow-xs">
@@ -383,15 +383,14 @@ export default function PatientAppointmentsPage() {
                         <td className="py-4 px-5">
                           <Badge
                             variant="secondary"
-                            className={`text-base font-semibold px-3 py-1 ${
-                              apt.status === "COMPLETED"
+                            className={`text-base font-semibold px-3 py-1 ${apt.status === "COMPLETED"
                                 ? "bg-blue-500/15 text-blue-600 dark:text-blue-400"
                                 : apt.status === "CONFIRMED"
-                                ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
-                                : isCancelled
-                                ? "bg-destructive/15 text-destructive"
-                                : "bg-muted text-muted-foreground"
-                            }`}
+                                  ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                                  : isCancelled
+                                    ? "bg-destructive/15 text-destructive"
+                                    : "bg-muted text-muted-foreground"
+                              }`}
                           >
                             {apt.status}
                           </Badge>

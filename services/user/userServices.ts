@@ -10,7 +10,13 @@ import { updateUserProfileZodSchema } from "@/zod/auth.zodSchema";
 export const getLoggedInUser = async (): Promise<IUser | null> => {
   try {
     const res = await serverFetch.get("/user/profile");
-    if (!res.ok) return null;
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 403) {
+        await deleteCookie("accessToken").catch(() => {});
+        await deleteCookie("refreshToken").catch(() => {});
+      }
+      return null;
+    }
     const result = await res.json();
     return result?.data || null;
   } catch (error) {

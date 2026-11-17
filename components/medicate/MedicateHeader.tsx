@@ -110,31 +110,7 @@ export default function MedicateHeader({ user }: MedicateHeaderProps) {
       <div className="container mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
         {/* Dynamic Logo & Clinic Name */}
         <Link href="/" className="flex items-center gap-2 sm:gap-3 group shrink min-w-0">
-          {branding?.logoUrl ? (
-            <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-lg overflow-hidden shrink-0 shadow-xs transition-transform group-hover:scale-105 border border-slate-100 dark:border-slate-800">
-              <Image
-                src={branding.logoUrl}
-                alt={brandName}
-                fill
-                className="object-contain"
-              />
-            </div>
-          ) : (
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shadow-xs transition-transform group-hover:scale-105 shrink-0">
-              <svg
-                className="w-5 h-5 sm:w-6 sm:h-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-              </svg>
-            </div>
-          )}
-          <span className="text-base sm:text-xl md:text-2xl font-black tracking-tight text-foreground truncate max-w-[140px] xs:max-w-[180px] sm:max-w-[260px] md:max-w-none">
-            {brandName}
-          </span>
+          <Image src={'/images/logo/site-logo.png'} width={230} height={100} alt="logo" />
         </Link>
 
         {/* Desktop Navigation */}
@@ -148,11 +124,10 @@ export default function MedicateHeader({ user }: MedicateHeaderProps) {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm xl:text-base font-bold tracking-wider transition-colors uppercase ${
-                  isActive
-                    ? "text-primary"
-                    : "text-slate-700 dark:text-slate-200 hover:text-primary dark:hover:text-primary"
-                }`}
+                className={`text-sm xl:text-base font-bold tracking-wider transition-colors uppercase ${isActive
+                  ? "text-primary"
+                  : "text-slate-700 dark:text-slate-200 hover:text-primary dark:hover:text-primary"
+                  }`}
               >
                 {link.label}
               </Link>
@@ -302,13 +277,6 @@ export default function MedicateHeader({ user }: MedicateHeaderProps) {
                   </>
                 ) : (
                   <>
-                    <div className="px-3 py-2 bg-slate-50 dark:bg-slate-800/60 rounded-lg mb-1.5">
-                      <p className="text-xs font-bold text-foreground">Welcome to Care Portal</p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">
-                        Access appointments and verified digital prescriptions.
-                      </p>
-                    </div>
-
                     <DropdownMenuItem asChild>
                       <Link
                         href="/login"
@@ -474,11 +442,10 @@ export default function MedicateHeader({ user }: MedicateHeaderProps) {
                           key={link.href}
                           href={link.href}
                           onClick={() => setMobileOpen(false)}
-                          className={`flex items-center justify-between text-sm font-bold tracking-wide py-2.5 px-3 rounded-lg transition-colors ${
-                            isActive
-                              ? "bg-primary/10 text-primary"
-                              : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
-                          }`}
+                          className={`flex items-center justify-between text-sm font-bold tracking-wide py-2.5 px-3 rounded-lg transition-colors ${isActive
+                            ? "bg-primary/10 text-primary"
+                            : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                            }`}
                         >
                           <span>{link.label}</span>
                         </Link>

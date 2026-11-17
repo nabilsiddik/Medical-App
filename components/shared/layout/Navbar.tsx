@@ -122,11 +122,10 @@ export default async function Navbar() {
                           {user.fullName}
                         </p>
                         <span
-                          className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
-                            isStaff
-                              ? "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300"
-                              : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
-                          }`}
+                          className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${isStaff
+                            ? "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300"
+                            : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+                            }`}
                         >
                           {user.role}
                         </span>

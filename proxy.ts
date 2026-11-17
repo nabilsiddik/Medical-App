@@ -14,46 +14,66 @@ export async function proxy(request: NextRequest) {
   const accessToken = request.cookies.get("accessToken")?.value || null;
 
   let userRole: UserRole | null = null;
+  let isTokenValid = false;
 
   if (accessToken) {
     try {
       const decoded = jwt.decode(accessToken) as JwtPayload;
-      if (decoded && decoded.role) {
+      const currentTime = Math.floor(Date.now() / 1000);
+      // Ensure token has role and has not expired
+      if (decoded && decoded.role && (!decoded.exp || decoded.exp > currentTime)) {
         userRole = decoded.role as UserRole;
+        isTokenValid = true;
       }
     } catch {
-      const response = NextResponse.redirect(new URL("/login", request.url));
-      response.cookies.delete("accessToken");
-      response.cookies.delete("refreshToken");
-      return response;
-    }
-  }
-
-  // Redirect base dashboard routes to overview
-  if (pathname === "/admin/dashboard" || pathname === "/admin") {
-    if (!accessToken) {
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-  }
-
-  if (pathname === "/user/dashboard" || pathname === "/user") {
-    if (!accessToken) {
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(loginUrl);
+      isTokenValid = false;
+      userRole = null;
     }
   }
 
   // Check if it is an auth route (/login, /signup, /verify-otp, /forgot-password, /reset-password)
   const isAuth = isAuthRoute(pathname);
 
-  // If already logged in and visiting an auth route, redirect to default dashboard
-  if (accessToken && isAuth) {
+  // If already logged in with a VALID non-expired token and visiting an auth route, redirect to default dashboard
+  if (isTokenValid && isAuth) {
     return NextResponse.redirect(
       new URL(getDefaultDashboardRoute(userRole), request.url)
     );
+  }
+
+  // If visiting an auth route with an expired or invalid token, clean up dead cookies so no loop occurs
+  if (!isTokenValid && accessToken && isAuth) {
+    const response = NextResponse.next();
+    response.cookies.delete("accessToken");
+    response.cookies.delete("refreshToken");
+    return response;
+  }
+
+  // Redirect base dashboard routes to overview
+  if (pathname === "/admin/dashboard" || pathname === "/admin") {
+    if (!isTokenValid) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("redirect", pathname);
+      const res = NextResponse.redirect(loginUrl);
+      if (accessToken) {
+        res.cookies.delete("accessToken");
+        res.cookies.delete("refreshToken");
+      }
+      return res;
+    }
+  }
+
+  if (pathname === "/user/dashboard" || pathname === "/user") {
+    if (!isTokenValid) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("redirect", pathname);
+      const res = NextResponse.redirect(loginUrl);
+      if (accessToken) {
+        res.cookies.delete("accessToken");
+        res.cookies.delete("refreshToken");
+      }
+      return res;
+    }
   }
 
   const routeOwner = getRouteOwner(pathname);
@@ -63,11 +83,16 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // If unauthenticated user tries to access protected route
-  if (!accessToken && (routeOwner === "ADMIN" || routeOwner === "USER")) {
+  // If unauthenticated or token is expired when trying to access protected route
+  if (!isTokenValid && (routeOwner === "ADMIN" || routeOwner === "USER")) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(loginUrl);
+    const res = NextResponse.redirect(loginUrl);
+    if (accessToken) {
+      res.cookies.delete("accessToken");
+      res.cookies.delete("refreshToken");
+    }
+    return res;
   }
 
   // Role-based protection: non-staff trying to access staff/admin dashboard
