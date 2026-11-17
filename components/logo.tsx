@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Activity } from "lucide-react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useBranding } from "./branding/BrandingProvider";
 
@@ -11,63 +11,36 @@ interface LogoProps {
   size?: "sm" | "md" | "lg";
 }
 
-const Logo = ({ className, showText = true, size = "md" }: LogoProps) => {
+const Logo = ({ className, size = "md" }: LogoProps) => {
   const { branding } = useBranding();
 
-  const iconSizes = {
-    sm: "h-7 w-7",
-    md: "h-9 w-9",
-    lg: "h-11 w-11",
-  };
+  const brandName = branding?.brandName || "Nabils Chamber";
+  const logoSrc = branding?.logoUrl || "/images/logo/site-logo.png";
 
-  const textSizes = {
-    sm: "text-base",
-    md: "text-lg",
-    lg: "text-xl",
+  const sizeStyles = {
+    sm: "h-7 sm:h-8 w-auto max-w-[140px]",
+    md: "h-9 sm:h-10 w-auto max-w-[190px]",
+    lg: "h-11 sm:h-12 w-auto max-w-[240px]",
   };
-
-  const brandName = branding?.brandName || "Dr. Sarah's Care Chamber";
-  // Split name for visual distinction
-  const parts = brandName.split(" ");
-  const mainPart = parts.slice(0, 2).join(" ");
-  const restPart = parts.slice(2).join(" ");
 
   return (
     <Link
       href="/"
       className={cn(
-        "inline-flex items-center gap-2.5 group transition-opacity hover:opacity-95",
+        "inline-flex items-center gap-2 group transition-opacity hover:opacity-95 shrink-0",
         className
       )}
     >
-      <div
-        className={cn(
-          "rounded-xl bg-primary text-primary-foreground flex items-center justify-center shadow-md shadow-primary/20 group-hover:scale-105 transition-all duration-300",
-          iconSizes[size]
-        )}
-      >
-        <Activity className="h-5 w-5" />
+      <div className="relative flex items-center">
+        <Image
+          src={logoSrc}
+          alt={brandName}
+          width={200}
+          height={65}
+          className={cn("object-contain", sizeStyles[size])}
+          priority
+        />
       </div>
-      {showText && (
-        <div className="flex flex-col leading-tight">
-          <span
-            className={cn(
-              "font-bold tracking-tight text-foreground truncate max-w-[200px] sm:max-w-[280px]",
-              textSizes[size]
-            )}
-          >
-            {mainPart}{" "}
-            {restPart && (
-              <span className="text-primary font-medium">{restPart}</span>
-            )}
-          </span>
-          {branding?.brandTagline && size !== "sm" && (
-            <span className="text-[11px] text-muted-foreground truncate max-w-[220px]">
-              {branding.brandTagline}
-            </span>
-          )}
-        </div>
-      )}
     </Link>
   );
 };

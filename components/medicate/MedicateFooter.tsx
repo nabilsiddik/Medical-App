@@ -25,27 +25,16 @@ export default function MedicateFooter() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Column 1: Dynamic Brand Info */}
           <div className="space-y-5">
-            <Link href="/" className="flex items-center gap-3">
-              {branding?.logoUrl ? (
-                <div className="relative w-9 h-9 rounded-md overflow-hidden shrink-0">
-                  <Image src={branding.logoUrl} alt={brandName} fill className="object-contain" />
-                </div>
-              ) : (
-                <div className="w-9 h-9 rounded-md bg-primary flex items-center justify-center text-primary-foreground shrink-0">
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                  </svg>
-                </div>
-              )}
-              <span className="text-2xl font-black text-white tracking-tight">
-                {brandName}
-              </span>
+            <Link href="/" className="inline-flex items-center">
+              <div className="bg-white/95 rounded-lg px-3 py-1.5 shadow-sm inline-flex items-center">
+                <Image
+                  src={branding?.logoUrl || "/images/logo/site-logo.png"}
+                  alt={brandName}
+                  width={200}
+                  height={60}
+                  className="h-9 w-auto object-contain"
+                />
+              </div>
             </Link>
 
             <p className="text-base text-slate-300 leading-relaxed">

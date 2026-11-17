@@ -34,6 +34,7 @@ export default function DoctorCredentialsForm({ settings }: DoctorCredentialsFor
   const [degrees, setDegrees] = useState(settings?.degrees || "");
   const [bmdcNumber, setBmdcNumber] = useState(settings?.bmdcNumber || settings?.bmdcRegNumber || "");
   const [experienceYears, setExperienceYears] = useState(settings?.experienceYears?.toString() || "15");
+  const [contactEmail, setContactEmail] = useState(settings?.email || settings?.contactEmail || "");
   const [bio, setBio] = useState(settings?.bio || "");
   const [consultationFee, setConsultationFee] = useState(settings?.consultationFee?.toString() || "1000");
   const [videoConsultationFee, setVideoConsultationFee] = useState(settings?.videoConsultationFee?.toString() || "800");
@@ -60,6 +61,7 @@ export default function DoctorCredentialsForm({ settings }: DoctorCredentialsFor
         degrees: degrees.trim(),
         bmdcNumber: bmdcNumber.trim(),
         bmdcRegNumber: bmdcNumber.trim(),
+        email: contactEmail.trim(),
         experienceYears: Number(experienceYears) || 0,
         bio: bio.trim(),
         consultationFee: Number(consultationFee) || 0,
@@ -164,14 +166,27 @@ export default function DoctorCredentialsForm({ settings }: DoctorCredentialsFor
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold">Specialization</Label>
-            <Input
-              value={specialization}
-              onChange={(e) => setSpecialization(e.target.value)}
-              placeholder="Internal Medicine, Cardiovascular Care, Diabetes & Lifestyle"
-              className="rounded-xl h-10 text-xs"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold">Specialization</Label>
+              <Input
+                value={specialization}
+                onChange={(e) => setSpecialization(e.target.value)}
+                placeholder="Internal Medicine, Cardiovascular Care, Diabetes & Lifestyle"
+                className="rounded-xl h-10 text-xs"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold">Public Topbar & Chamber Email</Label>
+              <Input
+                type="email"
+                value={contactEmail}
+                onChange={(e) => setContactEmail(e.target.value)}
+                placeholder="doctor@chamber.com"
+                className="rounded-xl h-10 text-xs"
+              />
+            </div>
           </div>
 
           <div className="space-y-1.5">

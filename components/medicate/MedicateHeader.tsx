@@ -110,7 +110,14 @@ export default function MedicateHeader({ user }: MedicateHeaderProps) {
       <div className="container mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
         {/* Dynamic Logo & Clinic Name */}
         <Link href="/" className="flex items-center gap-2 sm:gap-3 group shrink min-w-0">
-          <Image src={'/images/logo/site-logo.png'} width={230} height={100} alt="logo" />
+          <Image
+            src={branding?.logoUrl || '/images/logo/site-logo.png'}
+            width={220}
+            height={70}
+            alt={brandName}
+            className="h-10 sm:h-12 w-auto object-contain"
+            priority
+          />
         </Link>
 
         {/* Desktop Navigation */}
@@ -340,24 +347,15 @@ export default function MedicateHeader({ user }: MedicateHeaderProps) {
               <div>
                 {/* Drawer Header */}
                 <SheetHeader className="p-5 text-left border-b border-slate-100 dark:border-slate-800">
-                  <SheetTitle className="flex items-center gap-2.5">
-                    {branding?.logoUrl ? (
-                      <div className="relative w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-slate-100">
-                        <Image
-                          src={branding.logoUrl}
-                          alt={brandName}
-                          fill
-                          className="object-contain"
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-8 h-8 rounded bg-primary flex items-center justify-center text-primary-foreground shrink-0">
-                        <Plus className="h-5 w-5 stroke-[2.5]" />
-                      </div>
-                    )}
-                    <span className="text-lg font-black text-foreground truncate">
-                      {brandName}
-                    </span>
+                  <SheetTitle className="flex items-center">
+                    <Image
+                      src={branding?.logoUrl || '/images/logo/site-logo.png'}
+                      width={180}
+                      height={55}
+                      alt={brandName}
+                      className="h-9 w-auto object-contain"
+                      priority
+                    />
                   </SheetTitle>
                 </SheetHeader>
 

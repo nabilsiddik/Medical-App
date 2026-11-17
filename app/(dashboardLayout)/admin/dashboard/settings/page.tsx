@@ -43,6 +43,7 @@ export default function ClinicSettingsPage() {
   const [bmdcRegNumber, setBmdcRegNumber] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [emergencyPhone, setEmergencyPhone] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
 
   // Branding Customizer State
@@ -87,6 +88,11 @@ export default function ClinicSettingsPage() {
           sRes.emergencyPhone ||
           (sRes as any).contact?.emergencyPhone ||
           "";
+        const fetchedEmail =
+          sRes.contactEmail ||
+          (sRes as any).email ||
+          (sRes as any).contact?.email ||
+          "";
         const fetchedPrimary =
           sRes.primaryColor ||
           (sRes as any).branding?.primaryColor ||
@@ -107,6 +113,7 @@ export default function ClinicSettingsPage() {
         setBmdcRegNumber(fetchedBmdc);
         setContactPhone(fetchedPhone);
         setEmergencyPhone(fetchedEmergency);
+        setContactEmail(fetchedEmail);
         setPrimaryColor(fetchedPrimary);
         setSecondaryColor(fetchedSecondary);
         setBrandTagline(fetchedTagline);
@@ -148,6 +155,7 @@ export default function ClinicSettingsPage() {
         contactPhone,
         phone: contactPhone,
         emergencyPhone,
+        email: contactEmail,
       });
 
       if (res?.success || res?.id || res?.data) {
@@ -283,6 +291,20 @@ export default function ClinicSettingsPage() {
                       placeholder="12345 or +880 1700-000000"
                     />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-base font-bold">Chamber / Topbar Public Email</Label>
+                  <Input
+                    type="email"
+                    value={contactEmail}
+                    onChange={(e) => setContactEmail(e.target.value)}
+                    className="rounded-xl h-12 text-base"
+                    placeholder="doctor@chamber.com"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    This email is displayed across the public website topbar, footer, and contact page.
+                  </p>
                 </div>
 
                 <Button
