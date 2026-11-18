@@ -45,7 +45,7 @@ export default function SingleBlogPage({
   }, [slugOrId]);
 
   const postTitle = post?.title || "Medical Insights & Clinical Care Update";
-  const postAuthor = post?.authorName || "Prof. Dr. Sarah Rahman";
+  const postAuthor = post?.authorName || "MD. Nabil Siddik";
   const postCategory = post?.category || "Clinical Care";
   const postDate = post?.publishedAt
     ? new Date(post.publishedAt)

@@ -18,9 +18,9 @@ const Logo = ({ className, size = "md" }: LogoProps) => {
   const logoSrc = branding?.logoUrl || "/images/logo/site-logo.png";
 
   const sizeStyles = {
-    sm: "h-7 sm:h-8 w-auto max-w-[140px]",
-    md: "h-9 sm:h-10 w-auto max-w-[190px]",
-    lg: "h-11 sm:h-12 w-auto max-w-[240px]",
+    sm: "h-8 sm:h-9 w-auto max-w-[160px]",
+    md: "h-10 sm:h-12 w-auto max-w-[210px]",
+    lg: "h-13 sm:h-16 w-auto max-w-[280px]",
   };
 
   return (

@@ -181,16 +181,6 @@ export default function LiveChatWidget() {
     });
   };
 
-  // Quick FAQ suggestions
-  const sendQuickPrompt = (prompt: string) => {
-    if (!hasStarted) {
-      setInputValue(prompt);
-      handleStartChat();
-    } else {
-      setInputValue(prompt);
-    }
-  };
-
   return (
     <div className="fixed bottom-5 right-5 z-50 font-sans">
       {/* Floating Trigger Button */}
@@ -234,14 +224,14 @@ export default function LiveChatWidget() {
                 <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-primary" />
               </div>
               <div className="min-w-0">
-                <div className="text-sm font-bold truncate flex items-center gap-1">
-                  <span>Practice AI Assistant</span>
+                <div className="text-sm font-bold truncate flex items-center gap-1.5">
+                  <span>AI Assistant</span>
                   <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 bg-white/20 text-white border-0 font-medium">
                     Online
                   </Badge>
                 </div>
-                <div className="text-[10px] text-primary-foreground/80 truncate">
-                  Fees, Schedules, Chambers & Queries
+                <div className="text-[11px] text-primary-foreground/80 truncate">
+                  Instant Chamber & Appointment Support
                 </div>
               </div>
             </div>
@@ -274,79 +264,57 @@ export default function LiveChatWidget() {
 
           {!isMinimized && (
             <>
-              {/* Pre-Chat Name Intake */}
+              {/* Minimal Clean Pre-Chat Name Intake */}
               {!hasStarted ? (
-                <div className="flex-1 p-6 flex flex-col justify-between overflow-y-auto">
-                  <div className="space-y-4">
-                    <div className="text-center space-y-1.5 pt-2">
-                      <div className="h-12 w-12 rounded-2xl bg-primary/10 text-primary mx-auto flex items-center justify-center">
-                        <Bot className="h-6 w-6" />
+                <div className="flex-1 p-6 flex flex-col justify-center items-center overflow-y-auto bg-card">
+                  <form onSubmit={handleStartChat} className="w-full max-w-[320px] space-y-5 text-center">
+                    <div className="space-y-2">
+                      <div className="h-14 w-14 rounded-2xl bg-primary/10 text-primary mx-auto flex items-center justify-center shadow-xs">
+                        <Bot className="h-7 w-7" />
                       </div>
-                      <h3 className="text-base font-bold text-foreground">
-                        Welcome to CarePractice Chat
+                      <h3 className="text-lg font-bold text-foreground tracking-tight">
+                        Chat with Assistant
                       </h3>
-                      <p className="text-xs text-muted-foreground leading-relaxed">
-                        Get instant, professional answers about consultation fees, chamber timings, and appointments powered by doctor's verified knowledge base.
+                      <p className="text-xs text-muted-foreground">
+                        Please provide your name to start conversation.
                       </p>
                     </div>
 
-                    <div className="space-y-2 pt-2">
-                      <label className="text-xs font-semibold text-foreground">
-                        Your Name (or Nickname)
+                    <div className="space-y-1.5 text-left">
+                      <label htmlFor="patientName" className="text-xs font-semibold text-foreground">
+                        Your Name
                       </label>
                       <Input
+                        id="patientName"
                         placeholder="e.g. Kamal Hasan"
                         value={patientName}
                         onChange={(e) => setPatientName(e.target.value)}
-                        className="rounded-xl h-10 text-xs"
+                        className="rounded-xl h-11 text-sm bg-muted/40 focus:bg-background"
+                        autoFocus
                       />
                     </div>
 
-                    {/* Quick Topic Chips */}
-                    <div className="space-y-1.5 pt-2">
-                      <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                        Common Questions
-                      </span>
-                      <div className="flex flex-col gap-1.5">
-                        {[
-                          "What are the doctor's consultation fees?",
-                          "Where are the chamber locations and timings?",
-                          "How do I book an appointment?",
-                          "Can I get a free report review?",
-                        ].map((prompt) => (
-                          <button
-                            key={prompt}
-                            type="button"
-                            onClick={() => sendQuickPrompt(prompt)}
-                            className="text-left text-xs p-2 rounded-xl bg-muted/40 hover:bg-muted text-foreground/90 transition-colors border border-border/50 cursor-pointer"
-                          >
-                            💬 {prompt}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <Button
-                    onClick={() => handleStartChat()}
-                    isLoading={loading}
-                    className="w-full rounded-xl h-10 text-xs font-semibold mt-4 shadow-sm"
-                  >
-                    Start Consultation Chat
-                  </Button>
+                    <Button
+                      type="submit"
+                      isLoading={loading}
+                      className="w-full rounded-xl h-11 text-sm font-semibold shadow-sm"
+                    >
+                      Start Chat
+                    </Button>
+                  </form>
                 </div>
               ) : (
                 /* Active Chat Messages Feed */
                 <div className="flex-1 flex flex-col min-h-0 bg-muted/20">
                   <div className="flex-1 p-4 overflow-y-auto space-y-3.5">
                     {/* Welcome notice */}
-                    <div className="p-3 rounded-xl bg-card border border-border/70 text-center space-y-1">
-                      <div className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
-                        <Sparkles className="h-3 w-3" />
-                        <span>AI Medical Assistant Connected</span>
+                    <div className="p-3 rounded-xl bg-card border border-border/70 text-center space-y-0.5 shadow-xs">
+                      <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary">
+                        <Sparkles className="h-3.5 w-3.5" />
+                        <span>AI Assistant Connected</span>
                       </div>
-                      <p className="text-[10px] text-muted-foreground">
-                        Responses are generated from the verified clinic knowledge base. A doctor may also join to respond directly.
+                      <p className="text-[11px] text-muted-foreground">
+                        Ask any question about appointments, consultation fees, or chamber timings.
                       </p>
                     </div>
 

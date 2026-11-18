@@ -26,13 +26,13 @@ export default function MedicateFooter() {
           {/* Column 1: Dynamic Brand Info */}
           <div className="space-y-5">
             <Link href="/" className="inline-flex items-center">
-              <div className="bg-white/95 rounded-lg px-3 py-1.5 shadow-sm inline-flex items-center">
+              <div className="bg-white/95 rounded-xl px-4 py-2 shadow-sm inline-flex items-center hover:bg-white transition-all">
                 <Image
                   src={branding?.logoUrl || "/images/logo/site-logo.png"}
                   alt={brandName}
-                  width={200}
-                  height={60}
-                  className="h-9 w-auto object-contain"
+                  width={240}
+                  height={80}
+                  className="h-12 sm:h-14 w-auto object-contain"
                 />
               </div>
             </Link>

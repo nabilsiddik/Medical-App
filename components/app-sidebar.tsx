@@ -30,7 +30,7 @@ export function AppSidebar({ userInfo, ...props }: AppSidebarProps) {
       {/* Sidebar Workspace Header */}
       <SidebarHeader className="border-b border-sidebar-border/60 p-4">
         <div className="flex items-center justify-between">
-          <Logo size="sm" />
+          <Logo size="md" />
           <span
             className={`text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider ${
               isAdmin

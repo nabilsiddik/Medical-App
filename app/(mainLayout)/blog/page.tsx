@@ -37,59 +37,48 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   const defaultPosts: IBlogPost[] = [
     {
       id: "1",
-      slug: "get-the-exercise-limited-mobility",
-      title: "Get The Exercise Limited Mobility",
+      slug: "high-blood-pressure-silent-warning-signs-and-daily-management",
+      title: "High Blood Pressure: The Silent Warning Signs and Daily Management",
       summary:
-        "Regular gentle movement and specialized physical therapy can dramatically preserve joint function and mobility in patients.",
-      content: "",
+        "Learn how silent hypertension damages vital organs and the practical daily habits that keep your blood pressure within a healthy target range.",
+      content:
+        "<h2>Understanding Blood Pressure: Why Early Detection Saves Lives</h2><p>Blood pressure often rises quietly without pronounced symptoms, earning its medical reputation as a silent condition. Left unchecked, persistent high pressure strains the arterial walls, overworking the heart muscle and significantly increasing the risk of stroke, heart attack, and progressive kidney damage.</p><h3>Critical Daily Habits to Keep Blood Pressure in Check</h3><p>Adopting simple, consistent lifestyle habits plays a profound role in stabilizing arterial pressure:</p><ul><li><strong>Reduce Dietary Sodium:</strong> Aim to keep daily salt intake under one teaspoon (less than 2,000 mg) by minimizing processed snacks and table salt.</li><li><strong>Daily Aerobic Exercise:</strong> Just 30 minutes of brisk walking, cycling, or swimming 5 days a week improves vascular elasticity.</li><li><strong>Stress Management:</strong> Prioritize 7 to 8 hours of restorative sleep to prevent chronic cortisol spikes that constrict blood vessels.</li></ul><h3>When Should You Consult a Doctor?</h3><p>If home blood pressure readings consistently surpass 130/80 mmHg, or if you experience unexplained morning headaches, visual blurriness, or chest tightness, seek a clinical evaluation immediately.</p>",
       coverImage:
-        "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=600&q=80",
-      category: "Rehabilitation",
-      tags: ["Healthcare", "Exercise", "Mobility"],
-      authorName: "Prof. Dr. Sarah Rahman",
-      publishedAt: "2025-12-17T00:00:00.000Z",
+        "https://images.unsplash.com/photo-1628348068343-c6a848d2b6dd?auto=format&fit=crop&w=600&q=80",
+      category: "Clinical Cardiology",
+      tags: ["HeartHealth", "Hypertension", "Cardiology", "PreventiveMedicine"],
+      authorName: "MD. Nabil Siddik",
+      publishedAt: "2026-11-18T00:00:00.000Z",
     },
     {
       id: "2",
-      slug: "transfusion-strategy-and-heart-surgery",
-      title: "Transfusion Strategy And Heart Surgery",
+      slug: "managing-blood-sugar-effective-strategies-for-diabetes-insulin-resistance",
+      title: "Managing Blood Sugar: Effective Strategies for Diabetes & Insulin Resistance",
       summary:
-        "Modern intraoperative blood preservation techniques significantly improve cardiac surgery outcomes and accelerate post-op recovery.",
-      content: "",
+        "Simple dietary adjustments, post-meal walking, and routine HbA1c screening can significantly reduce diabetes complications.",
+      content:
+        "<h2>The Reality of Glucose Spikes and Metabolic Health</h2><p>Type 2 diabetes and prediabetes develop when body cells gradually become resistant to insulin. Achieving balanced blood sugar is not about extreme deprivation—it is about adopting sustainable dietary habits and consistent daily movement.</p><h3>Three Golden Rules for Glycemic Balance</h3><p>Implementing targeted daily strategies keeps energy steady and prevents hazardous glucose spikes:</p><ul><li><strong>Follow the Healthy Plate Method:</strong> Fill half your plate with colorful vegetables, one-quarter with lean protein, and one-quarter with complex whole grains.</li><li><strong>Take a 10-Minute Post-Meal Walk:</strong> A gentle walk immediately following meals stimulates muscle cells to absorb circulating glucose directly from the bloodstream.</li><li><strong>Prioritize Pure Hydration:</strong> Eliminate sugary beverages, energy drinks, and packaged fruit juices.</li></ul><h3>The Importance of Routine HbA1c Monitoring</h3><p>An HbA1c blood test every 3 to 6 months provides a reliable snapshot of your average 90-day glycemic control. Timely clinical adjustments protect vital nerve endings, eyesight, and cardiovascular vessels.</p>",
       coverImage:
-        "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=600&q=80",
-      category: "Clinical Cardiology",
-      tags: ["Cardiology", "Surgery", "Medicine"],
-      authorName: "Prof. Dr. Sarah Rahman",
-      publishedAt: "2025-12-15T00:00:00.000Z",
+        "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=600&q=80",
+      category: "Diabetes & Endocrinology",
+      tags: ["Diabetes", "BloodSugar", "Nutrition", "Endocrinology", "HealthTips"],
+      authorName: "MD. Nabil Siddik",
+      publishedAt: "2026-11-15T00:00:00.000Z",
     },
     {
       id: "3",
-      slug: "latest-equipment-for-heart-treatment",
-      title: "Latest Equipment For The Heart Treatment",
+      slug: "preventive-health-checkups-why-waiting-for-symptoms-is-a-mistake",
+      title: "Preventive Health Checkups: Why Waiting for Symptoms Is a Mistake",
       summary:
-        "Advanced echocardiography and non-invasive hemodynamics provide earlier diagnostic precision for complex structural heart conditions.",
-      content: "",
+        "Routine clinical evaluations detect underlying chronic illnesses years before symptoms manifest. Discover which tests are essential for your age.",
+      content:
+        "<h2>The Power of Early Clinical Intervention</h2><p>Most individuals schedule a medical appointment only when pain, severe fatigue, or acute discomfort becomes impossible to ignore. However, conditions such as elevated cholesterol, fatty liver, borderline hypertension, and early diabetes develop quietly over years without generating overt symptoms.</p><h3>Essential Screenings Every Adult Should Prioritize</h3><p>Key routine diagnostic investigations provide comprehensive insight into internal organ health:</p><ul><li><strong>Fasting Lipid Panel:</strong> Measures total cholesterol, LDL, HDL, and triglycerides to accurately calculate your 10-year cardiovascular risk score.</li><li><strong>Liver & Kidney Function Profiles (LFT & Creatinine):</strong> Crucial for evaluating vital metabolic detoxification and filtration efficiency.</li><li><strong>Complete Blood Count (CBC) & Vitamin D:</strong> Detects subclinical anemias, hidden infections, and vitamin deficiencies.</li></ul><h3>Building a Lifelong Partnership with Your Physician</h3><p>An annual comprehensive health assessment allows your doctor to identify subtle biomarker trends before they evolve into chronic illness.</p>",
       coverImage:
-        "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=600&q=80",
-      category: "Clinical Cardiology",
-      tags: ["Cardiology", "Equipment", "Technology"],
-      authorName: "Prof. Dr. Sarah Rahman",
-      publishedAt: "2025-12-11T00:00:00.000Z",
-    },
-    {
-      id: "4",
-      slug: "what-is-future-of-blood-pressure-monitoring",
-      title: "What Is Future Of Blood Pressure Monitoring?",
-      summary:
-        "Continuous ambulatory BP tracking combined with physician analytics helps detect nocturnal hypertension before cardiovascular harm occurs.",
-      content: "",
-      coverImage:
-        "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=600&q=80",
-      category: "General Medicine",
-      tags: ["BloodPressure", "Preventive Care", "Health Tips"],
-      authorName: "Prof. Dr. Sarah Rahman",
-      publishedAt: "2025-12-09T00:00:00.000Z",
+        "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=600&q=80",
+      category: "Health Tips",
+      tags: ["Wellness", "Checkup", "PreventiveMedicine", "Healthcare", "Diagnostics"],
+      authorName: "MD. Nabil Siddik",
+      publishedAt: "2026-11-12T00:00:00.000Z",
     },
   ];
 

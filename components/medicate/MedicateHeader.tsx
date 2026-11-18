@@ -107,15 +107,15 @@ export default function MedicateHeader({ user }: MedicateHeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 shadow-xs transition-all">
-      <div className="container mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
+      <div className="container mx-auto px-3 sm:px-6 lg:px-8 h-20 sm:h-24 flex items-center justify-between gap-2">
         {/* Dynamic Logo & Clinic Name */}
         <Link href="/" className="flex items-center gap-2 sm:gap-3 group shrink min-w-0">
           <Image
             src={branding?.logoUrl || '/images/logo/site-logo.png'}
-            width={220}
-            height={70}
+            width={280}
+            height={90}
             alt={brandName}
-            className="h-10 sm:h-12 w-auto object-contain"
+            className="h-14 sm:h-18 md:h-20 w-auto max-w-[260px] sm:max-w-[340px] object-contain transition-all"
             priority
           />
         </Link>
