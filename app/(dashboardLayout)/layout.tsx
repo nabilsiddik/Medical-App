@@ -15,7 +15,7 @@ export default async function CommonDashboardLayout({
 }) {
   const userInfo = (await getLoggedInUser()) as IUserInfo | null;
   if (!userInfo) {
-    redirect("/login");
+    redirect("/login?unauthorized=true");
   }
 
   const isPatient = userInfo?.role === UserRole.PATIENT || userInfo?.role === UserRole.USER;

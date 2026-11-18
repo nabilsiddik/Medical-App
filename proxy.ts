@@ -33,20 +33,26 @@ export async function proxy(request: NextRequest) {
 
   // Check if it is an auth route (/login, /signup, /verify-otp, /forgot-password, /reset-password)
   const isAuth = isAuthRoute(pathname);
+  const isUnauthorizedRedirect =
+    request.nextUrl.searchParams.has("unauthorized") ||
+    request.nextUrl.searchParams.has("redirect");
 
-  // If already logged in with a VALID non-expired token and visiting an auth route, redirect to default dashboard
-  if (isTokenValid && isAuth) {
+  // If visiting an auth route with an unauthorized/redirect flag, or if the token is invalid:
+  // Purge the stale cookies and allow the login page to render cleanly without redirect loops
+  if (isAuth && (isUnauthorizedRedirect || !isTokenValid)) {
+    const response = NextResponse.next();
+    if (accessToken) {
+      response.cookies.delete("accessToken");
+      response.cookies.delete("refreshToken");
+    }
+    return response;
+  }
+
+  // If already logged in with a VALID non-expired token and visiting an auth route (not an unauthorized fallback), redirect to default dashboard
+  if (isTokenValid && isAuth && !isUnauthorizedRedirect) {
     return NextResponse.redirect(
       new URL(getDefaultDashboardRoute(userRole), request.url)
     );
-  }
-
-  // If visiting an auth route with an expired or invalid token, clean up dead cookies so no loop occurs
-  if (!isTokenValid && accessToken && isAuth) {
-    const response = NextResponse.next();
-    response.cookies.delete("accessToken");
-    response.cookies.delete("refreshToken");
-    return response;
   }
 
   // Redirect base dashboard routes to overview
