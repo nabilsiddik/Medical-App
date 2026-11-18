@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 import { AppSidebar } from "@/components/app-sidebar";
 import DashboardNavbar from "@/components/modules/dashboard/dashboardNavbar/DashboardNavbar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -16,9 +15,6 @@ export default async function CommonDashboardLayout({
 }) {
   const userInfo = (await getLoggedInUser()) as IUserInfo | null;
   if (!userInfo) {
-    const cookieStore = await cookies();
-    cookieStore.delete("accessToken");
-    cookieStore.delete("refreshToken");
     redirect("/login");
   }
 
@@ -41,3 +37,4 @@ export default async function CommonDashboardLayout({
     </SidebarProvider>
   );
 }
+

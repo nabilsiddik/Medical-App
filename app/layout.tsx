@@ -1,22 +1,24 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { DM_Sans, Inter } from "next/font/google";
+import { Montserrat, Quicksand } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import PageLoader from "@/components/shared/PageLoader";
 import { BrandingProvider } from "@/components/branding/BrandingProvider";
 import { getPublicSiteConfig } from "@/services/doctor/clinicServices";
 
-const inter = Inter({
+const montserrat = Montserrat({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-montserrat",
   display: "swap",
+  weight: ["300", "400", "500", "600", "700", "800"],
 });
 
-const dmSans = DM_Sans({
+const quicksand = Quicksand({
   subsets: ["latin"],
-  variable: "--font-dm-sans",
+  variable: "--font-quicksand",
   display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -156,7 +158,7 @@ export default async function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className={`${inter.variable} ${dmSans.variable} antialiased min-h-screen bg-background text-foreground`}
+        className={`${montserrat.variable} ${quicksand.variable} antialiased min-h-screen bg-background text-foreground`}
       >
         <BrandingProvider initialConfig={siteConfig}>
           <Suspense fallback={null}>

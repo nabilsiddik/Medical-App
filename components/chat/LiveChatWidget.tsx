@@ -21,6 +21,11 @@ import { Badge } from "@/components/ui/badge";
 import { IChatMessage, IConversation } from "@/types/doctor.interface";
 import { getOrCreatePatientConversation, sendChatMessage } from "@/services/doctor/chatServices";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Web Audio API chime generator for incoming messages
 function playMessageChime() {
@@ -185,25 +190,25 @@ export default function LiveChatWidget() {
     <div className="fixed bottom-5 right-5 z-50 font-sans">
       {/* Floating Trigger Button */}
       {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="group relative flex items-center gap-2.5 h-14 px-5 rounded-full bg-primary text-primary-foreground shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
-          aria-label="Open Live Doctor Chat"
-        >
-          <div className="relative">
-            <MessageSquare className="h-6 w-6" />
-            <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-emerald-400 ring-2 ring-primary animate-pulse" />
-          </div>
-          <div className="text-left hidden sm:block">
-            <div className="text-xs font-bold leading-tight flex items-center gap-1">
-              <span>Chat with Doctor</span>
-              <Sparkles className="h-3 w-3 text-amber-300" />
-            </div>
-            <div className="text-[10px] text-primary-foreground/80 leading-tight">
-              Instant AI & Chamber Support
-            </div>
-          </div>
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => setIsOpen(true)}
+              className="group relative flex items-center justify-center h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-xl hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              aria-label="Chat with Doctor"
+            >
+              <MessageSquare className="h-6 w-6 transition-transform group-hover:scale-110" />
+              <span className="absolute top-0 right-0 h-3.5 w-3.5 rounded-full bg-emerald-400 ring-2 ring-card animate-pulse" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent
+            side="left"
+            sideOffset={10}
+            className="font-medium text-xs px-3 py-1.5 shadow-lg bg-popover text-popover-foreground border border-border"
+          >
+            Chat with Doctor
+          </TooltipContent>
+        </Tooltip>
       )}
 
       {/* Chat Window Container */}

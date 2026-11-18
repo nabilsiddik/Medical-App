@@ -11,10 +11,6 @@ export const getLoggedInUser = async (): Promise<IUser | null> => {
   try {
     const res = await serverFetch.get("/user/profile");
     if (!res.ok) {
-      if (res.status === 401 || res.status === 403) {
-        await deleteCookie("accessToken").catch(() => {});
-        await deleteCookie("refreshToken").catch(() => {});
-      }
       return null;
     }
     const result = await res.json();
