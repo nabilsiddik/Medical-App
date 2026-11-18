@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import PageBanner from "@/components/medicate/PageBanner";
-import NewsletterBanner from "@/components/medicate/NewsletterBanner";
 import { MapPin, Phone, Mail, Send, CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useBranding } from "@/components/branding/BrandingProvider";
@@ -271,9 +270,6 @@ export default function ContactPage() {
           title="Doctor Chamber Location Map"
         />
       </section>
-
-      {/* 5. Newsletter Banner */}
-      <NewsletterBanner />
     </div>
   );
 }

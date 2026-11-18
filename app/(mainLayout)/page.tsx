@@ -11,7 +11,6 @@ import ProtectLifeSection from "@/components/medicate/home/ProtectLifeSection";
 import SpecialistDoctorsSection from "@/components/medicate/home/SpecialistDoctorsSection";
 import TestimonialsSection from "@/components/medicate/home/TestimonialsSection";
 import LatestBlogSection from "@/components/medicate/home/LatestBlogSection";
-import NewsletterBanner from "@/components/medicate/NewsletterBanner";
 import { getPublicSiteConfig, getServices, getChamberLocations } from "@/services/doctor/clinicServices";
 import { getTestimonials, getBlogs } from "@/services/doctor/cmsServices";
 
@@ -64,9 +63,6 @@ export default async function HomePage() {
 
       {/* 11. Latest Blogs: 10 latest blogs (Swiper Slider with Equal-Height Cards) */}
       <LatestBlogSection blogs={blogs} />
-
-      {/* 12. Reusable Newsletter Banner (Container width with footer overlap) */}
-      <NewsletterBanner />
     </div>
   );
 }

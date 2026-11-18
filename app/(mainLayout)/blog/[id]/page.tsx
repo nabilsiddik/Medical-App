@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import PageBanner from "@/components/medicate/PageBanner";
-import NewsletterBanner from "@/components/medicate/NewsletterBanner";
 import BlogCommentsSection from "@/components/medicate/blog/BlogCommentsSection";
 import BlogSidebar from "@/components/medicate/blog/BlogSidebar";
 import { User, MessageSquare, Folder } from "lucide-react";
@@ -150,9 +149,6 @@ export default function SingleBlogPage({
           </div>
         </div>
       </section>
-
-      {/* 3. Reusable Newsletter Banner */}
-      <NewsletterBanner />
     </div>
   );
 }

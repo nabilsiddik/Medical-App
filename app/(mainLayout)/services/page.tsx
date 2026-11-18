@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import PageBanner from "@/components/medicate/PageBanner";
-import NewsletterBanner from "@/components/medicate/NewsletterBanner";
 import { ChevronRight, ChevronDown, Check, Plus } from "lucide-react";
 
 export default function ServicesPage() {
@@ -229,9 +228,6 @@ export default function ServicesPage() {
           </div>
         </div>
       </section>
-
-      {/* 3. Newsletter Banner */}
-      <NewsletterBanner />
     </div>
   );
 }

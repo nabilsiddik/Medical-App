@@ -1,7 +1,6 @@
 import React from "react";
 import Link from "next/link";
 import PageBanner from "@/components/medicate/PageBanner";
-import NewsletterBanner from "@/components/medicate/NewsletterBanner";
 import BlogSidebar from "@/components/medicate/blog/BlogSidebar";
 import { User, MessageSquare, Plus, X, Search, FileText } from "lucide-react";
 import { getBlogs } from "@/services/doctor/cmsServices";
@@ -312,9 +311,6 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
           </div>
         </div>
       </section>
-
-      {/* 3. Newsletter Banner */}
-      <NewsletterBanner />
     </div>
   );
 }
